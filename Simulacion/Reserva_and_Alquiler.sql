@@ -1,16 +1,18 @@
 create or replace package reserva_and_alquiler_pkg as
     -- procedure para alquiler
-    procedure reserva(cliente_reservar cliente%rowtype);
+    procedure reserva(cliente_reservar cliente%rowtype, dia_actual date, fecha_fin_simulacion date);
     -- procedure para alquiler
     procedure simulacion_reservas;
 end reserva_and_alquiler_pkg;
 /
 
 create or replace package body reserva_and_alquiler_pkg as
+    ----------------------------------------------------------------------------
     -- procedure para alquiler
-    procedure reserva(cliente_reservar cliente%rowtype)
+    procedure reserva(cliente_reservar cliente%rowtype, dia_actual date, fecha_fin_simulacion date)
     is 
         tipo_cliente_actual tipo_cliente%rowtype; -- tipo de cliente del cliente actual
+        periodo_duracion_reserva periodo_duracion; -- periodo durante el cual sera el alquiler a reservar
         
     begin
         -- buscamos el tipo de cliente
@@ -21,8 +23,23 @@ create or replace package body reserva_and_alquiler_pkg as
             utilities_pkg.print_cliente(cliente_reservar, 'Tipo de cliente no deseado');
             return; -- finaliza el procedure
         end if;
+        -- se selecciona el periodo durante el que sera el alquiler
+        periodo_duracion_reserva := utilities_pkg.get_random_periodo(
+            dia_actual, 
+            fecha_fin_simulacion
+        );
+        -- se traen todos los carros para aquiler (esten o no dispoibles para el periodo)
+        
+        -- se selecciona un vehiculo de las lista
+        
+        -- se valida si esta disponible
+        
+        -- 
+        
+        
         --- SEGUIR CON EL DESARROLLO
     end reserva;
+    ----------------------------------------------------------------------------
     -- procedure para alquiler
     procedure simulacion_reservas 
     is

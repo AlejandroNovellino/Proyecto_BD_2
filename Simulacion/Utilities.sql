@@ -5,6 +5,8 @@ create or replace package utilities_pkg as
     function get_cliente_random return cliente%rowtype;
     -- procedure para imprimir un cliente
     procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2);
+    -- function para devolcer un periodo aleatorio
+    function get_random_periodo(dia_actual date, fecha_fin_simulacion date) return periodo_duracion;
 
 end utilities_pkg;
 /
@@ -43,7 +45,7 @@ create or replace package body utilities_pkg as
             fetch clientes into cliente_row;
             exit when clientes%notfound;
             -- se verifica si se llego al index deseado
-            if (random_index = cliente_row%rowcount) then
+            if (random_index = clientes%rowcount) then
                 cliente_to_return := cliente_row;
             end if;
         end loop;
@@ -68,11 +70,62 @@ create or replace package body utilities_pkg as
         );
         DBMS_OUTPUT.PUT_LINE('  ' || msg);
     end print_cliente;
+    ----------------------------------------------------------------------------
+    -- function para devolcer un periodo aleatorio
+    function get_random_periodo(dia_actual date, fecha_fin_simulacion date) return periodo_duracion
+    is
+        periodo_retornar periodo_duracion;      -- periodo de duracion a retornar
+        fecha_inicio date;                      -- fecha de inicio del periodo
+        fecha_fin date;                         -- fecha de fin del periodo
+    begin 
+        -- se selecciona la fecha de inicio de forma aleatoria
+        SELECT TO_DATE(
+              TRUNC(
+                     DBMS_RANDOM.VALUE (to_number(to_char(dia_actual, 'j')), to_number(to_char(fecha_fin_simulacion, 'j'))) 
+                    )
+                , 'J')  into fecha_inicio
+        FROM DUAL;
+        -- se selecciona la fecha de fin
+        -- por ahora se coloca como maximo 2 meses para esa reserva
+        SELECT TO_DATE(
+              TRUNC(
+                     DBMS_RANDOM.VALUE (to_number(to_char(fecha_inicio, 'j')), to_number(to_char(ADD_MONTHS(fecha_inicio, 2), 'j'))) 
+                    )
+                , 'J')  into fecha_fin
+        FROM DUAL;
+        
+        -- creamos el periodo
+        periodo_retornar := periodo_duracion(
+            fecha_inicio,
+            fecha_fin
+        );
+        --periodo_retornar.P_Fecha_Inicio := fecha_inicio;
+        --periodo_retornar.P_Fecha_Fin := fecha_fin;
+        
+        return periodo_retornar;
+    
+    end get_random_periodo;
 
 end utilities_pkg;
 /
 
+-- esto es para probar las funciones -------------------------------------------
+declare
+    dta_prueba periodo_duracion;
+    
+    fecha_inicio_simulacion date;                     -- fecha de inicio de la simulacion
+    fecha_fin_simulacion date;                        -- fecha de fin de la simulacion
 begin 
     DBMS_Output.PUT_LINE('Numero ' || to_char(utilities_pkg.get_random_integer(1,8)));
+    DBMS_Output.PUT_LINE('Numero ' || to_char(utilities_pkg.get_random_integer(1,3)));
+    
+    fecha_inicio_simulacion := TO_DATE('04/20/2013','MM/DD/YYYY');
+    fecha_fin_simulacion := TO_DATE('05/25/2013','MM/DD/YYYY'); 
+    dta_prueba := utilities_pkg.get_random_periodo(
+        fecha_inicio_simulacion, 
+        fecha_fin_simulacion
+    );
+    DBMS_Output.PUT_LINE('Fecha inicio ' || to_char(dta_prueba.P_Fecha_Inicio, 'yyyy-MM-dd'));
+    DBMS_Output.PUT_LINE('Fecha fin ' || to_char(dta_prueba.P_Fecha_Fin, 'yyyy-MM-dd'));
 end;
 /
