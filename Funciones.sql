@@ -102,7 +102,7 @@ PROCEDURE BUSCAR_vehiculo( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_
   BEGIN
     OPEN o_result_set FOR SELECT v_foto,anno,modelo,marca,tipo,cant
                         FROM (SELECT count(*) as cant, v.v_anno as anno,m.m_nombre as modelo,n.ma_nombre as marca,t.tv_nombre as tipo,v.v_placa as placa
-                              from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo v
+                              from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler d, alquiler a , vehiculo v
                               where v.modelo_M_ID=m.m_id 
                               and v.tipo_vehiculo_TV_ID=t.tv_id 
                               and n.ma_id=m.marca_ma_id
@@ -121,7 +121,7 @@ PROCEDURE BUSCAR_vehiculo( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_
     OPEN o_result_set FOR SELECT v_foto,anno,modelo,marca,tipo,mo,an, cant
                           FROM (SELECT count(v_placa)as cant,CASE   EXTRACT(MONTH FROM d.DA_fecha ) WHEN 1 THEN 'Enero' when 2 then 'Febrero'when 3 Then 'Marzo' when 4 then 'Abril' when 5 then 'Mayo' when 6 then 'Junio' when 7 then 'Julio'when 8 then 'Agosto' when 9 then 'Septiembre' when 10 then 'Octubre' when 11 then 'Noviembre' when 12 then 'Diciembre'End as mo
                           ,EXTRACT(YEAR FROM d.DA_fecha ) AS an, v_placa as placa ,v.v_anno as anno,m.m_nombre as modelo,n.ma_nombre as marca,t.tv_nombre as tipo
-                                  from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo v
+                                  from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler d, alquiler a , vehiculo v
                                   where v.modelo_M_ID=m.m_id 
                                   and v.tipo_vehiculo_TV_ID=t.tv_id 
                                   and n.ma_id=m.marca_ma_id
@@ -148,7 +148,7 @@ PROCEDURE BUSCAR_Promocion( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha
   AS
   BEGIN
     OPEN o_result_set FOR SELECT p.p_descripcion,v.v_precio, v.v_precio-(v.v_precio- p.p_porcentaje_descuento),m.m_nombre,n.ma_nombre, v.v_foto,v_anno
-                          from  marca n , modelo m,historico_promocion  h, Promocion p , vehiculo2 v
+                          from  marca n , modelo m,historico_promocion  h, Promocion p , vehiculo v
                           where v.modelo_M_ID=m.m_id  
                           and n.ma_id=m.marca_ma_id
                           and p.p_id =h.promocion_p_id 
