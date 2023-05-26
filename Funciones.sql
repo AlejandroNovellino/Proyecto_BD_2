@@ -14,7 +14,7 @@ is
  temp blob;
  fle bfile;
   BEGIN
-    INSERT INTO Vehiculo2 values (v_anno,v_placa,EMPTY_BLOB(),v_km,v_precio,(SELECT m_id From modelo where m_nombre = modelos), (SELECT sv_id From status_vehiculo where sv_nombre = status),(SELECT c_id From color where c_nombre = colorv) ,(SELECT tv_id From tipo_vehiculo where tv_nombre = tipo),(SELECT s_id From sede where  s_numerosede  = sedes)) returning v_foto INTO temp;
+    INSERT INTO Vehiculo values (v_anno,v_placa,EMPTY_BLOB(),v_km,v_precio,(SELECT m_id From modelo where m_nombre = modelos), (SELECT sv_id From status_vehiculo where sv_nombre = status),(SELECT c_id From color where c_nombre = colorv) ,(SELECT tv_id From tipo_vehiculo where tv_nombre = tipo),(SELECT s_id From sede where  s_numerosede  = sedes)) returning v_foto INTO temp;
    fle:= BFILENAME ('OBJETOS_LOB', V_Nombre_foto);
    DBMS_LOB.fileopen (fle, DBMS_LOB.file_readonly);
    DBMS_LOB.loadfromfile (temp,fle,DBMS_LOB.getlength (fle));
@@ -102,7 +102,7 @@ PROCEDURE BUSCAR_vehiculo( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_
   BEGIN
     OPEN o_result_set FOR SELECT v_foto,anno,modelo,marca,tipo,cant
                         FROM (SELECT count(*) as cant, v.v_anno as anno,m.m_nombre as modelo,n.ma_nombre as marca,t.tv_nombre as tipo,v.v_placa as placa
-                              from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo2 v
+                              from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo v
                               where v.modelo_M_ID=m.m_id 
                               and v.tipo_vehiculo_TV_ID=t.tv_id 
                               and n.ma_id=m.marca_ma_id
@@ -121,7 +121,7 @@ PROCEDURE BUSCAR_vehiculo( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_
     OPEN o_result_set FOR SELECT v_foto,anno,modelo,marca,tipo,mo,an, cant
                           FROM (SELECT count(v_placa)as cant,CASE   EXTRACT(MONTH FROM d.DA_fecha ) WHEN 1 THEN 'Enero' when 2 then 'Febrero'when 3 Then 'Marzo' when 4 then 'Abril' when 5 then 'Mayo' when 6 then 'Junio' when 7 then 'Julio'when 8 then 'Agosto' when 9 then 'Septiembre' when 10 then 'Octubre' when 11 then 'Noviembre' when 12 then 'Diciembre'End as mo
                           ,EXTRACT(YEAR FROM d.DA_fecha ) AS an, v_placa as placa ,v.v_anno as anno,m.m_nombre as modelo,n.ma_nombre as marca,t.tv_nombre as tipo
-                                  from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo2 v
+                                  from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo v
                                   where v.modelo_M_ID=m.m_id 
                                   and v.tipo_vehiculo_TV_ID=t.tv_id 
                                   and n.ma_id=m.marca_ma_id
@@ -203,7 +203,7 @@ PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fe
   AS
   BEGIN
     OPEN o_result_set FOR SELECT v.v_placa,v.v_anno ,v.v_foto,m.m_nombre,n.ma_nombre ,ma.m_descripcion,t.tm_nombre,s.s_nombre,ta.t_ubicacion_geografica.UG_Latitud,ta.t_ubicacion_geografica.UG_Longitud,mv.man_fecha_proximo_man,mv.man_fechaI,ta.T_nombre
-                          FROM vehiculo2 v, marca n , modelo m, mantenimiento ma,taller ta,mantenimiento_vehiculo mv, mantenimiento_taller mt, status_mantenimiento s, tipo_mantenimiento t
+                          FROM vehiculo v, marca n , modelo m, mantenimiento ma,taller ta,mantenimiento_vehiculo mv, mantenimiento_taller mt, status_mantenimiento s, tipo_mantenimiento t
                           WHERE v.v_placa=mv.vehiculo_v_id
                           and n.ma_id=m.marca_ma_id
                           and v.modelo_M_ID=m.m_id 
@@ -258,4 +258,5 @@ insert into alianza values (DEFAULT,'25/05/23','25/06/23','02/06/23','Todos los 
 ---mantenimientos--
  insert into mantenimiento values(Default,'cambio de aceite',(select TM_ID from tipo_mantenimiento where tm_nombre='Preventido') );
   insert  into mantenimiento_taller values (default,4,1);
-  insert into mantenimiento_vehiculo values(default,'23/03/23','24/03/23','03/04/23',30,'AA25A6',1,4)
+  insert into mantenimiento_vehiculo values(default,'23/03/23','25/03/23','23/04/23',30,'AA25A6',1,4)
+  
