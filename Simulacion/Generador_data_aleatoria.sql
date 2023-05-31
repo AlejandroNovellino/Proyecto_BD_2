@@ -1,13 +1,22 @@
+-- objetos para las imagenes
+CREATE OR REPLACE DIRECTORY imagenes_vehiculos AS 'C:\IMAGENES\BD2\VEHICULOS';
+CREATE OR REPLACE DIRECTORY imagenes_personas AS 'C:\IMAGENES\BD2\PERSONAS';
+
+-- paquete para generar la data de forma aleatoria
 create or replace package generador_data_aleatoria_pkg as
+    -- variables globales necesarias para el paquete
+    cedula_counter number := 1; -- contador de la cedula
+    
     -- procedure para generar una persona
     procedure generar_persona;
+    -- procedure para generar un cliente
+    procedure generar_cliente;
     -- procedure para la generacion aleatoria de personas
     procedure generador_personas(cantidad number);
     -- procedure para la generacion aleatoria de clientes
     procedure generador_clientes(cantidad number);
     -- procedure para la generacion aleatoria de autos
     
-    -- procedure para la generacion aleatoria de 
 end generador_data_aleatoria_pkg; 
 /
 
@@ -29,14 +38,20 @@ create or replace package body generador_data_aleatoria_pkg as
         nombres_mujer nombres_mujer_array;
         nombres_hombre nombres_hombre_array;
         apellidos apellidos_array;
+        -- arreglos para imagenes de mujeres
+        type imagenes_mujeres_array IS VARRAY(2) OF VARCHAR2(20);
+        imagenes_mujeres imagenes_mujeres_array;
+        -- arreglos para imagenes de hombres
+        type imagenes_hombres_array IS VARRAY(2) OF VARCHAR2(20);
+        imagenes_hombres imagenes_hombres_array;
         
         -- variables para los valores a dar a la persona
         -- variables de la tabla
-        direccion            VARCHAR2(50);
+        --direccion            VARCHAR2(50);
         foto                 BLOB;
         lugar                number;
         tipo_cliente         number;
-        -- variables del dta
+        -- variables del tda
         cedula               VARCHAR2(15);
         primer_nombre        VARCHAR2(20);
         segundo_nombre       VARCHAR2(20);
@@ -180,7 +195,19 @@ create or replace package body generador_data_aleatoria_pkg as
             'Toro'
         );
         
-        -- generamos los valores que se daran a al cliente
+        -- definicion de los arreglos de posibles imagenes
+        -- imagenes de mujeres
+        imagenes_mujeres := (
+            'mujer_1.png',
+            'mujer_2.jpg'
+        );
+        
+        imagenes_hombres := (
+            'hombre_1.jpg',
+            'hombre_2.jpg'
+        );
+        
+        -- generamos la data para la persona -----------------------------------
         -- generamos el sexo
         sexo := sexos(utilities_pkg.get_random_integer(1,4));
         -- generamos los nombres en base al genero
@@ -199,14 +226,33 @@ create or replace package body generador_data_aleatoria_pkg as
         segundo_apellido := apellidos(utilities_pkg.get_random_integer(1,51));
         -- generamos el correo
         correo := primer_nombre || primer_apellido || correos(utilities_pkg.get_random_integer(1,4));
-        
-        -- faltan
-        -- generar foto
         -- generar cedula
-        -- generar direccion
+        cedula := TO_CHAR(cedula_counter); -- asignamos la cedula del contador
+        cedula_counter := cedula_counter + 1; -- actualizamos el contador + 1
+        
+         -- faltan
         -- generar direccion
         -- fecha de nacimiento
+        
+        -- generar foto
+        
+        -- insertar en la tabla personas
+        --insert into persona values(
+        
+        --);
+
+    end generar_persona;
+    ----------------------------------------------------------------------------
+    -- procedure para generar un cliente
+    procedure generar_cliente
+    is
+    begin
+        -- selecciamos una persona de forma aleatorio y pasa a ser cliente
         -- generar tipo de cliente
+        
+        -- se inserta en la tabla cliente
+        
+        -- se elimina de la tabla persona porque paso a ser un cliente
         
     end generador_personas;
     ----------------------------------------------------------------------------

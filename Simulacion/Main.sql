@@ -70,6 +70,8 @@ create or replace package body main_pkg as
                  
                 -- DESARROLLO POR CADA SEDE
                 
+                -- se selecciona una persona ya sea cliente o no de forma aleatoria (esto va dentro de las reservas y alquileres)
+                
             end loop;
             close cursor_sedes; -- cerramos el cursor
             

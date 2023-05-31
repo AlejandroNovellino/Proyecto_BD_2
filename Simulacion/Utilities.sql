@@ -1,10 +1,14 @@
 create or replace package utilities_pkg as
-    -- funcion para retornar un numero aleatorio dentro del rango dado
+    -- funcion para retornar un entero aleatorio dentro del rango dado
     function get_random_integer(limite_inferior number, limite_superior number) return number;
+    -- funcion para retornar una persona aleatoria que no se encuentre registrada en el sistema
+    function get_persona_random return persona%rowtype;
     -- funcion para retornar un cliente aleatorio que ya se encuentre registrado en el sistema
     function get_cliente_random return cliente%rowtype;
+    -- procedure para imprimir una persona
+    procedure print_persona(persona_imprimir pesona%rowtype, msg varchar2 DEFAULT '');
     -- procedure para imprimir un cliente
-    procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2);
+    procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '');
     -- function para devolcer un periodo aleatorio
     function get_random_periodo(dia_actual date, fecha_fin_simulacion date) return periodo_duracion;
 
@@ -55,8 +59,56 @@ create or replace package body utilities_pkg as
         return cliente_to_return;
     end get_cliente_random;
     ----------------------------------------------------------------------------
+    -- funcion para retornar una persona aleatoria que no se encuentre registrada en el sistema
+    function get_persona_random return persona%rowtype
+    is
+        random_index number;        -- index aleatorio
+        cantidad_personas number;   -- cantidad de clientes
+        -- variables para el cursor
+        cursor personas is select * from cliente;
+        persona_row persona%rowtype;
+        -- variable para retornar
+        persona_to_return pesona%rowtype;
+    begin
+        -- contamos la cantidad de clientes
+        select count(*) into cantidad_personas from cliente;
+        -- tomamos un index aleatorio
+        random_index := get_random_integer(0, cantidad_personas);
+        -- abrimos el cursor e iteramos sobre el 
+        open personas;
+        loop 
+            fetch personas into persona_row;
+            exit when personas%notfound;
+            -- se verifica si se llego al index deseado
+            if (random_index = personas%rowcount) then
+                persona_to_return := persona_row;
+            end if;
+        end loop;
+        -- cerramos el cursor
+        close personas;
+        
+        return persona_to_return;
+    end get_persona_random;
+    
+    ----------------------------------------------------------------------------
+    -- procedure para imprimir una persona
+    procedure print_persona(persona_imprimir pesona%rowtype, msg varchar2 DEFAULT '')
+    is
+    begin
+        DBMS_OUTPUT.PUT_LINE('Persona: ');
+        DBMS_OUTPUT.PUT_LINE(
+            '   ' 
+            || persona_imprimir.ip.IP_Primer_Nombre || ' '
+            || persona_imprimir.ip.IP_Segundo_Nombre || ', '
+            || persona_imprimir.ip.IP_Primer_Apeliido || ' '
+            || persona_imprimir.ip.IP_Segundo_Apellido || ' '
+            || 'C.I. ' || persona_imprimir.ip.IP_cedula
+        );
+        DBMS_OUTPUT.PUT_LINE('  ' || msg);
+    end print_cliente;
+    ----------------------------------------------------------------------------
     -- procedure para imprimir un cliente
-    procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2)
+    procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '')
     is
     begin
         DBMS_OUTPUT.PUT_LINE('Cliente: ');
@@ -71,7 +123,7 @@ create or replace package body utilities_pkg as
         DBMS_OUTPUT.PUT_LINE('  ' || msg);
     end print_cliente;
     ----------------------------------------------------------------------------
-    -- function para devolcer un periodo aleatorio
+    -- function para devolver un periodo aleatorio
     function get_random_periodo(dia_actual date, fecha_fin_simulacion date) return periodo_duracion
     is
         periodo_retornar periodo_duracion;      -- periodo de duracion a retornar
