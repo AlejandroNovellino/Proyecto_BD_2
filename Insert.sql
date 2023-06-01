@@ -156,15 +156,14 @@ INSERT INTO forma_pago  VALUES (DEFAULT,'Tarjeta Internacional');
 INSERT INTO forma_pago  VALUES (DEFAULT,'Criptomoneda');
 
 --- insert lugar---
-    INSERT INTO LUGAR VALUES (DEFAULT,'Venezuela','Pais',NULL);/
-    INSERT INTO LUGAR VALUES (DEFAULT,'Distrito Capital','Estado',(select l_id from LUGAR where l_nombre='Venezuela'));/
-    INSERT INTO LUGAR VALUES DEFAULT,'Libertador','Municipio',(select l_id from LUGAR where l_nombre='Distrito Capital'));
+    INSERT INTO LUGAR VALUES (DEFAULT,'Venezuela','Pais',NULL,NULL);/
+    INSERT INTO LUGAR VALUES (DEFAULT,'Distrito Capital','Estado',NULL,(select l_id from LUGAR where l_nombre='Venezuela'));/
+    INSERT INTO LUGAR VALUES (DEFAULT,'Libertador','Municipio',NULL,(select l_id from LUGAR where l_nombre='Distrito Capital'));
 ----insert consesionario----
- INSERT INTO CONSESIONARIO VALUES (DEFAULT.nextval,'Equipo','0212-5599283','Av. Teheran, Montalban',(select l_id from LUGAR where l_nombre='Libertador'));/
+ INSERT INTO CONSESIONARIO VALUES (DEFAULT,'0212-5599283','Av. Teheran, Montalban',(select l_id from LUGAR where l_nombre='Libertador'));/
  ----insert sede---
-    INSERT INTO SEDE VALUES (DEFAULT,'Av. Teheran, Montalban','0212-5599283',1,20,1,(select l_id from LUGAR where l_nombre='Libertador'),(select c_id from CONSESIONARIO where c_nombre='Equipo'))
+    INSERT INTO SEDE VALUES (DEFAULT,'Av. Teheran, Montalban','0212-5599283',1,20,1,(select l_id from LUGAR where l_nombre='Libertador'),(select c_id from CONSESIONARIO where c_direccion='Av. Teheran, Montalban'));
 ----insert alquiler------
-
 
 
 
