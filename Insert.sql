@@ -162,7 +162,7 @@ INSERT INTO forma_pago  VALUES (DEFAULT,'Criptomoneda');
 ----insert consesionario----
  INSERT INTO CONSESIONARIO VALUES (DEFAULT,'0212-5599283','Av. Teheran, Montalban',(select l_id from LUGAR where l_nombre='Libertador'));/
  ----insert sede---
-    INSERT INTO SEDE VALUES (DEFAULT,'Av. Teheran, Montalban','0212-5599283',1,20,1,(select l_id from LUGAR where l_nombre='Libertador'),(select c_id from CONSESIONARIO where c_direccion='Av. Teheran, Montalban'));
+    INSERT INTO SEDE VALUES (DEFAULT,'Av. Teheran, Montalban','0212-5599283',1,20,1,(select c_id from CONSESIONARIO where c_direccion='Av. Teheran, Montalban'),(select l_id from LUGAR where l_nombre='Libertador'));
 ----insert alquiler------
 
 
