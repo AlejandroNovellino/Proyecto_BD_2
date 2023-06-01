@@ -40,20 +40,19 @@ create or replace package body inventario_pkg as
 
     begin
         --valida que sea el día 28 del mes
-        --select extract(day from sysdate) into num_dia from dual;
-        num_dia := 28;
+        select extract(day from sysdate) into num_dia from dual;
         if (num_dia=28) then
             loop
             --selecciona modelo de carro
             select count(*) into ctd_marcas from marca;
-            id_marca := utilities_pkg.get_random_integer(1,ctd_marcas);
+            id_marca := utilities_pkg.get_random_integer(1,ctd_marcas+1);
             select count(*) into ctd_modelos from modelo 
                 where marca_ma_id = id_marca;
             select m_id into id_1er_modelo from modelo
                where marca_ma_id = id_marca
                   and rownum = 1;
             id_modelo := utilities_pkg.get_random_integer(id_1er_modelo, 
-                                            id_1er_modelo+ctd_modelos);
+                                            id_1er_modelo+ctd_modelos+1);
             --verifica si el proveedor tiene ese modelo
             modelo_disponible := utilities_pkg.get_random_integer(1,6);
             if (modelo_disponible <= 3) then
@@ -63,13 +62,19 @@ create or replace package body inventario_pkg as
                 salir := utilities_pkg.get_random_integer(0,2);
                 if (salir = 0) then
                     insert into vehiculo values
-                    (generar_placa,extract(year from sysdate),
-                    hextoraw('e67672a'),0,
-                    utilities_pkg.get_random_integer(10,51)*1000,
-                    id_modelo,id_marca,1,
+                    (generar_placa,
+                     extract(year from sysdate),
+                     rawtohex('Test'),
+                     0,
+                     utilities_pkg.get_random_integer(10,51)*1000,
+                     id_modelo,
+                     id_marca,
+                     1,
                     --automatizar para que escoja de cuantas
                     --filas de Color haya
-                    utilities_pkg.get_random_integer(1,15),1,num_sede);
+                     utilities_pkg.get_random_integer(1,15),
+                     1,
+                     num_sede);
                     salir := 1;
                 end if;
             else
