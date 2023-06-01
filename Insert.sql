@@ -31,10 +31,11 @@ INSERT INTO MARCA VALUES (default,'Renault');
 INSERT INTO MARCA VALUES (default,'Bmw');
 INSERT INTO MARCA VALUES (default,'Volkswagen');
 INSERT INTO MARCA VALUES (default,'Hyundai');
-INSERT INTO MARCA VALUES (default,'Lexus');
 INSERT INTO MARCA VALUES (default,'Mercedes');
 INSERT INTO MARCA VALUES (default,'Subaru');
-INSERT INTO MARCA VALUES (default,'Mg');
+INSERT INTO MARCA VALUES (default,'Skoda');
+INSERT INTO MARCA VALUES (default,'Alfa Romeo');
+INSERT INTO MARCA VALUES (default,'Volvo');
 
 
 
@@ -95,12 +96,53 @@ INSERT INTO MODELO VALUES (DEFAULT,'logan',(SELECT ma_id FROM marca Where ma_nom
 INSERT INTO MODELO VALUES (DEFAULT,'megane',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
 INSERT INTO MODELO VALUES (DEFAULT,'duster',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
 
-INSERT INTO MODELO VALUES (DEFAULT,'simbol',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
-INSERT INTO MODELO VALUES (DEFAULT,'twingo',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
-INSERT INTO MODELO VALUES (DEFAULT,'evolution',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
-INSERT INTO MODELO VALUES (DEFAULT,'logan',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
-INSERT INTO MODELO VALUES (DEFAULT,'megane',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
-INSERT INTO MODELO VALUES (DEFAULT,'duster',(SELECT ma_id FROM marca Where ma_nombre='Renault'));
+INSERT INTO MODELO VALUES (DEFAULT,'swift',(SELECT ma_id FROM marca Where ma_nombre='Suzuki'));
+INSERT INTO MODELO VALUES (DEFAULT,'alto',(SELECT ma_id FROM marca Where ma_nombre='Suzuki'));
+INSERT INTO MODELO VALUES (DEFAULT,'vitara',(SELECT ma_id FROM marca Where ma_nombre='Suzuki'));
+INSERT INTO MODELO VALUES (DEFAULT,'cultus',(SELECT ma_id FROM marca Where ma_nombre='Suzuki'));
+INSERT INTO MODELO VALUES (DEFAULT,'sx4',(SELECT ma_id FROM marca Where ma_nombre='Suzuki'));
+
+INSERT INTO MODELO VALUES (DEFAULT,'altima',(SELECT ma_id FROM marca Where ma_nombre='Nissan'));
+INSERT INTO MODELO VALUES (DEFAULT,'sentra',(SELECT ma_id FROM marca Where ma_nombre='Nissan'));
+INSERT INTO MODELO VALUES (DEFAULT,'murano',(SELECT ma_id FROM marca Where ma_nombre='Nissan'));
+INSERT INTO MODELO VALUES (DEFAULT,'rogue',(SELECT ma_id FROM marca Where ma_nombre='Nissan'));
+INSERT INTO MODELO VALUES (DEFAULT,'versa',(SELECT ma_id FROM marca Where ma_nombre='Nissan'));
+
+INSERT INTO MODELO VALUES (DEFAULT,'m',(SELECT ma_id FROM marca Where ma_nombre='Bmw'));
+INSERT INTO MODELO VALUES (DEFAULT,'m2',(SELECT ma_id FROM marca Where ma_nombre='Bmw'));
+INSERT INTO MODELO VALUES (DEFAULT,'m3',(SELECT ma_id FROM marca Where ma_nombre='Bmw'));
+INSERT INTO MODELO VALUES (DEFAULT,'m4',(SELECT ma_id FROM marca Where ma_nombre='Bmw'));
+INSERT INTO MODELO VALUES (DEFAULT,'m5',(SELECT ma_id FROM marca Where ma_nombre='Bmw'));
+
+INSERT INTO MODELO VALUES (DEFAULT,'AMG',(SELECT ma_id FROM marca Where ma_nombre='Mercedes'));
+INSERT INTO MODELO VALUES (DEFAULT,'GLC',(SELECT ma_id FROM marca Where ma_nombre='Mercedes'));
+INSERT INTO MODELO VALUES (DEFAULT,'W201',(SELECT ma_id FROM marca Where ma_nombre='Mercedes'));
+INSERT INTO MODELO VALUES (DEFAULT,'AMG GT',(SELECT ma_id FROM marca Where ma_nombre='Mercedes'));
+INSERT INTO MODELO VALUES (DEFAULT,'CLK GTR',(SELECT ma_id FROM marca Where ma_nombre='Mercedes'));
+
+INSERT INTO MODELO VALUES (DEFAULT,'outback',(SELECT ma_id FROM marca Where ma_nombre='Subaru'));
+INSERT INTO MODELO VALUES (DEFAULT,'impreza',(SELECT ma_id FROM marca Where ma_nombre='Subaru'));
+INSERT INTO MODELO VALUES (DEFAULT,'wrx',(SELECT ma_id FROM marca Where ma_nombre='Subaru'));
+INSERT INTO MODELO VALUES (DEFAULT,'legacy',(SELECT ma_id FROM marca Where ma_nombre='Subaru'));
+INSERT INTO MODELO VALUES (DEFAULT,'brz',(SELECT ma_id FROM marca Where ma_nombre='Subaru'));
+
+INSERT INTO MODELO VALUES (DEFAULT,'octavia',(SELECT ma_id FROM marca Where ma_nombre='Skoda'));
+INSERT INTO MODELO VALUES (DEFAULT,'scala',(SELECT ma_id FROM marca Where ma_nombre='Skoda'));
+INSERT INTO MODELO VALUES (DEFAULT,'kodiaq',(SELECT ma_id FROM marca Where ma_nombre='Skoda'));
+INSERT INTO MODELO VALUES (DEFAULT,'fabia',(SELECT ma_id FROM marca Where ma_nombre='Skoda'));
+INSERT INTO MODELO VALUES (DEFAULT,'karoq',(SELECT ma_id FROM marca Where ma_nombre='Skoda'));
+
+INSERT INTO MODELO VALUES (DEFAULT,'giulia',(SELECT ma_id FROM marca Where ma_nombre='Alfa Romeo'));
+INSERT INTO MODELO VALUES (DEFAULT,'giulietta',(SELECT ma_id FROM marca Where ma_nombre='Alfa Romeo'));
+INSERT INTO MODELO VALUES (DEFAULT,'stelvio',(SELECT ma_id FROM marca Where ma_nombre='Alfa Romeo'));
+INSERT INTO MODELO VALUES (DEFAULT,'156',(SELECT ma_id FROM marca Where ma_nombre='Alfa Romeo'));
+INSERT INTO MODELO VALUES (DEFAULT,'155',(SELECT ma_id FROM marca Where ma_nombre='Alfa Romeo'));
+
+INSERT INTO MODELO VALUES (DEFAULT,'XC90',(SELECT ma_id FROM marca Where ma_nombre='Volvo'));
+INSERT INTO MODELO VALUES (DEFAULT,'S90',(SELECT ma_id FROM marca Where ma_nombre='Volvo'));
+INSERT INTO MODELO VALUES (DEFAULT,'XC60',(SELECT ma_id FROM marca Where ma_nombre='Volvo'));
+INSERT INTO MODELO VALUES (DEFAULT,'V60',(SELECT ma_id FROM marca Where ma_nombre='Volvo'));
+INSERT INTO MODELO VALUES (DEFAULT,'S60',(SELECT ma_id FROM marca Where ma_nombre='Volvo'));
 
 INSERT INTO MODELO VALUES (DEFAULT,'sportage',(SELECT ma_id FROM marca Where ma_nombre='Kia'));
 INSERT INTO MODELO VALUES (DEFAULT,'rio',(SELECT ma_id FROM marca Where ma_nombre='Kia'));
