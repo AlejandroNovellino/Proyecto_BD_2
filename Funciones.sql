@@ -35,7 +35,7 @@ CREATE OR REPLACE PACKAGE BODY PK_Cliente IS
 PROCEDURE BUSCAR_Cliente( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2) 
   AS
   BEGIN
-    OPEN o_result_set FOR SELECT  c.p_id,
+    OPEN o_result_set FOR SELECT  c.c_id,
     c.datos_personales.IP_cedula cedula,
     CONCAT( c.datos_personales.IP_Primer_Nombre ,c.datos_personales.IP_Segundo_Nombre) full_name,
     --c.datos_personales.IP_Primer_Nombre pnombre,
@@ -45,7 +45,7 @@ PROCEDURE BUSCAR_Cliente( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F
    -- c.datos_personales.IP_Segundo_Apellido sapellido,
     c.datos_personales.IP_Correo correo,
     c.datos_personales.IP_Fecha_Nacimiento fnac,
-    c.datos_personales.IP_Sexo sexo,
+   CASE c.datos_personales.IP_Sexo WHEN 'M' THEN 'Masculino' When 'F' THEN 'Femenino'  END AS sexo,
     c.datos_personales.IP_Direccion dir,
     c.ubicacion_mapa.UG_Latitud lat,
     c.ubicacion_mapa.UG_Longitud lon,
@@ -75,7 +75,7 @@ fle bfile;
     ubicacion_geografica.verificar_longitud(longitud),
     ubicacion_geografica.verificar_timestamp(TO_TIMESTAMP('2003/12/13 10:13:18', 'YYYY/MM/DD HH:MI:SS'))),
     (select TC_ID from tipo_cliente where TC_NOMBRE=Tipo),
-    '28/03/23') returning foto INTO temp;
+    (select SYSDATE  from dual)) returning foto INTO temp;
     
     
    fle:= BFILENAME ('OBJETOS_LOB', V_Nombre_foto);
@@ -97,43 +97,44 @@ END PK_Alquiler;
 ---Creacion del body del paquete
 CREATE OR REPLACE PACKAGE BODY PK_Alquiler IS
 ----Precedimiento para el reporte 1----
-PROCEDURE BUSCAR_vehiculo( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2) 
-  AS
-  BEGIN
-    OPEN o_result_set FOR SELECT v_foto,anno,modelo,marca,tipo,cant
-                        FROM (SELECT count(*) as cant, v.v_anno as anno,m.m_nombre as modelo,n.ma_nombre as marca,t.tv_nombre as tipo,v.v_placa as placa
-                              from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo2 v
-                              where v.modelo_M_ID=m.m_id 
-                              and v.tipo_vehiculo_TV_ID=t.tv_id 
-                              and n.ma_id=m.marca_ma_id
-                              and v.v_placa=d.DA_fk_vehiculo
-                              and a.detalle_alquiler_da_id=d.DA_ID
-                             -- and d.DA_fecha between TO_DATE(fecha_I,'dd/mm/yy')and TO_DATE(fecha_F,'dd/mm/yy')
-                              group by  v.v_anno,m.m_nombre,n.ma_nombre,t.tv_nombre,v.v_placa
-                              order by 1 desc) ,vehiculo2 
-                        where placa=v_placa
-                        order by cant desc;                                            
-  END BUSCAR_vehiculo;
+Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_F Varchar2) 
+  As
+  Begin
+    Open O_Result_Set For Select V_Foto,Anno,Modelo,Marca,Tipo,Cant
+                        From (Select Count(*) As Cant, V.V_Anno As Anno,M.M_Nombre As Modelo,N.Ma_Nombre As Marca,T.Tv_Nombre As Tipo,V.V_Placa As Placa
+                              From  Marca N , Modelo M,Tipo_Vehiculo T , Detalle_Alquiler D, Alquiler A , Vehiculo V
+                              Where V.Modelo_M_Id=M.M_Id 
+                              And V.Tipo_Vehiculo_Tv_Id=T.Tv_Id 
+                              And N.Ma_Id=M.Marca_Ma_Id
+                              And V.V_Placa=D.Da_Fk_Vehiculo
+                              And A.Detalle_Alquiler_Da_Id=D.Da_Id
+                              And D.Da_Fecha Between To_Date(Fecha_I,'dd/mm/yy')And To_Date(Fecha_F,'dd/mm/yy')
+                              Group By  V.V_Anno,M.M_Nombre,N.Ma_Nombre,T.Tv_Nombre,V.V_Placa
+                              Order By 1 Desc) ,Vehiculo 
+                        Where Placa=V_Placa
+                        Order By Cant Desc;                                            
+  End Buscar_Vehiculo;
   ----Precedimiento para el reporte 3----
-  PROCEDURE BUSCAR_vehiculo_Mes( o_result_set OUT RESULT_SET) 
-  AS
-  BEGIN
-    OPEN o_result_set FOR SELECT v_foto,anno,modelo,marca,tipo,mo,an, cant
-                          FROM (SELECT count(v_placa)as cant,CASE   EXTRACT(MONTH FROM d.DA_fecha ) WHEN 1 THEN 'Enero' when 2 then 'Febrero'when 3 Then 'Marzo' when 4 then 'Abril' when 5 then 'Mayo' when 6 then 'Junio' when 7 then 'Julio'when 8 then 'Agosto' when 9 then 'Septiembre' when 10 then 'Octubre' when 11 then 'Noviembre' when 12 then 'Diciembre'End as mo
-                          ,EXTRACT(YEAR FROM d.DA_fecha ) AS an, v_placa as placa ,v.v_anno as anno,m.m_nombre as modelo,n.ma_nombre as marca,t.tv_nombre as tipo
-                                  from  marca n , modelo m,tipo_vehiculo t , detalle_alquiler2 d, alquiler5 a , vehiculo2 v
-                                  where v.modelo_M_ID=m.m_id 
-                                  and v.tipo_vehiculo_TV_ID=t.tv_id 
-                                  and n.ma_id=m.marca_ma_id
-                                  and v.v_placa=d.DA_fk_vehiculo
-                                  and a.detalle_alquiler_da_id=d.DA_ID
+  Procedure Buscar_Vehiculo_Mes( O_Result_Set Out Result_Set) 
+  As
+  Begin
+    Open O_Result_Set For Select V_Foto,Anno,Modelo,Marca,Tipo,Case  MO When 1 Then 'Enero' When 2 Then 'Febrero'When 3 Then 'Marzo' When 4 Then 'Abril' When 5 Then 'Mayo' When 6 Then 'Junio' When 7 Then 'Julio'When 8 Then 'Agosto' When 9 Then 'Septiembre' When 10 Then 'Octubre' When 11 Then 'Noviembre' When 12 Then 'Diciembre'End,An, Cant
+                          From (Select Count(V_Placa)As Cant,Extract(Month From D.Da_Fecha ) As Mo
+                          ,Extract(Year From D.Da_Fecha ) As An, V_Placa As Placa ,V.V_Anno As Anno,M.M_Nombre As Modelo,N.Ma_Nombre As Marca,T.Tv_Nombre As Tipo
+                                  From  Marca N , Modelo M,Tipo_Vehiculo T , Detalle_Alquiler D, Alquiler A , Vehiculo V
+                                  Where V.Modelo_M_Id=M.M_Id 
+                                  And V.Tipo_Vehiculo_Tv_Id=T.Tv_Id 
+                                  And N.Ma_Id=M.Marca_Ma_Id
+                                  And V.V_Placa=D.Da_Fk_Vehiculo
+                                  And A.Detalle_Alquiler_Da_Id=D.Da_Id
                              -- and d.DA_fecha between TO_DATE(fecha_I,'dd/mm/yy')and TO_DATE(fecha_F,'dd/mm/yy')
-                              group by EXTRACT(MONTH FROM d.DA_fecha ), EXTRACT(YEAR FROM d.DA_fecha ),v_placa,v.v_anno,m.m_nombre,n.ma_nombre,t.tv_nombre
-                              order by 1 desc) ,vehiculo2 
-                        where placa=v_placa
-                        order by 7 desc;
-  END BUSCAR_vehiculo_Mes;
-  END PK_Alquiler;
+                              Group By Extract(Month From D.Da_Fecha ), Extract(Year From D.Da_Fecha ),V_Placa,V.V_Anno,M.M_Nombre,N.Ma_Nombre,T.Tv_Nombre
+                              Order By 2 asc,3 desc,1 desc
+                              ) ,Vehiculo 
+                        Where Placa=V_Placa;
+                        --Order By 6 desc  ;
+  End Buscar_Vehiculo_Mes;
+  End Pk_Alquiler;
  
 ----  paquete pk_promocion-----
 CREATE OR REPLACE PACKAGE PK_Promocion AS
@@ -160,21 +161,22 @@ PROCEDURE BUSCAR_Promocion( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha
 CREATE OR REPLACE PACKAGE PK_Alianza AS
 TYPE RESULT_SET IS REF CURSOR;
  
-PROCEDURE BUSCAR_Alianza(o_result_set OUT RESULT_SET);
+PROCEDURE BUSCAR_Alianza(o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2);
 PROCEDURE I_Aliado(V_Nombre_foto varchar2,nombre Varchar2);
 END PK_Alianza;
 
 
-CREATE OR REPLACE PACKAGE BODY PK_Alianza IS
-PROCEDURE BUSCAR_alianza( o_result_set OUT RESULT_SET) 
+CREATE OR REPLACE PACKAGE BODY  PK_Alianza IS
+PROCEDURE BUSCAR_alianza( o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2) 
   AS
   BEGIN
     OPEN o_result_set FOR SELECT aa_fechaI,aa_fechaF,aa_FechaFirma,aa_descripcion,ao_nombre,ao_logo
                           from  alianza, aliado
-                          where aliado_ao_id=ao_id;
+                          where aliado_ao_id=ao_id
+                          and AA_fechai between TO_DATE(fecha_I,'dd/mm/yy')and TO_DATE(fecha_F,'dd/mm/yy'); 
                                                                   
   END BUSCAR_alianza;
-  
+
   PROCEDURE I_Aliado(V_Nombre_foto varchar2,nombre Varchar2)
 is 
  temp blob;
@@ -202,8 +204,8 @@ CREATE OR REPLACE PACKAGE BODY PK_Mantenimiento IS
 PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2) 
   AS
   BEGIN
-    OPEN o_result_set FOR SELECT v.v_placa,v.v_anno ,v.v_foto,m.m_nombre,n.ma_nombre ,ma.m_descripcion,t.tm_nombre,s.s_nombre,ta.t_ubicacion_geografica.UG_Latitud,ta.t_ubicacion_geografica.UG_Longitud,mv.man_fecha_proximo_man,mv.man_fechaI,ta.T_nombre
-                          FROM vehiculo2 v, marca n , modelo m, mantenimiento ma,taller ta,mantenimiento_vehiculo mv, mantenimiento_taller mt, status_mantenimiento s, tipo_mantenimiento t
+    OPEN o_result_set FOR SELECT v.v_placa,v.v_anno ,v.v_foto,m.m_nombre,n.ma_nombre ,ma.m_descripcion,t.tm_nombre,s.s_nombre,ta.t_ubicacion_geografica.UG_Latitud,ta.t_ubicacion_geografica.UG_Longitud,mv.man_fecha_proximo_man,mv.man_fechaI,ta.T_nombre,MAN_fechai
+                          FROM vehiculo v, marca n , modelo m, mantenimiento ma,taller ta,mantenimiento_vehiculo mv, mantenimiento_taller mt, status_mantenimiento s, tipo_mantenimiento t
                           WHERE v.v_placa=mv.vehiculo_v_id
                           and n.ma_id=m.marca_ma_id
                           and v.modelo_M_ID=m.m_id 
@@ -211,7 +213,8 @@ PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fe
                           and ma.tipo_mantenimiento_TM_ID= t.tm_id
                           and mv.mantenimiento_m_id=ma.m_id
                           and mt.mantenimiento_m_id=ma.m_id
-                          and mt.taller_t_id=ta.t_id;                                                                
+                          and mt.taller_t_id=ta.t_id
+                         and MAN_fechai between TO_DATE(fecha_I,'dd/mm/yy')and TO_DATE(fecha_F,'dd/mm/yy'); 
   END BUSCAR_Mantenimiento;
   END PK_Mantenimiento;
  
@@ -220,7 +223,7 @@ create or replace function buscar_numero(id number ,fechaI date, fechaF date ) r
 IS cant number;
    ci number;
     begin
-        Select count(*) into cant from alquiler5 where cliente_C_id=id and A_fecha_inicio between fechaI and fechaF group by cliente_c_id ; 
+        Select count(*) into cant from alquiler where cliente_C_id=id and A_fecha_inicio between fechaI and fechaF group by cliente_c_id ; 
         return cant ;
 end;
  
@@ -231,16 +234,16 @@ end;
  begin
     if(buscar_numero(id,fechaI,fechaF)=1) then
         Update cliente set tipo_cliente_tc_id =(select TC_ID from tipo_cliente where TC_NOMBRE='Ocacional')
-        where p_id=id ;
+        where c_id=id ;
       else if (buscar_numero(id,fechaI,fechaF)=3)then
         begin
         Update cliente set tipo_cliente_tc_id = (select TC_ID from tipo_cliente where TC_NOMBRE='Frecuente')
-        where p_id=id;   
+        where c_id=id;   
         end;
      else if ((buscar_numero(id,fechaI,fechaF)>=5))then
         begin
         Update cliente set tipo_cliente_tc_id =(select TC_ID from tipo_cliente where TC_NOMBRE='VIP')
-        where p_id=id;   
+        where c_id=id;   
         end;
      end if;
      end if;
