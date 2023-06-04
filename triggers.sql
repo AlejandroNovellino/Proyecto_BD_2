@@ -72,6 +72,7 @@ declare
     insert into compra values (default,
    :new.V_precio,(select SYSDATE from dual),id,:new.Sede_S_ID);
  end;
+
 create or replace trigger cambio_km_vehiculo AFTER UPDATE on detalle_alquiler2 FOR EACH ROW
 declare
   id VARCHAR2(12) ;
@@ -85,6 +86,14 @@ declare
     end if ; 
  end;
   
+create or replace trigger cambio_status_cliente  AFTER insert on denuncia FOR EACH ROW
+Declare
+
+begin
+
+Update cliente set tipo_cliente_tc_id =(select TC_ID from tipo_cliente where TC_NOMBRE='No deseado')
+        where p_id=:new.Alquiler_Cliente_C_ID; 
+end;
 
      
    
