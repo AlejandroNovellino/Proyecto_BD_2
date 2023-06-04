@@ -35,6 +35,9 @@ create or replace package body inventario_pkg as
         ctd_modelos integer;
         id_1er_modelo integer;
         id_modelo integer;
+        
+        nom_marca varchar2(15);
+        nom_modelo varchar2(15);
 
         modelo_disponible integer;
 
@@ -42,10 +45,12 @@ create or replace package body inventario_pkg as
         --valida que sea el día 28 del mes
         select extract(day from sysdate) into num_dia from dual;
         if (num_dia=28) then
+            DBMS_OUTPUT.PUT_LINE('Es el 28 del mes, se intentara una compra de vehiculo');
             loop
             --selecciona modelo de carro
             select count(*) into ctd_marcas from marca;
             id_marca := utilities_pkg.get_random_integer(1,ctd_marcas+1);
+            select ma_nombre into nom_marca from marca where ma_id=id_marca;
             select count(*) into ctd_modelos from modelo 
                 where marca_ma_id = id_marca;
             select m_id into id_1er_modelo from modelo
@@ -53,14 +58,20 @@ create or replace package body inventario_pkg as
                   and rownum = 1;
             id_modelo := utilities_pkg.get_random_integer(id_1er_modelo, 
                                             id_1er_modelo+ctd_modelos+1);
+            select m_nombre into nom_modelo from modelo where m_id=id_modelo;                                            
             --verifica si el proveedor tiene ese modelo
             modelo_disponible := utilities_pkg.get_random_integer(1,6);
-            if (modelo_disponible <= 3) then
+            if (modelo_disponible <= 4) then
+                DBMS_OUTPUT.PUT_LINE('Esta disponible un '
+                                    ||nom_marca||' '
+                                    ||nom_modelo
+                                    ||' para la compra');
                 --verifica si hay fondos suficientes
                 --OJO: seria chevere poder implementarlo con
                 --base en el precio del modelo y los fondos
                 salir := utilities_pkg.get_random_integer(0,2);
                 if (salir = 0) then
+                    DBMS_OUTPUT.PUT_LINE('Se procede con la compra, ya que se dispone de los fondos');
                     insert into vehiculo values
                     (generar_placa,
                      extract(year from sysdate),
