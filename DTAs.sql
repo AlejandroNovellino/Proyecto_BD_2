@@ -165,7 +165,8 @@ create or replace type periodo_duracion as object (
     -- metodos mienbro del objeto
     member FUNCTION verificar_activo return boolean,
     member FUNCTION get_dia_semana_inicio return varchar2,
-    member FUNCTION get_dia_semana_final return varchar2
+    member FUNCTION get_dia_semana_final return varchar2,
+    member FUNCTION get_cantidad_dias_del_periodo return number
 );
 /
 
@@ -229,6 +230,18 @@ create or replace type body periodo_duracion as
         select TO_CHAR(P_Fecha_Fin, 'DAY') day into dia_semana FROM dual;
         return dia_semana;
     end get_dia_semana_final;
+    
+    -- get cantidad de dias en el periodo
+    member FUNCTION get_cantidad_dias_del_periodo return number
+    is
+        cantidad_dias_en_el_periodo number;
+    begin
+        select (P_Fecha_Fin - P_Fecha_Inicio) into cantidad_dias_en_el_periodo
+            from dual;
+            
+            -- se suma 1 porque la funcion anterior no tincluye el limite superior es [min, max)
+            return cantidad_dias_en_el_periodo + 1;
+    end get_cantidad_dias_del_periodo;
 end;
 /
 
