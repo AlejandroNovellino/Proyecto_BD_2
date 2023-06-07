@@ -341,6 +341,7 @@ CREATE TABLE vehiculo (
     v_km                  number NOT NULL,
     v_precio              NUMBER NOT NULL,
     modelo_m_id           number NOT NULL,
+    modelo_marca_ma_id    number NOT NULL,
     status_vehiculo_sv_id number NOT NULL,
     color_c_id            number NOT NULL,
     tipo_vehiculo_tv_id   number NOT NULL,
