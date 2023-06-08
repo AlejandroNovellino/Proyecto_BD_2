@@ -101,7 +101,7 @@ CREATE TABLE detalle_alquiler (
     da_fecha              number NOT NULL,
     vehiculo_v_placa      VARCHAR2(7 CHAR) NOT NULL,
     -- claves primarias de la tabla
-    PRIMARY KEY (da_i)
+    PRIMARY KEY (da_id)
 );
 /
 CREATE TABLE detalle_pago (
