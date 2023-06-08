@@ -16,7 +16,7 @@ create or replace package utilities_pkg as
     ----------------------------------------------------------------------------
     -- funciones para impirmir
     -- procedure para imprimir una persona
-    procedure print_persona(persona_imprimir pesona%rowtype, msg varchar2 DEFAULT '');
+    procedure print_persona(persona_imprimir persona%rowtype, msg varchar2 DEFAULT '');
     -- procedure para imprimir un cliente
     procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '');
     -- procedure para imprimir un vehiculo
@@ -114,7 +114,7 @@ create or replace package body utilities_pkg as
         cursor personas is select * from persona;
         persona_row persona%rowtype;
         -- variable para retornar
-        persona_to_return pesona%rowtype;
+        persona_to_return persona%rowtype;
     begin
         -- contamos la cantidad de clientes
         select count(*) into cantidad_personas from persona;
@@ -143,9 +143,9 @@ create or replace package body utilities_pkg as
         cantidad_vehiculos number;   -- cantidad de clientes
         -- variables para el cursor
         cursor vehiculos is select * from vehiculo where sede_s_id=pk_sede;
-        vehiculo_row persona%rowtype;
+        vehiculo_row vehiculo%rowtype;
         -- variable para retornar
-        vehiculo_to_return pesona%rowtype;
+        vehiculo_to_return vehiculo%rowtype;
     begin
         -- contamos la cantidad de clientes
         select count(*) into cantidad_vehiculos from vehiculo where sede_s_id=pk_sede;
@@ -168,7 +168,7 @@ create or replace package body utilities_pkg as
     end get_vehiculo_random;
     ----------------------------------------------------------------------------
     -- procedure para imprimir una persona
-    procedure print_persona(persona_imprimir pesona%rowtype, msg varchar2 DEFAULT '')
+    procedure print_persona(persona_imprimir persona%rowtype, msg varchar2 DEFAULT '')
     is
     begin
         DBMS_OUTPUT.PUT_LINE('Persona: ');
@@ -181,7 +181,7 @@ create or replace package body utilities_pkg as
             || 'C.I. ' || persona_imprimir.ip.IP_cedula
         );
         DBMS_OUTPUT.PUT_LINE('  ' || msg);
-    end print_cliente;
+    end print_persona;
     ----------------------------------------------------------------------------
     -- procedure para imprimir un cliente
     procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '')
@@ -207,7 +207,7 @@ create or replace package body utilities_pkg as
     begin
         select mo.m_nombre into modelo_vehiculo 
             from modelo mo
-            where mo.mo_id=vehiculo_imprimir.modelo_m_id;
+            where mo.m_id=vehiculo_imprimir.modelo_m_id;
             
         select ma.ma_nombre into modelo_vehiculo 
             from marca ma
