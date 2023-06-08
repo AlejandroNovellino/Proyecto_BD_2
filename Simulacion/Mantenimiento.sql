@@ -104,6 +104,30 @@ create or replace package body mantenimiento_pkg as
         end loop;
     end taller_sin_disponibilidad;
 
+    procedure siguiente_mantenimiento_durante_alquiler (hoy date) is
+
+        ult_mto mantenimiento_vehiculo%rowtype;
+        
+        taller_actual integer;
+
+        disponible integer;
+
+        begin
+        select * into ult_mto from mantenimiento_vehiculo where rownum=1 order by man_periodo_duracion.p_fecha_inicio desc;
+        if ult_mto.man_fecha_proximo_man between ult_mto.man_periodo_duracion.p_fecha_inicio and ult_mto.man_periodo_duracion.p_fecha_fin then
+            select taller_t_id into taller_actual from mantenimiento_taller where mantenimiento_m_id=ult_mto.mantenimiento_m_id;
+            --logica para determinar si el taller tiene disponibilidad
+            disponible := utilities_pkg.get_random_integer(1,11);
+            if (disponible<8) then
+                update mantenimiento_vehiculo 
+                    set man_fecha_proximo_man=ult_mto.man_fecha_proximo_man+2 
+                    where man_id=ult_mto.man_id;
+            else
+                taller_sin_disponibilidad (ult_mto, ult_mto.man_fecha_proximo_man+2);
+            end if;
+        end if;
+        end siguiente_mantenimiento_durante_alquiler;
+  
 end mantenimiento_pkg;
 /
 
