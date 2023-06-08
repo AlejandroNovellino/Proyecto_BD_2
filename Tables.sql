@@ -101,7 +101,7 @@ CREATE TABLE detalle_alquiler (
     da_fecha              number NOT NULL,
     vehiculo_v_placa      VARCHAR2(7 CHAR) NOT NULL,
     -- claves primarias de la tabla
-    PRIMARY KEY (da_i)
+    PRIMARY KEY (da_id)
 );
 /
 CREATE TABLE detalle_pago (
@@ -196,10 +196,9 @@ CREATE TABLE mantenimiento (
 /
 CREATE TABLE mantenimiento_taller (
     mantenimiento_m_id                     number NOT NULL,
-    mantenimiento_tipo_mantenimiento_tm_id number NOT NULL,
     taller_t_id                            number NOT NULL,
     -- claves primarias de la tabla
-    PRIMARY KEY (mantenimiento_m_id)
+    PRIMARY KEY (mantenimiento_m_id, taller_t_id)
 );
 /
 CREATE TABLE mantenimiento_vehiculo (
@@ -365,14 +364,8 @@ ALTER TABLE alquiler
         REFERENCES cliente ( c_id );
 /
 ALTER TABLE alquiler
-    ADD CONSTRAINT alquiler_detalle_alquiler_fk FOREIGN KEY ( detalle_alquiler_vehiculo_v_placa,
-                                                              detalle_alquiler_vehiculo_m_id,
-                                                              detalle_alquiler_vehiculo_ma_id,
-                                                              detalle_alquiler_da_id )
-        REFERENCES detalle_alquiler ( vehiculo_v_placa,
-                                      vehiculo_m_id,
-                                      vehiculo_ma_id,
-                                      da_id );
+    ADD CONSTRAINT alquiler_detalle_alquiler_fk FOREIGN KEY ( detalle_alquiler_da_id )
+        REFERENCES detalle_alquiler ( da_id );
 /
 ALTER TABLE alquiler
     ADD CONSTRAINT alquiler_reserva_fk FOREIGN KEY ( reserva_re_id )
@@ -387,14 +380,8 @@ ALTER TABLE cliente
         REFERENCES tipo_cliente ( tc_id );
 /
 ALTER TABLE compra
-    ADD CONSTRAINT COMPRA_detalle_compra_FK FOREIGN KEY ( detalle_compra_DC_ID,
-                                                            detalle_compra_V_ID,
-                                                            detalle_compra_M_ID,
-                                                            detalle_compra_MA_ID )
-        REFERENCES detalle_compra ( dc_id,
-                                      vehiculo_v_placa,
-                                      vehiculo_m_id,
-                                      vehiculo_ma_id );
+    ADD CONSTRAINT COMPRA_detalle_compra_FK FOREIGN KEY ( detalle_compra_DC_ID )
+        REFERENCES detalle_compra ( dc_id );
 /
 ALTER TABLE compra
     ADD CONSTRAINT compra_sede_fk FOREIGN KEY ( sede_s_id )
@@ -405,16 +392,8 @@ ALTER TABLE consesionario
         REFERENCES lugar ( l_id );
 /
 ALTER TABLE denuncia
-    ADD CONSTRAINT denuncia_alquiler_fk FOREIGN KEY ( alquiler_a_id,
-                                                      alquiler_cliente_c_id )
-        REFERENCES alquiler ( a_id,
-                              cliente_c_id );
-/
-ALTER TABLE detalle_alquiler
-    ADD CONSTRAINT detalle_alquiler_alquiler_fk FOREIGN KEY ( alquiler_a_id,
-                                                              alquiler_cliente_c_id )
-        REFERENCES alquiler ( a_id,
-                              cliente_c_id );
+    ADD CONSTRAINT denuncia_alquiler_fk FOREIGN KEY ( alquiler_a_id )
+        REFERENCES alquiler ( a_id );
 /
 ALTER TABLE detalle_alquiler
     ADD CONSTRAINT detalle_alquiler_vehiculo_fk FOREIGN KEY ( vehiculo_v_placa )
@@ -429,16 +408,8 @@ ALTER TABLE detalle_pago
         REFERENCES forma_pago ( fp_id );
 /
 ALTER TABLE detalle_compra
-    ADD CONSTRAINT detalle_compra_COMPRA_FK FOREIGN KEY ( compra_c_id )
-        REFERENCES compra ( c_id );
-/
-ALTER TABLE detalle_compra
-    ADD CONSTRAINT detalle_compra_VEHICULO_FK FOREIGN KEY ( vehiculo_v_placa,
-                                                              vehiculo_m_id,
-                                                              vehiculo_ma_id )
-        REFERENCES vehiculo ( v_placa,
-                              modelo_m_id,
-                              modelo_marca_ma_id );
+    ADD CONSTRAINT detalle_compra_VEHICULO_FK FOREIGN KEY ( vehiculo_v_placa)
+        REFERENCES vehiculo ( v_placa );
 /
 ALTER TABLE empleado
     ADD CONSTRAINT empleado_sede_fk FOREIGN KEY ( sede_s_id )
@@ -461,12 +432,8 @@ ALTER TABLE historico_promocion
         REFERENCES promocion ( p_id );
 /
 ALTER TABLE historico_promocion
-    ADD CONSTRAINT historico_promocion_vehiculo_fk FOREIGN KEY ( vehiculo_v_placa,
-                                                                 vehiculo_m_id,
-                                                                 vehiculo_ma_id )
-        REFERENCES vehiculo ( v_placa,
-                              modelo_m_id,
-                              modelo_marca_ma_id );
+    ADD CONSTRAINT historico_promocion_vehiculo_fk FOREIGN KEY ( vehiculo_v_placa )
+        REFERENCES vehiculo ( v_placa );
 /
 ALTER TABLE ingreso
     ADD CONSTRAINT ingreso_sede_fk FOREIGN KEY ( sede_s_id )
@@ -477,10 +444,8 @@ ALTER TABLE lugar
         REFERENCES lugar ( l_id );
 /
 ALTER TABLE mantenimiento_taller
-    ADD CONSTRAINT mantenimiento_taller_mantenimiento_fk FOREIGN KEY ( mantenimiento_m_id,
-                                                                       mantenimiento_tipo_mantenimiento_tm_id )
-        REFERENCES mantenimiento ( m_id,
-                                   tipo_mantenimiento_tm_id );
+    ADD CONSTRAINT mantenimiento_taller_mantenimiento_fk FOREIGN KEY ( mantenimiento_m_id )
+        REFERENCES mantenimiento ( m_id );
 /
 ALTER TABLE mantenimiento_taller
     ADD CONSTRAINT mantenimiento_taller_taller_fk FOREIGN KEY ( taller_t_id )
@@ -491,22 +456,16 @@ ALTER TABLE mantenimiento
         REFERENCES tipo_mantenimiento ( tm_id );
 /
 ALTER TABLE mantenimiento_vehiculo
-    ADD CONSTRAINT mantenimiento_vehiculo_mantenimiento_fk FOREIGN KEY ( mantenimiento_m_id,
-                                                                         mantenimiento_tm_id )
-        REFERENCES mantenimiento ( m_id,
-                                   tipo_mantenimiento_tm_id );
+    ADD CONSTRAINT mantenimiento_vehiculo_mantenimiento_fk FOREIGN KEY ( mantenimiento_m_id )
+        REFERENCES mantenimiento ( m_id );
 /
 ALTER TABLE mantenimiento_vehiculo
     ADD CONSTRAINT mantenimiento_vehiculo_status_mantenimiento_fk FOREIGN KEY ( status_mantenimiento_s_id )
         REFERENCES status_mantenimiento ( s_id );
 /
 ALTER TABLE mantenimiento_vehiculo
-    ADD CONSTRAINT mantenimiento_vehiculo_vehiculo_fk FOREIGN KEY ( vehiculo_v_placa,
-                                                                    vehiculo_m_id,
-                                                                    vehiculo_ma_id )
-        REFERENCES vehiculo ( v_placa,
-                              modelo_m_id,
-                              modelo_marca_ma_id );
+    ADD CONSTRAINT mantenimiento_vehiculo_vehiculo_fk FOREIGN KEY ( vehiculo_v_placa )
+        REFERENCES vehiculo ( v_placa );
 /
 ALTER TABLE modelo
     ADD CONSTRAINT modelo_marca_fk FOREIGN KEY ( marca_ma_id )
@@ -517,10 +476,8 @@ ALTER TABLE observacion
         REFERENCES rating ( r_id );
 /
 ALTER TABLE rating
-    ADD CONSTRAINT rating_alquiler_fk FOREIGN KEY ( alquiler_a_id,
-                                                    alquiler_cliente_c_id )
-        REFERENCES alquiler ( a_id,
-                              cliente_c_id );
+    ADD CONSTRAINT rating_alquiler_fk FOREIGN KEY ( alquiler_a_id )
+        REFERENCES alquiler ( a_id );
 /
 ALTER TABLE reserva
     ADD CONSTRAINT reserva_cliente_fk FOREIGN KEY ( cliente_c_id )
