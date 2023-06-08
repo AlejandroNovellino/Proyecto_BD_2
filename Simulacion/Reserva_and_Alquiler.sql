@@ -2,17 +2,19 @@ create or replace package reserva_and_alquiler_pkg as
     -- funcion para verificar si el vehiculo podria ser alquilado en un periodo dado
     function verificar_periodo_valido(vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion) return boolean;
     -- funcion para comprobar disponibilidad del vehiculo
-    function comprobacion_disponibilidad_vehiculo(vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_pk number) return boolean;
+    function comprobacion_disponibilidad_vehiculo(vehiculo_seleccionado OUT vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_pk number) return boolean;
     -- procedure para encontrarle al usuario una opcion de vehiculo para alquilar
     procedure solucion_vehiculo_no_disponible_en_sede(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_donde_no_hay_el_vehiculo number);
+    -- funcion para el fallo en pago
+    function fallo_durante_pago(forma_pago_actual forma_pago%rowtype) return boolean;
     -- procedure para el pago del alquiler
     procedure pago_alquiler(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, alquiler_realizado alquiler%rowtype);
     -- procedure para alquiler
-    procedure alquiler(cliente_reservar cliente%rowtype, dia_actual date, fecha_fin_simulacion date, ultimo_alquiler_realizado OUT alquiler%rowtype);
+    procedure alquiler(cliente_reservar cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, ultimo_alquiler_realizado OUT alquiler%rowtype);
     -- procedure para reserva
     procedure reserva(cliente_reservar cliente%rowtype, dia_actual date, fecha_fin_simulacion date);
     -- procedure para simular el modulo de reservas
-    procedure simulacion_reservas(pk_sede number);
+    procedure simulacion_reservas(pk_sede number, dia_actual date, fecha_fin_simulacion date);
     -- procedure para simular el modulo de alquileres
     procedure simulacion_alquileres(pk_sede number, dia_actual date, fecha_fin_simulacion date);
 end reserva_and_alquiler_pkg;
@@ -110,7 +112,9 @@ create or replace package body reserva_and_alquiler_pkg as
     -- procedure para encontrarle al usuario una opcion de vehiculo para alquilar (escenario 6)
     procedure solucion_vehiculo_no_disponible_en_sede(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_donde_no_hay_el_vehiculo number)
       is    
-        vehiculo_disponible boolean; -- variable para verificar si un vehiculo esta disponible o no
+        vehiculo_disponible boolean;            -- variable para verificar si un vehiculo esta disponible o no
+        alquiler_realizado alquiler%rowtype;    -- variable para el alquiler que se realizara si existe auto disponible
+        
         -- variables para el cursor
         -- se seleccionan todos los vehiculos de las otras sedes
         cursor todos_vehiculos_de_las_otras_sedes is select * 
@@ -156,7 +160,10 @@ create or replace package body reserva_and_alquiler_pkg as
             
             vehiculo_seleccionado := nuevo_vehiculo_a_alquilar;
             -- se alquila el vehiculo
-            reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler);
+            reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
+            
+            -- se llama al escenario 'pago de alquiler'
+            reserva_and_alquiler_pkg.pago_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
             
             -- finaliza el procedure
             return;
@@ -192,7 +199,10 @@ create or replace package body reserva_and_alquiler_pkg as
             
             vehiculo_seleccionado := nuevo_vehiculo_a_alquilar;
             -- se alquila el vehiculo
-            reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler);
+            reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
+            
+            -- se llama al escenario 'pago de alquiler'
+            reserva_and_alquiler_pkg.pago_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
             
             -- finaliza el procedure
             return;
@@ -203,9 +213,71 @@ create or replace package body reserva_and_alquiler_pkg as
         
     end solucion_vehiculo_no_disponible_en_sede;
     ----------------------------------------------------------------------------
+    -- funcion para el fallo en pago
+    function fallo_durante_pago(forma_pago_actual forma_pago%rowtype) return boolean
+    is
+        se_dio_un_fallo boolean := false; -- varibale a retornar por si se dio un fallo o no
+        error_que_ocurrio varchar2(35);
+        
+        -- errores para las posibles opciones
+        TYPE tipos_de_fallos IS VARRAY(5) OF VARCHAR2(35);
+        errores_efectivo tipos_de_fallos := tipos_de_fallos('Billete invalido', 'Cambio insuficiente');
+        errores_tranferencia tipos_de_fallos := tipos_de_fallos('Perdida de conexion', 'Fondo insuficiente', 'Seguridad bancaria');
+        errores_pago_movil tipos_de_fallos :=  tipos_de_fallos('Perdida de conexion', 'Fondo insuficiente');
+        errores_tarjeta_internacional tipos_de_fallos := tipos_de_fallos('Perdida de conexion', 'Fondo insuficiente', 'Seguridad bancaria');
+        errores_criptomonedas tipos_de_fallos := tipos_de_fallos('Perdida de conexion', 'Fondo insuficiente');
+    begin
+        -- se verifica si se genero un fallo o no
+        if (utilities_pkg.get_random_integer(0,101) <= 20) then
+            -- actualizamos la variable a retornar
+            se_dio_un_fallo := true;
+            
+            -- verificamos que tipo de error se dara segun el metodo de pago
+            if (forma_pago_actual.fp_nombre = 'efectivo,') then
+                -- caso cuando el metodo de pago efectivo
+                -- seleccionamos uno de los posibles fallos para este metodo
+                error_que_ocurrio := errores_efectivo(
+                    utilities_pkg.get_random_integer(1,3)
+                );
+            elsif (forma_pago_actual.fp_nombre = 'transferencia') then
+                -- caso cuando el metodo de pago transferencia
+                -- seleccionamos uno de los posibles fallos para este metodo
+                error_que_ocurrio := errores_tranferencia(
+                    utilities_pkg.get_random_integer(1,4)
+                );
+            elsif (forma_pago_actual.fp_nombre = 'pago movil') then
+                -- caso cuando el metodo de pago pago movil
+                -- seleccionamos uno de los posibles fallos para este metodo
+                 error_que_ocurrio := errores_pago_movil(
+                    utilities_pkg.get_random_integer(1,3)
+                );
+            elsif (forma_pago_actual.fp_nombre = 'tarjeta internacional') then
+                -- caso cuando el metodo de pago tarjeta internacional
+                -- seleccionamos uno de los posibles fallos para este metodo
+                 error_que_ocurrio := errores_tarjeta_internacional(
+                    utilities_pkg.get_random_integer(1,4)
+                );
+            elsif (forma_pago_actual.fp_nombre = 'criptomonedas') then
+                -- caso cuando el metodo de pago criptomonedas
+                -- seleccionamos uno de los posibles fallos para este metodo
+                 error_que_ocurrio := errores_criptomonedas(
+                    utilities_pkg.get_random_integer(1,3)
+                );
+            end if;
+            
+            -- imprimimos que se dio el error
+            DBMS_OUTPUT.PUT_LINE('      Ocurrio un error con el tipo de metodo de pago ' || 
+                                    forma_pago_actual.fp_nombre ||
+                                    ' ' || error_que_ocurrio);
+        end if;
+        
+        return se_dio_un_fallo;
+    end fallo_durante_pago;
+    ----------------------------------------------------------------------------
     -- procedure para el pago del alquiler
     procedure pago_alquiler(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, alquiler_realizado alquiler%rowtype)
     is 
+        detalle_alquiler_actual detalle_alquiler%rowtype; -- variable para guardar el detalle alquiler del alqjiler acutla que se esta pagando
         monto_a_pagar_total number := 0; -- valor total a pagar
         tipo_cliente_actual tipo_cliente%rowtype; -- tipo de cliente del cliente actual seleccionado
         descuento_aplicado number := 0; -- variable para llevar el conteo del descuento aplicado. el desceunto se llevo con enteros del 0 al 100
@@ -232,6 +304,11 @@ create or replace package body reserva_and_alquiler_pkg as
     begin
             -- se imprimer que se va a pagar
              DBMS_OUTPUT.PUT_LINE('  Se procede a pagar el alquiler:');
+             
+             -- buscamos el detalle del alquiler del alquiler que se va a pagar
+             select * into detalle_alquiler_actual
+                from detalle_alquiler da
+                where da.da_id = alquiler_realizado.detalle_alquiler_da_id;
             
             -- calculamos el valor total a pagar por el alquiler, que sera igual al precio del vechiculo por dia alquilado
             monto_a_pagar_total := periodo_alquiler.get_cantidad_dias_del_periodo() * vehiculo_seleccionado.v_precio;
@@ -279,29 +356,73 @@ create or replace package body reserva_and_alquiler_pkg as
             loop 
                 fetch formas_pago into forma_pago_row;
                 exit when formas_pago%notfound;
-                -- pagar con el metodo
-                insert into detalle_pago values (
-                    forma_pago_row.fp_id,
-                    monto_pagar_por_metodo_pago,
-                    alquiler.
-                );
+                while true
+                loop 
+                    -- verificamos si se da un error o no 
+                    if(not reserva_and_alquiler_pkg.fallo_durante_pago(forma_pago_row)) then
+                        -- pagar con el metodo
+                        insert into detalle_pago values (
+                            forma_pago_row.fp_id,
+                            monto_pagar_por_metodo_pago,
+                            alquiler_realizado.a_id
+                        );
+                        -- salimos del while
+                        exit;
+                    end if;
+                    -- no se cumple la condicion por lo tanto hubo un problema se vuelve a intentar
+                end loop;
                 -- se verifica si se llego al index deseado
                 if (cant_metodos_pago_a_utilizar = formas_pago%rowcount) then
+                    -- salimos del loop del cursor
                     exit;
                 end if;
             end loop;
             -- cerramos el cursor
             close formas_pago;
             
+            -- luego de salir del bucle ya se debio cancelar todo lo referente a la
+            
+            -- imprimimos que se realizo el pago del alquiler
+            DBMS_OUTPUT.PUT_LINE('  Se completo el pago del alquiler.');
+            
     end pago_alquiler;
     ----------------------------------------------------------------------------
     -- procedure para alquilar
-    procedure alquiler()
+    procedure alquiler(cliente_reservar cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, ultimo_alquiler_realizado OUT alquiler%rowtype)
     is
-        
+        detalle_alquiler_id number; -- detalle del alquiler recien insertado
+        alquiler_id number;         -- alquiler recien insertado
     begin
+        -- insertar el detalle de alquiler
+        insert into detalle_alquiler values (
+            default,
+            vehiculo_seleccionado.v_precio,
+            0,
+            0,
+            periodo_alquiler.get_cantidad_dias_del_periodo(),
+            0, -- esto no deberia ser un entero
+            vehiculo_seleccionado.v_placa
+        ) returning da_id into detalle_alquiler_id;
         
-        return;
+        -- insertar el alquiler
+        insert into alquiler values (
+            default,
+            0,
+            periodo_alquiler,
+            null,
+            detalle_alquiler_id,
+            cliente_reservar.c_id
+        ) returning a_id into alquiler_id;
+        
+        -- si el ultimo alquiler vale NULL retornar y no hacer nada
+        if (ultimo_alquiler_realizado is NULL) then
+            return;
+        end if;
+        
+        -- modificamos el valor del ultimo alquiler realizado
+        select * into ultimo_alquiler_realizado
+            from alquiler a
+            where a.a_id = alquiler_id;
         
     end alquiler;
     ----------------------------------------------------------------------------
@@ -338,7 +459,7 @@ create or replace package body reserva_and_alquiler_pkg as
     end reserva;
     ----------------------------------------------------------------------------
     -- procedure para alquiler
-    procedure simulacion_reservas 
+    procedure simulacion_reservas(pk_sede number, dia_actual date, fecha_fin_simulacion date) 
     is
         numero_reservas number;                 -- numero de reservas a realizar
         
@@ -370,12 +491,12 @@ create or replace package body reserva_and_alquiler_pkg as
     -- procedure para simular el modulo de alquileres
     procedure simulacion_alquileres(pk_sede number, dia_actual date, fecha_fin_simulacion date) 
     is
-        numero_alquileres number;                 -- numero de alquileres a realizar
+        numero_alquileres number;                   -- numero de alquileres a realizar
         
         prob_cliente number := 75;                  -- probabilidad en % de que se seleccione un cliente para realizar el proceso de alquiler
         cliente_seleccionado cliente%rowtype;       -- cliente seleccionado en el caso de que se haya seleccionado uno
         persona_seleccionada persona%rowtype;       -- persona seleccionada en el caso de que se haya seleccionado una
-        ultimo_alquiler_realizado alquiler%rowtype; -- ultimo alquiler realizado
+        alquiler_realizado alquiler%rowtype;        -- ultimo alquiler realizado
         
         vehiculo_seleccionado vehiculo%rowtype;   -- variable para guardar el vehiculo seleccionado aleatoriamente
         periodo_alquiler periodo_duracion;        -- periodo durante el que se realizara el alquiler
@@ -436,10 +557,10 @@ create or replace package body reserva_and_alquiler_pkg as
                 if(se_puede_realizar_un_alquiler) then
                                       
                     -- se realiza el alquiler
-                    reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, ultimo_alquiler_realizado);
+                    reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
                     
                      -- se llama al escenario 'pago de alquiler'
-                     
+                     reserva_and_alquiler_pkg.pago_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
                     
                     -- salimos del loop while
                     exit;
@@ -457,14 +578,12 @@ create or replace package body reserva_and_alquiler_pkg as
                         -- se llama al escenario 6
                         reserva_and_alquiler_pkg.solucion_vehiculo_no_disponible_en_sede(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, pk_sede);
                         
-                        -- si cambia la varaible a false ya que no seguira intentando por este medio, se llamara al escenario 6
-                        sigue_bucle_alquiler_para_mismo_cliente := false
+                        -- si cambia la variable a false ya que no seguira intentando por este medio, se llamara al escenario 6
+                        sigue_bucle_alquiler_para_mismo_cliente := false;
                     end if;
                 end if;
                 
             end loop;
-            
-            
             
             -- preparamos las variables para la siguiente iteracion
             cliente_seleccionado := NULL;

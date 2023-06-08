@@ -1,6 +1,6 @@
 -- objetos para las imagenes
-CREATE OR REPLACE DIRECTORY imagenes_vehiculos AS 'C:\IMAGENES\BD2\VEHICULOS';
-CREATE OR REPLACE DIRECTORY imagenes_personas AS 'C:\IMAGENES\BD2\PERSONAS';
+CREATE OR REPLACE DIRECTORY imagenes_vehiculos AS 'C:\PICTURES\BD2\VEHICULOS';
+CREATE OR REPLACE DIRECTORY imagenes_personas AS 'C:\PICTURES\BD2\PERSONAS';
 
 -- paquete para generar la data de forma aleatoria
 create or replace package generador_data_aleatoria_pkg as
