@@ -2,42 +2,42 @@ create or replace trigger status_mantenimiento AFTER insert on mantenimiento_veh
 declare
 
  begin
-    Update vehiculo2 set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='En mantenimiento')
-    where v_placa=:new.vehiculo_V_ID;
+    Update vehiculo set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='En mantenimiento')
+    where v_placa=:new.vehiculo_v_placa;
  end;
  
 create or replace trigger status_mantenimiento_disponible AFTER update on mantenimiento_vehiculo FOR EACH ROW
 declare
 
  begin
-    Update vehiculo2 set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='Disponible')
-    where v_placa=:new.vehiculo_V_ID;
+    Update vehiculo set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='Disponible')
+    where v_placa=:new.vehiculo_v_placa;
  end; 
  
- create or replace trigger cambio_status_alquiler AFTER insert on alquiler FOR EACH ROW
+ create or replace trigger cambio_status_alquileres AFTER insert on alquiler FOR EACH ROW
 declare
   id VARCHAR2(12) ;
  begin
-   Select DA_FK_vehiculo into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
-    Update vehiculo2 set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='En alquiler')
+   Select vehiculo_v_placa into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
+    Update vehiculo set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='En alquiler')
     where v_placa=id;
  end;
  
- create or replace trigger cambio_status_alquiler_disponible AFTER UPDATE on alquiler5 FOR EACH ROW
+ create or replace trigger cambio_status_alquiler_disponibles AFTER UPDATE on alquiler FOR EACH ROW
 declare
   id VARCHAR2(12) ;
  begin
-   Select DA_FK_vehiculo into id from detalle_alquiler2 where DA_ID= :new.Detalle_alquiler_DA_ID;
+   Select vehiculo_v_placa into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
     Update vehiculo set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='Disponible')
     where v_placa=id;
  end;
  
- create or replace trigger ingreso_alquiler AFTER insert on alquiler FOR EACH ROW
+ create or replace trigger ingresos_alquiler AFTER insert on alquiler FOR EACH ROW
 declare
   id VARCHAR2(12) ;
  begin
-   Select DA_FK_vehiculo into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
-   insert into ingreso values (default,:new.A_monto_total,:new.A_fecha_inicio,'Alquiler del vehiculo'||' '|| id ,1); 
+   Select vehiculo_v_placa into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
+   insert into ingreso values (default,:new.A_monto_total,:new.a_periodo_duracion.P_Fecha_Inicio,'Alquiler del vehiculo'||' '|| id ,1); 
  end;
 
  create or replace trigger gasto_mantenimiento AFTER insert on mantenimiento_vehiculo FOR EACH ROW
@@ -45,7 +45,7 @@ declare
 
  begin
     insert into gasto values (default,
-    :new.man_precio,:new.man_fechaI,'Gasto por mantenimiento del vehiculo'||' '||:new.Vehiculo_v_id ,
+    :new.man_precio,:new.man_periodo_duracion.P_Fecha_Inicio,'Gasto por mantenimiento del vehiculo'||' '||:new.Vehiculo_v_placa ,
     (select tg_id from tipo_gasto where tg_nombre='Operacionales'),
     (SELECT s_id From sede where  s_numerosede  =1));
  end;
@@ -73,16 +73,16 @@ declare
    :new.V_precio,(select SYSDATE from dual),id,:new.Sede_S_ID);
  end;
 
-create or replace trigger cambio_km_vehiculo AFTER UPDATE on detalle_alquiler2 FOR EACH ROW
+create or replace trigger cambio_kms_vehiculo AFTER UPDATE on detalle_alquiler FOR EACH ROW
 declare
   id VARCHAR2(12) ;
  begin
-   Update vehiculo2 set v_km = :new.DA_km_final
-   where v_placa= :new.DA_fk_vehiculo;
+   Update vehiculo set v_km = :new.da_km_final
+   where v_placa= :new.vehiculo_v_placa;
    
    if (:new.DA_km_final >50000) then 
-      Update vehiculo2 set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='Inhabilitado')
-     where v_placa= :new.DA_fk_vehiculo;
+      Update vehiculo set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='Inhabilitado')
+     where v_placa= :new.vehiculo_v_placa;
     end if ; 
  end;
   
@@ -92,9 +92,18 @@ Declare
 begin
 
 Update cliente set tipo_cliente_tc_id =(select TC_ID from tipo_cliente where TC_NOMBRE='No deseado')
-        where p_id=:new.Alquiler_Cliente_C_ID; 
+        where c_id=:new.Alquiler_Cliente_C_ID; 
 end;
 
-     
+   create or replace trigger cambio_status_vehiculo  AFTER insert on denuncia FOR EACH ROW
+Declare
+ id_vehiculo varchar2(12);
+ id_detalle_alquiler number;
+begin
+     select detalle_alquiler_da_id into id_detalle_alquiler from alquiler where a_id= :new.Alquiler_a_id;
+     select vehiculo_v_placa into id_vehiculo from detalle_alquiler where da_id=id_detalle_alquiler; 
+Update vehiculo set status_vehiculo_SV_ID =(select sv_id from status_vehiculo where SV_NOMBRE='Inhabilitado')
+        where v_placa= id_vehiculo;
+end;  
    
 
