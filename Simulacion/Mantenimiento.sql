@@ -8,9 +8,9 @@ create or replace package mantenimiento_pkg as
     --M3AN6: Finalización de mantenimiento
     procedure finalizacion_de_mantenimiento (hoy date);
     --M3E1: Taller sin disponibilidad para realizar mantenimiento
-    procedure taller_sin_disponibilidad (mto_hoy mantenimiento_vehiculo%rowtype);
+    procedure taller_sin_disponibilidad (mto_hoy mantenimiento_vehiculo%rowtype, hoy date);
     --M3E2: Siguiente mantenimiento durante alquiler
-    procedure siguiente_mantenimiento_durante_alquiler;
+    procedure siguiente_mantenimiento_durante_alquiler(hoy date);
 
 end mantenimiento_pkg;
 /
@@ -30,22 +30,22 @@ create or replace package body mantenimiento_pkg as
         open mtos_hoy;
         fetch mtos_hoy into mto_hoy;
         while mtos_hoy%found loop
-          taller_sin_disponibilidad(mto_hoy);
+          taller_sin_disponibilidad(mto_hoy,hoy);
           fetch mtos_hoy into mto_hoy;
-        end loop
+        end loop;
         close mtos_hoy;
       end if;
     end realizacion_de_mantenimiento;
 
     procedure finalizacion_de_mantenimiento (hoy date) is
 
-        cursor mtos_fin_hoy is select * from mantenimiento_vehiculo where man_periodo_duracion.p_fecha_fin=hoy;
+        cursor mtos_fin_hoy is (select * from mantenimiento_vehiculo m where m.man_periodo_duracion.p_fecha_fin=hoy);
         mto_fin_hoy mantenimiento_vehiculo%rowtype;
 
         hay_mtos_fin integer;
 
     begin
-      select count(*) into hay_mtos_fin from mantenimiento_vehiculo where man_periodo_duracion.p_fecha_fin=hoy;
+      select count(*) into hay_mtos_fin from mantenimiento_vehiculo m where m.man_periodo_duracion.p_fecha_fin=hoy;
       if (hay_mtos_fin>0) then
         open mtos_fin_hoy;
         fetch mtos_fin_hoy into mto_fin_hoy;
@@ -55,9 +55,10 @@ create or replace package body mantenimiento_pkg as
              where v_placa=mto_fin_hoy.vehiculo_v_placa;
              update mantenimiento_vehiculo
                 set status_mantenimiento_s_id=(select s_id from status_mantenimiento where s_nombre='Finalizado')
-              where man.id=mto_fin_hoy.man_id;
+              where man_id=mto_fin_hoy.man_id;
           fetch mtos_fin_hoy into mto_fin_hoy;
-        end loop
+        end loop;
+        close mtos_fin_hoy;
       end if;
     end finalizacion_de_mantenimiento;
 
@@ -89,8 +90,6 @@ create or replace package body mantenimiento_pkg as
                                                                     ,hoy+90
                                                                     ,mto_hoy.man_precio
                                                                     ,mto_hoy.vehiculo_v_placa
-                                                                    ,(SELECT modelo_m_id from vehiculo where v_placa=mto_hoy.vehiculo_v_placa)
-                                                                    ,(SELECT modelo_marca_ma_id from vehiculo where v_placa=mto_hoy.vehiculo_v_placa)
                                                                     ,(SELECT s_id from status_mantenimiento where s_nombre='Operativo')
                                                                     ,mto_hoy.mantenimiento_m_id);
                         update vehiculo
@@ -101,6 +100,7 @@ create or replace package body mantenimiento_pkg as
                 end if;
                 fetch talleres into taller_actual;
             end loop;
+            close talleres;
         end loop;
     end taller_sin_disponibilidad;
 
