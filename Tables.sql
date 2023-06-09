@@ -91,7 +91,6 @@ CREATE TABLE denuncia (
     d_fecha_denuncia      DATE NOT NULL,
     d_descripcion         CLOB,
     alquiler_a_id         number NOT NULL,
-    alquiler_cliente_c_id number NOT NULL,
     -- claves primarias de la tabla
     PRIMARY KEY (d_id)
 );
@@ -114,7 +113,7 @@ CREATE TABLE detalle_pago (
     dp_monto         NUMBER NOT NULL,
     alquiler_a_id    number NOT NULL,
     -- claves primarias de la tabla
-    PRIMARY KEY (forma_pago_fp_id, alquiler_a_id)
+    PRIMARY KEY (forma_pago_fp_id)
 );
 /
 CREATE TABLE detalle_compra (
@@ -231,7 +230,7 @@ CREATE TABLE modelo (
     m_nombre    VARCHAR2(50 CHAR) NOT NULL,
     marca_ma_id number NOT NULL,
     -- claves primarias de la tabla
-    PRIMARY KEY (m_id, marca_ma_id)
+    PRIMARY KEY (m_id)
 );
 /
 CREATE TABLE observacion (
