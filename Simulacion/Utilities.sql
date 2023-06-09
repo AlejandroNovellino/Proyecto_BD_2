@@ -11,12 +11,14 @@ create or replace package utilities_pkg as
     function get_persona_random return persona%rowtype;
     -- funcion para retornar un cliente aleatorio que ya se encuentre registrado en el sistema
     function get_cliente_random return cliente%rowtype;
-    -- function para elegir un vehiculo de forma aleatoria (simular desear un vehciulo con caracteristicas especificas)
+    -- function para elegir un vehiculo de forma aleatoria
     function get_vehiculo_random(pk_sede number) return vehiculo%rowtype;
+    -- function para elegir un lugar de forma aleatoria
+    function get_lugar_random return lugar%rowtype;
     ----------------------------------------------------------------------------
     -- funciones para impirmir
     -- procedure para imprimir una persona
-    procedure print_persona(persona_imprimir pesona%rowtype, msg varchar2 DEFAULT '');
+    procedure print_persona(persona_imprimir persona%rowtype, msg varchar2 DEFAULT '');
     -- procedure para imprimir un cliente
     procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '');
     -- procedure para imprimir un vehiculo
@@ -88,7 +90,7 @@ create or replace package body utilities_pkg as
         -- contamos la cantidad de clientes
         select count(*) into cantidad_clientes from cliente;
         -- tomamos un index aleatorio
-        random_index := get_random_integer(0, cantidad_clientes);
+        random_index := get_random_integer(1, cantidad_clientes+1);
         -- abrimos el cursor e iteramos sobre el 
         open clientes;
         loop 
@@ -114,12 +116,12 @@ create or replace package body utilities_pkg as
         cursor personas is select * from persona;
         persona_row persona%rowtype;
         -- variable para retornar
-        persona_to_return pesona%rowtype;
+        persona_to_return persona%rowtype;
     begin
         -- contamos la cantidad de clientes
         select count(*) into cantidad_personas from persona;
         -- tomamos un index aleatorio
-        random_index := get_random_integer(0, cantidad_personas);
+        random_index := get_random_integer(1, cantidad_personas+1);
         -- abrimos el cursor e iteramos sobre el 
         open personas;
         loop 
@@ -143,14 +145,14 @@ create or replace package body utilities_pkg as
         cantidad_vehiculos number;   -- cantidad de clientes
         -- variables para el cursor
         cursor vehiculos is select * from vehiculo where sede_s_id=pk_sede;
-        vehiculo_row persona%rowtype;
+        vehiculo_row vehiculo%rowtype;
         -- variable para retornar
-        vehiculo_to_return pesona%rowtype;
+        vehiculo_to_return vehiculo%rowtype;
     begin
         -- contamos la cantidad de clientes
         select count(*) into cantidad_vehiculos from vehiculo where sede_s_id=pk_sede;
         -- tomamos un index aleatorio
-        random_index := get_random_integer(0, cantidad_vehiculos);
+        random_index := get_random_integer(1, cantidad_vehiculos+1);
         -- abrimos el cursor e iteramos sobre el 
         open vehiculos;
         loop 
@@ -167,8 +169,39 @@ create or replace package body utilities_pkg as
         return vehiculo_to_return;
     end get_vehiculo_random;
     ----------------------------------------------------------------------------
+    -- function para elegir un lugar de forma aleatoria
+    function get_lugar_random return lugar%rowtype
+    is
+        random_index number;        -- index aleatorio
+        cantidad_lugares number;    -- cantidad de lugares
+        -- variables para el cursor
+        cursor lugares is select * from lugar;
+        lugar_row lugar%rowtype;
+        -- variable para retornar
+        lugar_to_return lugar%rowtype;
+    begin
+        -- contamos la cantidad de lugares
+        select count(*) into cantidad_lugares from lugar;
+        -- tomamos un index aleatorio
+        random_index := get_random_integer(1, cantidad_lugares+1);
+        -- abrimos el cursor e iteramos sobre el 
+        open lugares;
+        loop 
+            fetch lugares into lugar_row;
+            exit when lugares%notfound;
+            -- se verifica si se llego al index deseado
+            if (random_index = lugares%rowcount) then
+                lugar_to_return := lugar_row;
+            end if;
+        end loop;
+        -- cerramos el cursor
+        close lugares;
+        
+        return lugar_to_return;
+    end get_lugar_random;
+    ----------------------------------------------------------------------------
     -- procedure para imprimir una persona
-    procedure print_persona(persona_imprimir pesona%rowtype, msg varchar2 DEFAULT '')
+    procedure print_persona(persona_imprimir persona%rowtype, msg varchar2 DEFAULT '')
     is
     begin
         DBMS_OUTPUT.PUT_LINE('Persona: ');
@@ -181,7 +214,7 @@ create or replace package body utilities_pkg as
             || 'C.I. ' || persona_imprimir.ip.IP_cedula
         );
         DBMS_OUTPUT.PUT_LINE('  ' || msg);
-    end print_cliente;
+    end print_persona;
     ----------------------------------------------------------------------------
     -- procedure para imprimir un cliente
     procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '')
@@ -207,7 +240,7 @@ create or replace package body utilities_pkg as
     begin
         select mo.m_nombre into modelo_vehiculo 
             from modelo mo
-            where mo.mo_id=vehiculo_imprimir.modelo_m_id;
+            where mo.m_id=vehiculo_imprimir.modelo_m_id;
             
         select ma.ma_nombre into modelo_vehiculo 
             from marca ma

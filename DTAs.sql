@@ -6,7 +6,7 @@ create or replace type informacion_personal as object (
     IP_Segundo_Nombre       VARCHAR2(20),
     IP_Primer_Apeliido      VARCHAR2(20),
     IP_Segundo_Apellido     VARCHAR2(20),
-    IP_Correo               VARCHAR2(20),
+    IP_Correo               VARCHAR2(50),
     IP_Fecha_Nacimiento     DATE,
     IP_Sexo                 VARCHAR2(1), --Puede ser M, F u O (Otro)
     IP_Direccion            VARCHAR2(250),

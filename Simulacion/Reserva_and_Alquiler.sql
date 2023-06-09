@@ -4,13 +4,13 @@ create or replace package reserva_and_alquiler_pkg as
     -- funcion para comprobar disponibilidad del vehiculo
     function comprobacion_disponibilidad_vehiculo(vehiculo_seleccionado OUT vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_pk number) return boolean;
     -- procedure para encontrarle al usuario una opcion de vehiculo para alquilar
-    procedure solucion_vehiculo_no_disponible_en_sede(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_donde_no_hay_el_vehiculo number);
+    procedure solucion_vehiculo_no_disponible_en_sede(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado OUT vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_donde_no_hay_el_vehiculo number);
     -- funcion para el fallo en pago
     function fallo_durante_pago(forma_pago_actual forma_pago%rowtype) return boolean;
     -- procedure para el pago del alquiler
     procedure pago_alquiler(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, alquiler_realizado alquiler%rowtype);
     -- procedure para alquiler
-    procedure alquiler(cliente_reservar cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, ultimo_alquiler_realizado OUT alquiler%rowtype);
+    procedure realizar_alquiler(cliente_reservar cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, ultimo_alquiler_realizado OUT alquiler%rowtype);
     -- procedure para reserva
     procedure reserva(cliente_reservar cliente%rowtype, dia_actual date, fecha_fin_simulacion date);
     -- procedure para simular el modulo de reservas
@@ -35,7 +35,7 @@ create or replace package body reserva_and_alquiler_pkg as
             from (
                 select a.a_id, a.a_periodo_duracion
                 from alquiler a, detalle_alquiler da
-                where da.alquiler_a_id=a.a_id and
+                where a.detalle_alquiler_da_id = da.da_id and
                       da.vehiculo_v_placa=vehiculo_seleccionado.v_placa
             ) filtered_a
             where periodo_alquiler.P_Fecha_Fin between filtered_a.a_periodo_duracion.P_Fecha_Inicio and filtered_a.a_periodo_duracion.P_Fecha_Fin or
@@ -98,7 +98,7 @@ create or replace package body reserva_and_alquiler_pkg as
         -- cerramos el cursor
         close vehiculos;
         -- luego de este proceso se verifica si selecciono un vehiculo
-        if (nuevo_vehiculo_a_alquilar is NULL) then
+        if (nuevo_vehiculo_a_alquilar.v_placa is NULL) then
             -- si no se selecciono un vehiculo se retorna falso
             return false;
         else
@@ -110,7 +110,7 @@ create or replace package body reserva_and_alquiler_pkg as
     end comprobacion_disponibilidad_vehiculo;
     ----------------------------------------------------------------------------
     -- procedure para encontrarle al usuario una opcion de vehiculo para alquilar (escenario 6)
-    procedure solucion_vehiculo_no_disponible_en_sede(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_donde_no_hay_el_vehiculo number)
+    procedure solucion_vehiculo_no_disponible_en_sede(cliente_seleccionado cliente%rowtype, vehiculo_seleccionado OUT vehiculo%rowtype, periodo_alquiler periodo_duracion, sede_donde_no_hay_el_vehiculo number)
       is    
         vehiculo_disponible boolean;            -- variable para verificar si un vehiculo esta disponible o no
         alquiler_realizado alquiler%rowtype;    -- variable para el alquiler que se realizara si existe auto disponible
@@ -154,13 +154,13 @@ create or replace package body reserva_and_alquiler_pkg as
         -- cerramos el cursor
         close vehiculos_iguales_al_deseado_por_cliente;
         -- luego de este proceso se verifica si se selecciono un vehiculo
-        if (nuevo_vehiculo_a_alquilar is not NULL) then
+        if (nuevo_vehiculo_a_alquilar.v_placa is not NULL) then
             -- si se selecciono entonces existe un vehiculo con las mismas caracteristica en otra sede que puede ser alquilado
             DBMS_OUTPUT.PUT_LINE('  Se pudo encontrar otro vechiulo con las mismas carcateristicas en otra sede,  se procede a su alquiler.');
             
             vehiculo_seleccionado := nuevo_vehiculo_a_alquilar;
             -- se alquila el vehiculo
-            reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
+            reserva_and_alquiler_pkg.realizar_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
             
             -- se llama al escenario 'pago de alquiler'
             reserva_and_alquiler_pkg.pago_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
@@ -193,13 +193,13 @@ create or replace package body reserva_and_alquiler_pkg as
         -- cerramos el cursor
         close todos_vehiculos_de_las_otras_sedes;
         -- luego de este proceso se verifica si selecciono un vehiculo
-        if (nuevo_vehiculo_a_alquilar is NULL) then
+        if (nuevo_vehiculo_a_alquilar.v_placa is NULL) then
             -- si se selecciono entonces existe un vehiculo con las mismas caracteristica en otra sede que puede ser alquilado
             DBMS_OUTPUT.PUT_LINE('  Existe un vehiculo disponible, se procede a su alquiler.');
             
             vehiculo_seleccionado := nuevo_vehiculo_a_alquilar;
             -- se alquila el vehiculo
-            reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
+            reserva_and_alquiler_pkg.realizar_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
             
             -- se llama al escenario 'pago de alquiler'
             reserva_and_alquiler_pkg.pago_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
@@ -233,7 +233,7 @@ create or replace package body reserva_and_alquiler_pkg as
             se_dio_un_fallo := true;
             
             -- verificamos que tipo de error se dara segun el metodo de pago
-            if (forma_pago_actual.fp_nombre = 'efectivo,') then
+            if (forma_pago_actual.fp_nombre = 'efectivo') then
                 -- caso cuando el metodo de pago efectivo
                 -- seleccionamos uno de los posibles fallos para este metodo
                 error_que_ocurrio := errores_efectivo(
@@ -289,7 +289,12 @@ create or replace package body reserva_and_alquiler_pkg as
         cursor historicos_promociones is select * 
             from historico_promocion hp
             where hp.vehiculo_v_placa=vehiculo_seleccionado.v_placa and
-                  hp.hp_periodo_duracion.verificar_activo() = true;
+                ( (
+                    select SYSDATE from dual
+                ) >= hp.hp_periodo_duracion.P_Fecha_Inicio) and 
+                ( (
+                    select SYSDATE from dual
+                ) <= hp.hp_periodo_duracion.P_Fecha_Fin);
         -- se crea la variable para poder recorrer el cursor
         historico_promocion_row historico_promocion%rowtype := NULL;
         -- variable para buscar la promocion a la que este historico pertenece
@@ -337,7 +342,7 @@ create or replace package body reserva_and_alquiler_pkg as
             close historicos_promociones;
             
              -- buscamos el tipo del cliente
-            select * into tipo_cliente_actual from tipo_cliente where tc_id=cliente_reservar.tipo_cliente_tc_id;
+            select * into tipo_cliente_actual from tipo_cliente tc where tc.tc_id=cliente_seleccionado.tipo_cliente_tc_id;
             -- si el cliente es VIP aplicamos un 15% de descuento
             if (tipo_cliente_actual.tc_nombre = 'VIP' and descuento_aplicado + 15 <= 100) then 
                 -- sumamos al total de descuento el 15%
@@ -388,7 +393,7 @@ create or replace package body reserva_and_alquiler_pkg as
     end pago_alquiler;
     ----------------------------------------------------------------------------
     -- procedure para alquilar
-    procedure alquiler(cliente_reservar cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, ultimo_alquiler_realizado OUT alquiler%rowtype)
+    procedure realizar_alquiler(cliente_reservar cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, ultimo_alquiler_realizado OUT alquiler%rowtype)
     is
         detalle_alquiler_id number; -- detalle del alquiler recien insertado
         alquiler_id number;         -- alquiler recien insertado
@@ -415,7 +420,7 @@ create or replace package body reserva_and_alquiler_pkg as
         ) returning a_id into alquiler_id;
         
         -- si el ultimo alquiler vale NULL retornar y no hacer nada
-        if (ultimo_alquiler_realizado is NULL) then
+        if (ultimo_alquiler_realizado.a_id is NULL) then
             return;
         end if;
         
@@ -424,7 +429,7 @@ create or replace package body reserva_and_alquiler_pkg as
             from alquiler a
             where a.a_id = alquiler_id;
         
-    end alquiler;
+    end realizar_alquiler;
     ----------------------------------------------------------------------------
     -- procedure para reserva
     procedure reserva(cliente_reservar cliente%rowtype, dia_actual date, fecha_fin_simulacion date)
@@ -433,29 +438,7 @@ create or replace package body reserva_and_alquiler_pkg as
         periodo_duracion_reserva periodo_duracion; -- periodo durante el cual sera el alquiler a reservar
         
     begin
-        -- buscamos el tipo de cliente
-        select * into tipo_cliente_actual from tipo_cliente where tc_id=cliente_reservar.tipo_cliente_tc_id;
-        -- verificamos si es un cliente no deseado
-        if (tipo_cliente_actual = 'no deseado') then 
-            -- imprimimos que el cliente es no deseado
-            utilities_pkg.print_cliente(cliente_reservar, 'Tipo de cliente no deseado');
-            return; -- finaliza el procedure
-        end if;
-        -- se selecciona el periodo durante el que sera el alquiler
-        periodo_duracion_reserva := utilities_pkg.get_random_periodo(
-            dia_actual, 
-            fecha_fin_simulacion
-        );
-        -- se traen todos los carros para aquiler (esten o no dispoibles para el periodo)
-        
-        -- se selecciona un vehiculo de las lista
-        
-        -- se valida si esta disponible
-        
-        -- 
-        
-        
-        --- SEGUIR CON EL DESARROLLO
+       return;
     end reserva;
     ----------------------------------------------------------------------------
     -- procedure para alquiler
@@ -469,20 +452,20 @@ create or replace package body reserva_and_alquiler_pkg as
         
     begin
         -- numero de reservas a realizar
-        numero_reservas := utilities_pkg.get_random_integer();
+        numero_reservas := utilities_pkg.get_random_integer(1,16);
         -- iteramos para cada reserva
         for i in 0..numero_reservas loop
             -- verificamos si la reserva la hara una persona o un cliente basado en la probabilidad establecida
             if(utilities_pkg.get_random_integer(0, 101) <= 75) then
                 -- si la hace un cliente 
-                cliente_seleccionado := utilities_pkg.get_persona_random();
+                cliente_seleccionado := utilities_pkg.get_cliente_random();
             else
                 -- si la hace una persona no resgitrada
-                persona_seleccionada := utilities_pkg.get_cliente_random();
+                persona_seleccionada := utilities_pkg.get_persona_random();
             end if;
             
             -- realizamos una reserva para el cliente
-            reserva(cliente_seleccionado);
+            --reserva(cliente_seleccionado);
             --
         end loop;
         
@@ -527,13 +510,13 @@ create or replace package body reserva_and_alquiler_pkg as
             end if;
             
             -- buscamos el tipo del cliente
-            select * into tipo_cliente_actual from tipo_cliente where tc_id=cliente_reservar.tipo_cliente_tc_id;
+            select * into tipo_cliente_actual from tipo_cliente tc where tc.tc_id=cliente_seleccionado.tipo_cliente_tc_id;
             
             -- se verifica si el cliente es del tipo no deseado
             if(tipo_cliente_actual.tc_nombre = 'no deseado') then
                 -- imprimimos mensaje de error y el cliente
                 DBMS_OUTPUT.PUT_LINE('ALERTA: este cliente no puede realizar alquileres debido a que es NO DESEADO');
-                utilities_pkg.print_persona(cliente_seleccionado, 'NO DESEADO');
+                utilities_pkg.print_cliente(cliente_seleccionado, 'NO DESEADO');
                 continue;
             end if;
             
@@ -557,7 +540,7 @@ create or replace package body reserva_and_alquiler_pkg as
                 if(se_puede_realizar_un_alquiler) then
                                       
                     -- se realiza el alquiler
-                    reserva_and_alquiler_pkg.alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
+                    reserva_and_alquiler_pkg.realizar_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);
                     
                      -- se llama al escenario 'pago de alquiler'
                      reserva_and_alquiler_pkg.pago_alquiler(cliente_seleccionado, vehiculo_seleccionado, periodo_alquiler, alquiler_realizado);

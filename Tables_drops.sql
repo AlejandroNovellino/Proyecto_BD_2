@@ -34,6 +34,7 @@ DROP TABLE consesionario;
 DROP TABLE cliente CASCADE CONSTRAINTS;
 DROP TABLE tipo_cliente;
 DROP TABLE lugar CASCADE CONSTRAINTS;
+DROP TABLE persona; -- esta es la tabla de ayuda para pruebas
 drop type informacion_personal;
 /
 drop type ubicacion_geografica;
