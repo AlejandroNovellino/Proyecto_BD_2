@@ -285,7 +285,9 @@ create or replace package body generador_data_aleatoria_pkg as
         -- generar el tipo de cliente
         -- seleccionamos un tipo de cliente al azar
         aux_tipo_cliente := tipos_clientes(utilities_pkg.get_random_integer(1,5));
+        DBMS_OUTPUT.PUT_LINE('Tipo cliente: '|| aux_tipo_cliente);
         select tc_id into pk_de_tipo_cliente from tipo_cliente where tc_nombre = aux_tipo_cliente;
+        DBMS_OUTPUT.PUT_LINE('Tipo cliente pk: '|| pk_de_tipo_cliente);
         
         -- generar el lugar
         aux_lugar := utilities_pkg.get_lugar_random();

@@ -172,7 +172,7 @@ INSERT INTO status_vehiculo VALUES (DEFAULT,'En alquiler');
 INSERT INTO status_vehiculo VALUES (DEFAULT,'Inhabilitado');
 
 ---insert tipo cliente ---
-INSERT INTO tipo_cliente  VALUES (DEFAULT,'ocacional');
+INSERT INTO tipo_cliente  VALUES (DEFAULT,'ocasional');
 INSERT INTO tipo_cliente  VALUES (DEFAULT,'frecuente');
 INSERT INTO tipo_cliente  VALUES (DEFAULT,'VIP');
 INSERT INTO tipo_cliente  VALUES (DEFAULT,'no deseado');
