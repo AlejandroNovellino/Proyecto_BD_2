@@ -1,6 +1,6 @@
 -- objetos para las imagenes
-CREATE OR REPLACE DIRECTORY imagenes_vehiculos AS 'C:\Users\alnov\Pictures\BD2\VEHICULOS\';
-CREATE OR REPLACE DIRECTORY imagenes_personas AS 'C:\Users\alnov\Pictures\BD2\PERSONAS\';
+CREATE OR REPLACE DIRECTORY IMAGENES_VEHICULOS AS 'C:\Users\alnov\Pictures\BD2\VEHICULOS\';
+CREATE OR REPLACE DIRECTORY IMAGENES_PERSONAS AS 'C:\Users\alnov\Pictures\BD2\PERSONAS\';
 
 -- paquete para generar la data de forma aleatoria
 create or replace package generador_data_aleatoria_pkg as
@@ -313,14 +313,20 @@ create or replace package body generador_data_aleatoria_pkg as
             )
         ) RETURNING foto INTO blob_temporal;
         -- insertamos la imagen
-        documento := BFILENAME ('imagenes_personas', nombre_imagen);
+        documento := BFILENAME ('IMAGENES_PERSONAS', nombre_imagen);
         DBMS_LOB.fileopen (documento, DBMS_LOB.file_readonly);
         DBMS_LOB.loadfromfile (blob_temporal,documento,DBMS_LOB.getlength (documento));
         DBMS_LOB.fileclose (documento);
         COMMIT;
         
         DBMS_OUTPUT.PUT_LINE('  Persona aleatoria insertada');
-
+    EXCEPTION
+       WHEN OTHERS
+       THEN
+          DBMS_OUTPUT.put_line (   'ORA-'
+             || TO_CHAR (UTL_CALL_STACK.error_number (1), 'fm00000')
+             || ': '
+             || UTL_CALL_STACK.error_msg (1));
     end generar_persona;
     ----------------------------------------------------------------------------
     -- procedure para generar un cliente

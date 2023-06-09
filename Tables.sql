@@ -343,6 +343,7 @@ CREATE TABLE vehiculo (
     v_km                  number NOT NULL,
     v_precio              NUMBER NOT NULL,
     modelo_m_id           number NOT NULL,
+    modelo_marca_ma_id    number NOT NULL,
     status_vehiculo_sv_id number NOT NULL,
     color_c_id            number NOT NULL,
     tipo_vehiculo_tv_id   number NOT NULL,
@@ -504,12 +505,9 @@ ALTER TABLE vehiculo
         REFERENCES color ( c_id );
 /
 ALTER TABLE vehiculo
-    ADD CONSTRAINT vehiculo_modelo_fk FOREIGN KEY ( modelo_m_id,
-                                                    modelo_marca_ma_id )
-        REFERENCES modelo ( m_id,
-                            marca_ma_id );
+    ADD CONSTRAINT vehiculo_modelo_fk FOREIGN KEY ( modelo_m_id )
+        REFERENCES modelo ( m_id );
 /
-
 ALTER TABLE vehiculo
     ADD CONSTRAINT vehiculo_sede_fk FOREIGN KEY ( sede_s_id )
         REFERENCES sede ( s_id );
