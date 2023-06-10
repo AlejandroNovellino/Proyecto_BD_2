@@ -41,6 +41,8 @@ create or replace package body reserva_and_alquiler_pkg as
             where periodo_alquiler.P_Fecha_Fin between filtered_a.a_periodo_duracion.P_Fecha_Inicio and filtered_a.a_periodo_duracion.P_Fecha_Fin or
                   periodo_alquiler.P_Fecha_Inicio between filtered_a.a_periodo_duracion.P_Fecha_Inicio and filtered_a.a_periodo_duracion.P_Fecha_Fin;
         
+        DBMS_OUTPUT.PUT_LINE('  Cantidad de alquileres ya en el periodo seleccionado sobre el auto seleccionado ' || to_char(cantidad_alquileres_ya_en_ese_periodo));
+        
         -- vehiculo ya posee un alquiler en este periodo  
         if (cantidad_alquileres_ya_en_ese_periodo != 0) then
             periodo_valido := false;
@@ -75,7 +77,7 @@ create or replace package body reserva_and_alquiler_pkg as
         -- si el vehiculo no esta disponible seguimos --------------------------
         
         -- imprimimos que el vehiculo no esta disponible
-        utilities_pkg.print_vehiculo(vehiculo_seleccionado, 'Vehiculo no disponible, se buscara otro disponible en la sede');
+        utilities_pkg.print_vehiculo(vehiculo_seleccionado, '   Vehiculo no disponible, se buscara otro disponible en la sede');
         
         -- se procede a buscar otro auto con las mismas caracteristicas del seleccionado en la sede donde nos encontramos
         -- se seleccionara el primer auto con los mismos valores de marca, modelo y anno que se consiga en todas las sedes
@@ -318,7 +320,7 @@ create or replace package body reserva_and_alquiler_pkg as
             -- calculamos el valor total a pagar por el alquiler, que sera igual al precio del vechiculo por dia alquilado
             monto_a_pagar_total := periodo_alquiler.get_cantidad_dias_del_periodo() * vehiculo_seleccionado.v_precio;
             
-            -- buscamos las promociones que se encuentren activas y aplicamos el descuento 
+            -- buscamos las promociones que se encuentren activas y sumamos el descuento 
             OPEN historicos_promociones;
             LOOP
                 FETCH historicos_promociones into historico_promocion_row;
@@ -349,11 +351,27 @@ create or replace package body reserva_and_alquiler_pkg as
                 descuento_aplicado := descuento_aplicado + 15;
             end if;
             
+            DBMS_OUTPUT.PUT_LINE('  Monto a pagar ' || to_char(monto_a_pagar_total) || ' con un descuento de ' || to_char(descuento_aplicado));
+            
+            -- aplicamos el descuento
+            monto_a_pagar_total := monto_a_pagar_total - (monto_a_pagar_total * descuento_aplicado/100);
+            
+            if(monto_a_pagar_total = 0) then
+               DBMS_OUTPUT.PUT_LINE('   Monto a pagar es 0 por lo tanto no hay nada a cancelar');
+               return;
+            else 
+                DBMS_OUTPUT.PUT_LINE('  Monto a pagar con descuento aplicado' || to_char(monto_a_pagar_total));
+            end if;
+            
             -- verificamos cuantas pagos se haran, es decir cuantos metodos de pago se utilizaran
             -- tenemos por ahora 5 metodos de pagos por lo tanto como maximo se pueden hacer 4 pagos
             cant_metodos_pago_a_utilizar := utilities_pkg.get_random_integer(1, 6);
             -- calculamos el monto a pagar por metodo de pago se hara monto_pagar / cant_metodos_pago_a_utilizar
             monto_pagar_por_metodo_pago := (monto_a_pagar_total)/cant_metodos_pago_a_utilizar;
+            
+            DBMS_OUTPUT.PUT_LINE('  Se pagaran con ' || to_char(cant_metodos_pago_a_utilizar) || 
+                                ' y se cancelara por cada metodo ' || 
+                                to_char(monto_pagar_por_metodo_pago));
             
             -- iteramos por los metodos de pago
             -- abrimos el cursor e iteramos sobre el 
@@ -385,7 +403,7 @@ create or replace package body reserva_and_alquiler_pkg as
             -- cerramos el cursor
             close formas_pago;
             
-            -- luego de salir del bucle ya se debio cancelar todo lo referente a la
+            -- luego de salir del bucle ya se debio cancelar todo lo referente al pago
             
             -- imprimimos que se realizo el pago del alquiler
             DBMS_OUTPUT.PUT_LINE('  Se completo el pago del alquiler.');
@@ -395,24 +413,32 @@ create or replace package body reserva_and_alquiler_pkg as
     -- procedure para alquilar
     procedure realizar_alquiler(cliente_reservar cliente%rowtype, vehiculo_seleccionado vehiculo%rowtype, periodo_alquiler periodo_duracion, ultimo_alquiler_realizado OUT alquiler%rowtype)
     is
-        detalle_alquiler_id number; -- detalle del alquiler recien insertado
-        alquiler_id number;         -- alquiler recien insertado
+        dia_atual   date;               -- dia actual
+        detalle_alquiler_id number;     -- detalle del alquiler recien insertado
+        alquiler_id number;             -- alquiler recien insertado
+        monto_a_pagar_total number;     -- monto total a insertar en alquiler
     begin
+        -- buscamos el dia actual
+        select SYSDATE into dia_atual from dual;
+        
+        -- calculamos el monto total a insertar
+        monto_a_pagar_total := periodo_alquiler.get_cantidad_dias_del_periodo() * vehiculo_seleccionado.v_precio;
+        
         -- insertar el detalle de alquiler
         insert into detalle_alquiler values (
             default,
-            vehiculo_seleccionado.v_precio,
+            monto_a_pagar_total/(periodo_alquiler.get_cantidad_dias_del_periodo()+1),
             0,
             0,
             periodo_alquiler.get_cantidad_dias_del_periodo(),
-            0, -- esto no deberia ser un entero
+            dia_atual,
             vehiculo_seleccionado.v_placa
         ) returning da_id into detalle_alquiler_id;
         
         -- insertar el alquiler
         insert into alquiler values (
             default,
-            0,
+            monto_a_pagar_total,
             periodo_alquiler,
             null,
             detalle_alquiler_id,
@@ -490,12 +516,16 @@ create or replace package body reserva_and_alquiler_pkg as
         sigue_bucle_alquiler_para_mismo_cliente boolean := true; -- variable para verificar si se sigue con el bucle de alquiler para el cliente que esta seleccionado
     begin
         -- indicamos que dio inicio el modulo
-        DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------------------');
-        DBMS_OUTPUT.PUT_LINE('INICIA LA SIMULACION DE ALQUILERES');
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE ALQUILERES --------------');
         -- numero de alquileres a realizar
         numero_alquileres := utilities_pkg.get_random_integer(0,16);
         -- iteramos para cada reserva
         for i in 0..numero_alquileres loop
+            DBMS_OUTPUT.PUT_LINE('');
+            DBMS_OUTPUT.PUT_LINE('  ---- Alquiler numero ' || to_char(i) || ' ----');
+            DBMS_OUTPUT.PUT_LINE('');
+            
             -- verificamos si la reserva la hara una persona o un cliente basado en la probabilidad establecida
             if(utilities_pkg.get_random_integer(0, 101) <= 75) then
                 -- si la hace un cliente 
@@ -509,13 +539,16 @@ create or replace package body reserva_and_alquiler_pkg as
                 gestion_clientes_pkg.registro_cliente(persona_seleccionada, cliente_seleccionado);
             end if;
             
+            DBMS_OUTPUT.PUT_LINE('  - Intentara realizar el alquiler el cliente: ');
+            utilities_pkg.print_cliente(cliente_seleccionado);
+            
             -- buscamos el tipo del cliente
             select * into tipo_cliente_actual from tipo_cliente tc where tc.tc_id=cliente_seleccionado.tipo_cliente_tc_id;
             
             -- se verifica si el cliente es del tipo no deseado
             if(tipo_cliente_actual.tc_nombre = 'no deseado') then
                 -- imprimimos mensaje de error y el cliente
-                DBMS_OUTPUT.PUT_LINE('ALERTA: este cliente no puede realizar alquileres debido a que es NO DESEADO');
+                DBMS_OUTPUT.PUT_LINE('  ALERTA: este cliente no puede realizar alquileres debido a que es NO DESEADO');
                 utilities_pkg.print_cliente(cliente_seleccionado, 'NO DESEADO');
                 continue;
             end if;
@@ -529,12 +562,24 @@ create or replace package body reserva_and_alquiler_pkg as
                 
                 -- se selecciona al azar un vehiculo de la sede, este o no disponible
                 vehiculo_seleccionado := utilities_pkg.get_vehiculo_random(pk_sede);
+                if (vehiculo_seleccionado.v_placa is NULL) then
+                    DBMS_OUTPUT.PUT_LINE('  - No se selecciono un vehiculo, finaliza todo el proceso para este cliente. ');
+                    exit;
+                end if;
+                DBMS_OUTPUT.PUT_LINE('  - El cliente selecciono el vehiculo: ');
+                utilities_pkg.print_vehiculo(vehiculo_seleccionado);
+                
                 
                 -- se selecciona un periodo de forma aleatoria 
                 periodo_alquiler := utilities_pkg.get_random_periodo(dia_actual, fecha_fin_simulacion);
+                DBMS_OUTPUT.PUT_LINE('  - El cliente selecciono el periodo ' || 
+                                    TO_CHAR(periodo_alquiler.P_Fecha_Inicio , 'dd/mm/yyyy')|| 
+                                    '' || 
+                                    TO_CHAR(periodo_alquiler.P_Fecha_Fin , 'dd/mm/yyyy')
+                );
                 
                 -- se llama al escenario 'comprobacion de disponibilida de vehiculo'
-                se_puede_realizar_un_alquiler := reserva_and_alquiler_pkg.comprobacion_disponibilidad_vehiculo(vehiculo_seleccionado, periodo_alquiler, pk_sede);
+                se_puede_realizar_un_alquiler := comprobacion_disponibilidad_vehiculo(vehiculo_seleccionado, periodo_alquiler, pk_sede);
                 
                 -- se verifica si se pudo realizar un alquiler
                 if(se_puede_realizar_un_alquiler) then

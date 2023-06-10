@@ -54,6 +54,7 @@ create or replace package body generador_data_aleatoria_pkg as
         foto                 BLOB;
         pk_de_lugar          number;
         pk_de_tipo_cliente   number;
+        ubicacion_geografica_persona ubicacion_geografica; 
         -- variables del tda
         cedula               VARCHAR2(15);
         primer_nombre        VARCHAR2(20);
@@ -227,12 +228,12 @@ create or replace package body generador_data_aleatoria_pkg as
             'no deseado'
         );
     begin
-        DBMS_OUTPUT.PUT_LINE('  Persona aleatoria sera generada');
+        DBMS_OUTPUT.PUT_LINE('  - Persona aleatoria sera generada');
         
         -- generamos la data para la persona -----------------------------------
         -- generamos el sexo
         sexo := sexos(utilities_pkg.get_random_integer(1,4));
-        DBMS_OUTPUT.PUT_LINE(sexo);
+        
         -- generamos los nombres y la foto en base al genero
         if (sexo = 'F') then
             -- nombres
@@ -253,25 +254,20 @@ create or replace package body generador_data_aleatoria_pkg as
             -- foto
             nombre_imagen := imagenes_mujeres(utilities_pkg.get_random_integer(1,3));
         end if;
-        DBMS_OUTPUT.PUT_LINE(primer_nombre);
-        DBMS_OUTPUT.PUT_LINE(segundo_nombre);
-        DBMS_OUTPUT.PUT_LINE(nombre_imagen);
+        
         -- generamos los apellidos
         primer_apellido  := apellidos(utilities_pkg.get_random_integer(1,51));
         segundo_apellido := apellidos(utilities_pkg.get_random_integer(1,51));
-        DBMS_OUTPUT.PUT_LINE(primer_apellido);
-        DBMS_OUTPUT.PUT_LINE(segundo_apellido);
+        
         -- generamos el correo
         correo := primer_nombre || primer_apellido || tipos_correos(utilities_pkg.get_random_integer(1,4));
-        DBMS_OUTPUT.PUT_LINE(correo);
         
         -- generar cedula
         cedula := TO_CHAR(cedula_counter); -- asignamos la cedula del contador
         cedula_counter := cedula_counter + 1; -- actualizamos el contador + 1
-        DBMS_OUTPUT.PUT_LINE(cedula);
+        
         -- generar direccion
         direccion := direcciones_posibles(utilities_pkg.get_random_integer(1,7));
-        DBMS_OUTPUT.PUT_LINE(direccion);
         
         -- fecha de nacimiento
         SELECT TO_DATE(
@@ -281,23 +277,24 @@ create or replace package body generador_data_aleatoria_pkg as
                                     ) 
                     ),'J'
                ) into fecha_nacimiento FROM DUAL;
-        DBMS_OUTPUT.PUT_LINE(to_char(fecha_nacimiento, 'dd-mm-yyyy'));
+       
         -- generar el tipo de cliente
         -- seleccionamos un tipo de cliente al azar
         aux_tipo_cliente := tipos_clientes(utilities_pkg.get_random_integer(1,5));
-        DBMS_OUTPUT.PUT_LINE('Tipo cliente: '|| aux_tipo_cliente);
         select tc_id into pk_de_tipo_cliente from tipo_cliente where tc_nombre = aux_tipo_cliente;
-        DBMS_OUTPUT.PUT_LINE('Tipo cliente pk: '|| pk_de_tipo_cliente);
         
         -- generar el lugar
         aux_lugar := utilities_pkg.get_lugar_random();
-        DBMS_OUTPUT.PUT_LINE(to_char(aux_lugar.l_id) || ' ' || aux_lugar.l_nombre);
         pk_de_lugar := aux_lugar.l_id;
+        
+        -- generamos la ubicacion
+        ubicacion_geografica_persona := utilities_pkg.get_random_ubicacion_geografica();
         
         -- insertar en la tabla personas
         insert into persona values(
             default,
             EMPTY_BLOB(),
+            ubicacion_geografica_persona,
             pk_de_lugar,
             pk_de_tipo_cliente,
             informacion_personal(
@@ -332,15 +329,13 @@ create or replace package body generador_data_aleatoria_pkg as
     -- procedure para generar un cliente
     procedure generar_cliente
     is
+        persona_aleatoria persona%rowtype;  -- persona aleatoria
+        cliente_registrado cliente%rowtype; -- nuevo cliente registrado
     begin
-        -- POR AHORA NO PARECE NECEARIO GENERAR CLIENTES DE FORMA ALEATORIA
         -- selecciamos una persona de forma aleatorio y pasa a ser cliente
-        
-        -- ya las personas tienen un tipo de cliente por defecto
-        
+        persona_aleatoria := utilities_pkg.get_persona_random();
         -- se inserta en la tabla cliente
-        return;
-        -- se elimina de la tabla persona porque paso a ser un cliente
+        gestion_clientes_pkg.registro_cliente(persona_aleatoria, cliente_registrado);
         
     end generar_cliente;
     ----------------------------------------------------------------------------
@@ -350,7 +345,7 @@ create or replace package body generador_data_aleatoria_pkg as
     is
     begin
         for numero in 1..cantidad loop
-            generador_data_aleatoria_pkg.generar_persona();
+            generar_persona();
         end loop;
     end generador_personas;
     ----------------------------------------------------------------------------
@@ -359,7 +354,9 @@ create or replace package body generador_data_aleatoria_pkg as
     procedure generador_clientes(cantidad number) 
     is
     begin
-        return;
+        for numero in 1..cantidad loop
+            generar_cliente();
+        end loop;
     end generador_clientes;
     
 end generador_data_aleatoria_pkg;

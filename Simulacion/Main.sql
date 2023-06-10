@@ -48,19 +48,20 @@ create or replace package body main_pkg as
         cursor cursor_sedes is select * from sede;        -- cursor para las sedes
         sede_actual sede%rowtype;                         -- variable para poder utilizar el cursor
     begin
+        DBMS_Output.PUT_LINE('------------------------- Inicio de la simulacion -------------------------');
+        DBMS_Output.PUT_LINE('');
+        
         -- guardamos las fechas de la simulacion
         fecha_inicio_simulacion := TO_DATE(fecha_inicio,'MM/DD/YYYY');
         fecha_fin_simulacion := TO_DATE(fecha_fin,'MM/DD/YYYY'); 
     
         -- tomar el arreglo de dias para iterar sobre ellos
-        periodo_fechas := main_pkg.get_intervalo_fechas(TO_DATE(fecha_inicio,'MM/DD/YYYY'), TO_DATE(fecha_fin,'MM/DD/YYYY'));
+        periodo_fechas := get_intervalo_fechas(TO_DATE(fecha_inicio,'MM/DD/YYYY'), TO_DATE(fecha_fin,'MM/DD/YYYY'));
         
         -- imprimimos los dias obtenidos
         index_fecha := periodo_fechas.FIRST;
         -- iteramos sobre las fechas
         WHILE index_fecha IS NOT NULL LOOP
-            DBMS_Output.PUT_LINE('Dia ' || to_char(index_fecha) || ' es ' || to_char(periodo_fechas(index_fecha), 'yyyy-MM-dd'));
-            -- seleccionamos todas las sedes del sistema
             
             -- iteramos sobre las sedes
             OPEN cursor_sedes; -- abrimos el cursos
@@ -68,8 +69,19 @@ create or replace package body main_pkg as
                 FETCH cursor_sedes into sede_actual; 
                 EXIT WHEN cursor_sedes%notfound; 
                  
-                -- DESARROLLO POR CADA SEDE
+                -- DESARROLLO POR CADA SEDE-------------------------------------
                 
+                -- generamos los datos aleatorios para personas y clientes por cada dia
+                generador_data_aleatoria_pkg.generador_personas(25);
+                generador_data_aleatoria_pkg.generador_clientes(15);
+                
+                -- MODULO 1 ----------------------------------------------------
+                -- ALQUILERES
+                reserva_and_alquiler_pkg.simulacion_alquileres(
+                    sede_actual.s_id, 
+                    periodo_fechas(index_fecha), 
+                    fecha_fin_simulacion
+                );
                 
                 
             end loop;
@@ -83,7 +95,3 @@ create or replace package body main_pkg as
     
 end main_pkg;
 /
-
-execute main_pkg.main_simulacion('04/20/2013', '05/25/2013');
-/
-

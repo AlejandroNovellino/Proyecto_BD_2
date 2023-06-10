@@ -5,6 +5,8 @@ create or replace package utilities_pkg as
     function get_random_integer(limite_inferior number, limite_superior number) return number;
     -- function para devolcer un periodo aleatorio
     function get_random_periodo(dia_actual date, fecha_fin_simulacion date) return periodo_duracion;
+    -- function para devolcer una ubicacion geografica aleatoria
+    function get_random_ubicacion_geografica return ubicacion_geografica;
     ----------------------------------------------------------------------------
     -- funciones para tomar un elemento aleatorio de una tabla
     -- funcion para retornar una persona aleatoria que no se encuentre registrada en el sistema
@@ -69,8 +71,6 @@ create or replace package body utilities_pkg as
             fecha_inicio,
             fecha_fin
         );
-        --periodo_retornar.P_Fecha_Inicio := fecha_inicio;
-        --periodo_retornar.P_Fecha_Fin := fecha_fin;
         
         return periodo_retornar;
     
@@ -138,6 +138,29 @@ create or replace package body utilities_pkg as
         return persona_to_return;
     end get_persona_random;
     ----------------------------------------------------------------------------
+    -- function para devolcer una ubicacion geografica aleatoria
+    function get_random_ubicacion_geografica return ubicacion_geografica
+    is 
+        ubicacion_geografica_random ubicacion_geografica;   -- ubicacion a retornar
+        latitud_random      varchar2(12);                   -- longittud random
+        longitud_random     varchar2(12);                   -- latitud random
+        time_stamp_actual   timestamp;                      -- timestamp actual
+    begin
+        -- generamos la latitud y longitud de forma aleatoria
+        latitud_random := to_char(get_random_integer(-90, 90));
+        longitud_random := to_char(get_random_integer(-180, 180));
+        -- tomamos el time stamp
+        select CURRENT_TIMESTAMP into time_stamp_actual from DUAL;
+        -- colocamos los valores en la ubicacion geografica
+        ubicacion_geografica_random := ubicacion_geografica(
+            latitud_random,
+            longitud_random,
+            time_stamp_actual
+        );
+        
+        return ubicacion_geografica_random;
+    end get_random_ubicacion_geografica;
+    ----------------------------------------------------------------------------
     -- function para elegir un vehiculo de forma aleatoria (simular desear un vehciulo con caracteristicas especificas)
     function get_vehiculo_random(pk_sede number) return vehiculo%rowtype
     is
@@ -204,9 +227,9 @@ create or replace package body utilities_pkg as
     procedure print_persona(persona_imprimir persona%rowtype, msg varchar2 DEFAULT '')
     is
     begin
-        DBMS_OUTPUT.PUT_LINE('Persona: ');
+        DBMS_OUTPUT.PUT_LINE('  Persona: ');
         DBMS_OUTPUT.PUT_LINE(
-            '   ' 
+            '       ' 
             || persona_imprimir.ip.IP_Primer_Nombre || ' '
             || persona_imprimir.ip.IP_Segundo_Nombre || ', '
             || persona_imprimir.ip.IP_Primer_Apeliido || ' '
@@ -220,9 +243,9 @@ create or replace package body utilities_pkg as
     procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '')
     is
     begin
-        DBMS_OUTPUT.PUT_LINE('Cliente: ');
+        DBMS_OUTPUT.PUT_LINE('  Cliente: ');
         DBMS_OUTPUT.PUT_LINE(
-            '   ' 
+            '       ' 
             || cliente_imprimir.c_informacion_personal.IP_Primer_Nombre || ' '
             || cliente_imprimir.c_informacion_personal.IP_Segundo_Nombre || ', '
             || cliente_imprimir.c_informacion_personal.IP_Primer_Apeliido || ' '
@@ -246,9 +269,9 @@ create or replace package body utilities_pkg as
             from marca ma
             where ma.ma_id=vehiculo_imprimir.modelo_marca_ma_id;
         
-        DBMS_OUTPUT.PUT_LINE('Vehiculo: ');
+        DBMS_OUTPUT.PUT_LINE('  Vehiculo: ');
         DBMS_OUTPUT.PUT_LINE(
-            '   ' 
+            '       ' 
             || 'Placa: ' || vehiculo_imprimir.v_placa || ' '
             || modelo_vehiculo || ', '
             || marca_vehiculo || ' '
