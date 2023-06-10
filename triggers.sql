@@ -35,19 +35,19 @@ declare
  create or replace trigger ingresos_alquiler AFTER insert on alquiler FOR EACH ROW
 declare
   id VARCHAR2(12) ;
+  id_sede number;
  begin
    Select vehiculo_v_placa into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
-   insert into ingreso values (default,:new.A_monto_total,:new.a_periodo_duracion.P_Fecha_Inicio,'Alquiler del vehiculo'||' '|| id ,1); 
+   select sede_s_id into id_sede  from vehiculo where v_placa= id;
+   insert into ingreso values (default,:new.A_monto_total,:new.a_periodo_duracion.P_Fecha_Inicio,'Alquiler del vehiculo'||' '|| id ,id_sede); 
  end;
 
  create or replace trigger gasto_mantenimiento AFTER insert on mantenimiento_vehiculo FOR EACH ROW
 declare
-
+  id_sede number;
  begin
-    insert into gasto values (default,
-    :new.man_precio,:new.man_periodo_duracion.P_Fecha_Inicio,'Gasto por mantenimiento del vehiculo'||' '||:new.Vehiculo_v_placa ,
-    (select tg_id from tipo_gasto where tg_nombre='Operacionales'),
-    (SELECT s_id From sede where  s_numerosede  =1));
+    select sede_s_id into id_sede  from vehiculo where v_placa= :new.Vehiculo_v_placa;
+    insert into gasto values (default,:new.man_precio,:new.man_periodo_duracion.P_Fecha_Inicio,'Gasto por mantenimiento del vehiculo'||' '||:new.Vehiculo_v_placa ,(select tg_id from tipo_gasto where tg_nombre='Operacionales'), id_sede);
  end;
  
  create or replace trigger gasto_compra AFTER insert on compra FOR EACH ROW
@@ -57,20 +57,7 @@ declare
     insert into gasto values (default,
     :new.c_monto_total,:new.c_fecha,'Gasto por compra de vehiculo',
     (select tg_id from tipo_gasto where tg_nombre='Operacionales'),
-    (SELECT s_id From sede where  s_numerosede  =1));
- end;
-
- create or replace trigger detalle_compra AFTER insert on vehiculo FOR EACH ROW
-declare
-  id number;
-  precio number;
-  cant number;
- begin
-    insert into detalle_compra values (default,
-    1,:new.V_precio,:new.v_placa) returning dc_id into id; 
-                           
-    insert into compra values (default,
-   :new.V_precio,(select SYSDATE from dual),id,:new.Sede_S_ID);
+    (SELECT s_id From sede where  s_numerosede  =:new.sede_S_ID));
  end;
 
 create or replace trigger cambio_kms_vehiculo AFTER UPDATE on detalle_alquiler FOR EACH ROW

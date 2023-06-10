@@ -203,7 +203,7 @@ CREATE TABLE mantenimiento_taller (
     mantenimiento_m_id                     number NOT NULL,
     taller_t_id                            number NOT NULL,
     -- claves primarias de la tabla
-    PRIMARY KEY (mantenimiento_m_id)
+    PRIMARY KEY (mt_id)
 );
 /
 CREATE TABLE mantenimiento_vehiculo (
@@ -213,7 +213,7 @@ CREATE TABLE mantenimiento_vehiculo (
     man_precio                NUMBER NOT NULL,
     vehiculo_v_placa          VARCHAR2(7 CHAR) NOT NULL,
     status_mantenimiento_s_id number NOT NULL,
-    mantenimiento_m_id        number NOT NULL,
+    mantenimiento_taller_mt_id        number NOT NULL,
     -- claves primarias de la tabla
     PRIMARY KEY (man_id)
 );
@@ -461,8 +461,8 @@ ALTER TABLE mantenimiento
         REFERENCES tipo_mantenimiento ( tm_id );
 /
 ALTER TABLE mantenimiento_vehiculo
-    ADD CONSTRAINT mantenimiento_vehiculo_mantenimiento_fk FOREIGN KEY ( mantenimiento_m_id )
-        REFERENCES mantenimiento ( m_id );
+    ADD CONSTRAINT mantenimiento_vehiculo_mantenimiento_taller_fk FOREIGN KEY ( mantenimiento_taller_mt_id )
+        REFERENCES mantenimiento_taller ( mt_id );
 /
 ALTER TABLE mantenimiento_vehiculo
     ADD CONSTRAINT mantenimiento_vehiculo_status_mantenimiento_fk FOREIGN KEY ( status_mantenimiento_s_id )

@@ -1,12 +1,12 @@
 --Creacion de un directorio para guardar imagenes
 CREATE OR REPLACE DIRECTORY OBJETOS_LOB AS 'C:\IMAGENES\';
-
+/
 CREATE OR REPLACE PACKAGE PK_Vehiculo AS
 TYPE RESULT_SET IS REF CURSOR;
 
 PROCEDURE  I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number);
 END PK_Vehiculo;
-  
+  /
  CREATE OR REPLACE PACKAGE BODY PK_Vehiculo IS
  
 PROCEDURE I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number)
@@ -14,7 +14,7 @@ is
  temp blob;
  fle bfile;
   BEGIN
-    INSERT INTO vehiculo values (v_placa,v_anno,EMPTY_BLOB(),v_km,v_precio,(SELECT m_id From modelo where m_nombre = modelos), (SELECT sv_id From status_vehiculo where sv_nombre = status),(SELECT c_id From color where c_nombre = colorv) ,(SELECT tv_id From tipo_vehiculo where tv_nombre = tipo),(SELECT s_id From sede where  s_numerosede  = sedes)) returning v_foto INTO temp;
+    INSERT INTO vehiculo values (v_placa,v_anno,EMPTY_BLOB(),v_km,v_precio,(SELECT m_id From modelo where m_nombre = modelos),(SELECT marca_ma_id From modelo where m_nombre = modelos), (SELECT sv_id From status_vehiculo where sv_nombre = status),(SELECT c_id From color where c_nombre = colorv) ,(SELECT tv_id From tipo_vehiculo where tv_nombre = tipo),(SELECT s_id From sede where  s_numerosede  = sedes)) returning v_foto INTO temp;
    fle:= BFILENAME ('OBJETOS_LOB', V_Nombre_foto);
    DBMS_LOB.fileopen (fle, DBMS_LOB.file_readonly);
    DBMS_LOB.loadfromfile (temp,fle,DBMS_LOB.getlength (fle));
@@ -22,14 +22,14 @@ is
     COMMIT;
   END I_Vehiculo;
   END PK_Vehiculo;
-  
+  /
 CREATE OR REPLACE PACKAGE PK_Cliente AS
 TYPE RESULT_SET IS REF CURSOR;
  
 PROCEDURE BUSCAR_Cliente(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2);
 PROCEDURE I_Cliente(V_Nombre_foto varchar2,p_nombre Varchar2,s_nombre Varchar2, p_apellido varchar2, s_apellido varchar2, ci varchar2,correo varchar2,nac date,sexo varchar2,latitud varchar2, longitud varchar2, direccion varchar2, tipo varchar2, lugar varchar2);
 END PK_Cliente;
-
+/
 
 CREATE OR REPLACE PACKAGE BODY PK_Cliente IS
  
@@ -143,6 +143,7 @@ fle bfile;
 
 
 END PK_Cliente;
+/
 ----Creacion del paquete para alquiler----
 CREATE OR REPLACE PACKAGE PK_Alquiler AS
 TYPE RESULT_SET IS REF CURSOR;
@@ -150,6 +151,7 @@ TYPE RESULT_SET IS REF CURSOR;
 PROCEDURE BUSCAR_Vehiculo(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2);
 PROCEDURE BUSCAR_Vehiculo_Mes(o_result_set OUT RESULT_SET);
 END PK_Alquiler;
+/
 ---Creacion del body del paquete
 CREATE OR REPLACE PACKAGE BODY PK_Alquiler IS
 ----Precedimiento para el reporte 1----
@@ -247,14 +249,14 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
                         --Order By 6 desc  ;
   End Buscar_Vehiculo_Mes;
   End Pk_Alquiler;
- 
+ /
 ----  paquete pk_promocion-----
 CREATE OR REPLACE PACKAGE PK_Promocion AS
 TYPE RESULT_SET IS REF CURSOR;
  
 PROCEDURE BUSCAR_Promocion(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2);
 END PK_Promocion;
-
+/
 ----create body package------
 CREATE OR REPLACE PACKAGE BODY PK_Promocion IS
 PROCEDURE BUSCAR_Promocion( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2) 
@@ -308,14 +310,14 @@ PROCEDURE BUSCAR_Promocion( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha
                           
   END BUSCAR_Promocion;
   END PK_Promocion;
-
+/
 CREATE OR REPLACE PACKAGE PK_Alianza AS
 TYPE RESULT_SET IS REF CURSOR;
  
 PROCEDURE BUSCAR_Alianza(o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2);
 PROCEDURE I_Aliado(V_Nombre_foto varchar2,nombre Varchar2);
 END PK_Alianza;
-
+/
 
 CREATE OR REPLACE PACKAGE BODY  PK_Alianza IS
 PROCEDURE BUSCAR_alianza( o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2) 
@@ -342,14 +344,14 @@ is
    COMMIT;
   END I_Aliado; 
   END PK_Alianza;
-
+/
  
 CREATE OR REPLACE PACKAGE PK_Mantenimiento AS
 TYPE RESULT_SET IS REF CURSOR;
  
 PROCEDURE BUSCAR_Mantenimiento(o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2);
 END PK_Mantenimiento; 
- 
+ /
 
 CREATE OR REPLACE PACKAGE BODY PK_Mantenimiento IS
 PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2) 
@@ -418,7 +420,7 @@ PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fe
                          
   END BUSCAR_Mantenimiento;
   END PK_Mantenimiento;
- 
+ /
 ----Busca la cantidad de alquileres que ha realizado un cliente anualmente--- 
 create or replace function buscar_numero(id number ,fechaI date, fechaF date ) return number
 IS cant number;
@@ -427,7 +429,7 @@ IS cant number;
         Select count(*) into cant from alquiler where cliente_C_id=id and A_fecha_inicio between fechaI and fechaF group by cliente_c_id ; 
         return cant ;
 end;
- 
+ /
  
  ----Procedimiento que actualiza el tipo de cliente segun el numero de alquileres ha hecho anualmente --- 
  create or replace PROCEDURE cambiar_tipo_cliente (id number,fechaI date, fechaF date) 
@@ -450,7 +452,7 @@ end;
      end if;
       end if;
  end;
- 
+/ 
 
  
   ----insert de prueba----
