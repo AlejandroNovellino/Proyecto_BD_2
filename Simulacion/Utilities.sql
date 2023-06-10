@@ -5,6 +5,8 @@ create or replace package utilities_pkg as
     function get_random_integer(limite_inferior number, limite_superior number) return number;
     -- function para devolcer un periodo aleatorio
     function get_random_periodo(dia_actual date, fecha_fin_simulacion date) return periodo_duracion;
+    -- function para devolcer un periodo aleatorio con inicio en la fecha dada
+    function get_random_periodo_fecha_inicio_seteada(dia_actual date, fecha_fin_simulacion date) return periodo_duracion;
     -- function para devolcer una ubicacion geografica aleatoria
     function get_random_ubicacion_geografica return ubicacion_geografica;
     ----------------------------------------------------------------------------
@@ -75,6 +77,34 @@ create or replace package body utilities_pkg as
         return periodo_retornar;
     
     end get_random_periodo;
+    ----------------------------------------------------------------------------
+     -- function para devolver un periodo aleatorio
+    function get_random_periodo_fecha_inicio_seteada(dia_actual date, fecha_fin_simulacion date) return periodo_duracion
+    is
+        periodo_retornar periodo_duracion;      -- periodo de duracion a retornar
+        fecha_inicio date;                      -- fecha de inicio del periodo
+        fecha_fin date;                         -- fecha de fin del periodo
+    begin 
+        -- fecha de inicio igual a la actual
+        fecha_inicio := dia_actual;
+        -- se selecciona la fecha de fin
+        -- por ahora se coloca como maximo 2 meses para esa reserva
+        SELECT TO_DATE(
+              TRUNC(
+                     DBMS_RANDOM.VALUE (to_number(to_char(fecha_inicio, 'j')), to_number(to_char(ADD_MONTHS(fecha_inicio, 2), 'j'))) 
+                    )
+                , 'J')  into fecha_fin
+        FROM DUAL;
+        
+        -- creamos el periodo
+        periodo_retornar := periodo_duracion(
+            fecha_inicio,
+            fecha_fin
+        );
+        
+        return periodo_retornar;
+    
+    end get_random_periodo_fecha_inicio_seteada;
     ----------------------------------------------------------------------------
     -- funcion para retornar un cliente aleatorio que ya se encuentre registrado en el sistema
     function get_cliente_random return cliente%rowtype
@@ -227,32 +257,30 @@ create or replace package body utilities_pkg as
     procedure print_persona(persona_imprimir persona%rowtype, msg varchar2 DEFAULT '')
     is
     begin
-        DBMS_OUTPUT.PUT_LINE('  Persona: ');
         DBMS_OUTPUT.PUT_LINE(
-            '       ' 
+            '       - Persona:  ' 
             || persona_imprimir.ip.IP_Primer_Nombre || ' '
             || persona_imprimir.ip.IP_Segundo_Nombre || ', '
             || persona_imprimir.ip.IP_Primer_Apeliido || ' '
             || persona_imprimir.ip.IP_Segundo_Apellido || ' '
-            || 'C.I. ' || persona_imprimir.ip.IP_cedula
+            || 'C.I. ' || persona_imprimir.ip.IP_cedula || ' '
+            || msg
         );
-        DBMS_OUTPUT.PUT_LINE('  ' || msg);
     end print_persona;
     ----------------------------------------------------------------------------
     -- procedure para imprimir un cliente
     procedure print_cliente(cliente_imprimir cliente%rowtype, msg varchar2 DEFAULT '')
     is
     begin
-        DBMS_OUTPUT.PUT_LINE('  Cliente: ');
         DBMS_OUTPUT.PUT_LINE(
-            '       ' 
+            '       - Cliente:  ' 
             || cliente_imprimir.c_informacion_personal.IP_Primer_Nombre || ' '
             || cliente_imprimir.c_informacion_personal.IP_Segundo_Nombre || ', '
             || cliente_imprimir.c_informacion_personal.IP_Primer_Apeliido || ' '
             || cliente_imprimir.c_informacion_personal.IP_Segundo_Apellido || ' '
-            || 'C.I. ' || cliente_imprimir.c_informacion_personal.IP_cedula
+            || 'C.I. ' || cliente_imprimir.c_informacion_personal.IP_cedula || ' '
+            || msg
         );
-        DBMS_OUTPUT.PUT_LINE('  ' || msg);
     end print_cliente;
     ----------------------------------------------------------------------------
     -- procedure para imprimir un vehiculo
@@ -269,17 +297,16 @@ create or replace package body utilities_pkg as
             from marca ma
             where ma.ma_id=vehiculo_imprimir.modelo_marca_ma_id;
         
-        DBMS_OUTPUT.PUT_LINE('  Vehiculo: ');
         DBMS_OUTPUT.PUT_LINE(
-            '       ' 
+            '       - Vehiculo:  ' 
             || marca_vehiculo || ', '
             || modelo_vehiculo || ', '
             || 'placa: ' || vehiculo_imprimir.v_placa || ', '
             || vehiculo_imprimir.color_c_id || ', '
             || 'km: ' || vehiculo_imprimir.v_km || ', '
-            || 'precio: ' || vehiculo_imprimir.v_precio
+            || 'precio: ' || vehiculo_imprimir.v_precio || ' '
+            || msg
         );
-        DBMS_OUTPUT.PUT_LINE('  ' || msg);
     end print_vehiculo;
 
 end utilities_pkg;

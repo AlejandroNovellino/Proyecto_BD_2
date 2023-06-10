@@ -50,7 +50,8 @@ create or replace package body gestion_clientes_pkg as
         delete from persona p where p.ip.IP_cedula = cliente_registrado.c_informacion_personal.IP_cedula;
         
         -- indicamos que la persona fue registrada satisfactoriamente en el sistema
-        DBMS_OUTPUT.PUT_LINE('  Se ha registrado a la persona en el sisteam satisfactoriamente.');
+        DBMS_OUTPUT.PUT_LINE('          La persona no estaba registradad como cliente');
+        DBMS_OUTPUT.PUT_LINE('          Se ha registrado a la persona en el sisteam satisfactoriamente');
         
     end registro_cliente;
 

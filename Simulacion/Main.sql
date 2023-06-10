@@ -76,15 +76,23 @@ create or replace package body main_pkg as
                 generador_data_aleatoria_pkg.generador_clientes(15);
                 
                 -- PRESENTAMOS QUE DIA SE ESTA TRABAJANDO
-                DBMS_Output.PUT_LINE('DIA ' || TO_CHAR(periodo_fechas(index_fecha), 'dd/mm/yyyy') || ' de la simulacion');
+                DBMS_Output.PUT_LINE('---- DIA ' || TO_CHAR(periodo_fechas(index_fecha), 'dd/mm/yyyy') || ' de la simulacion');
                 
                 -- MODULO 1 ----------------------------------------------------
+                -- RESERVAS
+                reserva_and_alquiler_pkg.simulacion_reservas(
+                    sede_actual.s_id, 
+                    periodo_fechas(index_fecha), 
+                    fecha_fin_simulacion
+                );
+                
                 -- ALQUILERES
                 reserva_and_alquiler_pkg.simulacion_alquileres(
                     sede_actual.s_id, 
                     periodo_fechas(index_fecha), 
                     fecha_fin_simulacion
                 );
+                
                 
                 
             end loop;
