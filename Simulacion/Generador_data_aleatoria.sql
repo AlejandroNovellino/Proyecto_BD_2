@@ -217,7 +217,8 @@ create or replace package body generador_data_aleatoria_pkg as
             'Avenida La Estancia, C/C C. Ernesto Blohm, 1090, Miranda',
             'Avenida Libertador, con C. Los Ángeles, Caracas 1071, Miranda',
             'F5PH+9HF, Avenida Francisco de Miranda, Caracas 1071, Miranda',
-            'Calle Real De Playa Verde, Maiquetía, Vargas'
+            'Calle Real De Playa Verde, Maiquetía, Vargas',
+            'Av. Urdaneta con Viaducto Sucre, Merida 5101, Merida'
         );
         
         -- definicion del arreglo de posibles tipos de clientes
