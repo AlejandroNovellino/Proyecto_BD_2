@@ -68,7 +68,7 @@ create or replace package body mantenimiento_pkg as
 
     procedure taller_sin_disponibilidad (mto_hoy mantenimiento_vehiculo%rowtype, hoy date) is
 
-        cursor talleres is select taller_t_id from mantenimiento_taller where mantenimiento_m_id=mto_hoy.mantenimiento_m_id;
+        cursor talleres is select taller_t_id from mantenimiento_taller where mantenimiento_m_id=(SELECT mantenimiento_m_id from mantenimiento_taller where mt_id=mto_hoy.mantenimiento_taller_mt_id);
         taller_actual integer;
 
         disponible integer;
@@ -77,7 +77,7 @@ create or replace package body mantenimiento_pkg as
         hay_talleres integer;
 
     begin
-        select count(*) into hay_talleres from mantenimiento_taller where mantenimiento_m_id=mto_hoy.mantenimiento_m_id;
+        select count(*) into hay_talleres from mantenimiento_taller where mantenimiento_m_id=(SELECT mantenimiento_m_id from mantenimiento_taller where mt_id=mto_hoy.mantenimiento_taller_mt_id);
         if hay_talleres>0 then
             open talleres;
             fetch talleres into taller_actual;
@@ -94,7 +94,11 @@ create or replace package body mantenimiento_pkg as
                                                                     ,mto_hoy.man_precio
                                                                     ,mto_hoy.vehiculo_v_placa
                                                                     ,(SELECT s_id from status_mantenimiento where s_nombre='Operativo')
-                                                                    ,mto_hoy.mantenimiento_m_id);
+                                                                    ,(SELECT mt_id 
+                                                                        from mantenimiento_taller 
+                                                                       where mantenimiento_m_id=(SELECT mantenimiento_m_id from mantenimiento_taller where mt_id=mto_hoy.mantenimiento_taller_mt_id)
+                                                                         and taller_t_id=taller_actual
+                                                                    ));
                         update vehiculo
                            set status_vehiculo_sv_id=(select sv_id from status_vehiculo where sv_nombre='En mantenimiento')
                          where v_placa=mto_hoy.vehiculo_v_placa;
@@ -118,7 +122,7 @@ create or replace package body mantenimiento_pkg as
         begin
         select * into ult_mto from mantenimiento_vehiculo where rownum=1 order by man_periodo_duracion.p_fecha_inicio desc;
         if ult_mto.man_fecha_proximo_man between fecha_inicio and fecha_fin then
-            select taller_t_id into taller_actual from mantenimiento_taller where mantenimiento_m_id=ult_mto.mantenimiento_m_id;
+            select taller_t_id into taller_actual from mantenimiento_taller where mantenimiento_m_id=(SELECT mantenimiento_m_id from mantenimiento_taller where mt_id=ult_mto.mantenimiento_taller_mt_id);
             --logica para determinar si el taller tiene disponibilidad
             disponible := utilities_pkg.get_random_integer(1,11);
             if (disponible<8) then
