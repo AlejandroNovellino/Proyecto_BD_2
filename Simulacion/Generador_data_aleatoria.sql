@@ -222,10 +222,10 @@ create or replace package body generador_data_aleatoria_pkg as
         
         -- definicion del arreglo de posibles tipos de clientes
         tipos_clientes tipos_cliente_array := tipos_cliente_array(
-            'ocasional',
-            'frecuente',
+            'Ocasional',
+            'Frecuente',
             'VIP',
-            'no deseado'
+            'No deseado'
         );
     begin
         DBMS_OUTPUT.PUT_LINE('  - Persona aleatoria sera generada');

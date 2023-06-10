@@ -259,24 +259,25 @@ create or replace package body utilities_pkg as
     procedure print_vehiculo(vehiculo_imprimir vehiculo%rowtype, msg varchar2 DEFAULT '')
     is
         modelo_vehiculo varchar2(50);
-        marca_vehiculo varchar2(50);
+        marca_vehiculo  varchar2(50);
     begin
         select mo.m_nombre into modelo_vehiculo 
             from modelo mo
             where mo.m_id=vehiculo_imprimir.modelo_m_id;
             
-        select ma.ma_nombre into modelo_vehiculo 
+        select ma.ma_nombre into marca_vehiculo 
             from marca ma
             where ma.ma_id=vehiculo_imprimir.modelo_marca_ma_id;
         
         DBMS_OUTPUT.PUT_LINE('  Vehiculo: ');
         DBMS_OUTPUT.PUT_LINE(
             '       ' 
-            || 'Placa: ' || vehiculo_imprimir.v_placa || ' '
+            || marca_vehiculo || ', '
             || modelo_vehiculo || ', '
-            || marca_vehiculo || ' '
-            || vehiculo_imprimir.color_c_id || ' '
-            || 'Km: ' || vehiculo_imprimir.v_km
+            || 'placa: ' || vehiculo_imprimir.v_placa || ', '
+            || vehiculo_imprimir.color_c_id || ', '
+            || 'km: ' || vehiculo_imprimir.v_km || ', '
+            || 'precio: ' || vehiculo_imprimir.v_precio
         );
         DBMS_OUTPUT.PUT_LINE('  ' || msg);
     end print_vehiculo;
