@@ -244,6 +244,13 @@ INSERT INTO CONSESIONARIO VALUES (DEFAULT, 'C-1', '0212-5599283','Av. Teheran, M
  ----insert sede---
 INSERT INTO SEDE VALUES (DEFAULT,'Av. Teheran, Montalban','0212-5599283',1,20,1,(select c_id from CONSESIONARIO where c_nombre='C-1'),(select l_id from LUGAR where l_nombre='Libertador'));
 
+--insert aliado
+
+execute PK_Alianza.I_Aliado('descarga.PNG' ,'pana Tech');
+/
+execute PK_Alianza.I_Aliado('gruero.PNG' ,'Tu gruero');
+/
+
 ----insert alquiler------
 
 
