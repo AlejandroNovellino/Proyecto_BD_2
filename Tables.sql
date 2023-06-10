@@ -203,7 +203,7 @@ CREATE TABLE mantenimiento_taller (
     mantenimiento_m_id                     number NOT NULL,
     taller_t_id                            number NOT NULL,
     -- claves primarias de la tabla
-    PRIMARY KEY (mantenimiento_m_id)
+    PRIMARY KEY (mt_id)
 );
 /
 CREATE TABLE mantenimiento_vehiculo (

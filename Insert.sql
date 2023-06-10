@@ -177,14 +177,14 @@ INSERT INTO tipo_cliente  VALUES (DEFAULT,'Frecuente');
 INSERT INTO tipo_cliente  VALUES (DEFAULT,'VIP');
 INSERT INTO tipo_cliente  VALUES (DEFAULT,'No deseado');
 
+--- insert tipo entrega---
+INSERT INTO tipo_gasto  VALUES (DEFAULT,'Operacionales');
+INSERT INTO tipo_gasto  VALUES (DEFAULT,'No operacionales');
+
 ---insert tipo mantenimiento---
 INSERT INTO tipo_mantenimiento  VALUES (DEFAULT,'Correctivo');
 INSERT INTO tipo_mantenimiento  VALUES (DEFAULT,'Preventivo');
 INSERT INTO tipo_mantenimiento  VALUES (DEFAULT,'De emergencia');
-
---- insert tipo entrega---
-INSERT INTO tipo_gasto  VALUES (DEFAULT,'Operacionales');
-INSERT INTO tipo_gasto  VALUES (DEFAULT,'No operacionales');
 
 ---insert status mantenimiento---
 INSERT INTO status_mantenimiento VALUES (DEFAULT,'Operativo');
@@ -214,6 +214,19 @@ insert into mantenimiento values (default,'Motor',(select tm_id from tipo_manten
 insert into mantenimiento values (default,'Reparacion de transmision',(select tm_id from tipo_mantenimiento where tm_nombre='Correctivo'));
 insert into mantenimiento values (default,'Suspension',(select tm_id from tipo_mantenimiento where tm_nombre='Correctivo'));
 
+--insertar talleres
+insert into taller values (default, 'Mis 3 Hermanos', '0212-2663729', ubicacion_geografica(ubicacion_geografica.verificar_latitud('5.293874'),ubicacion_geografica.verificar_longitud('-40.213641'),null), 10, (select l_id from LUGAR where l_nombre='Libertador'));
+insert into taller values (default, 'Mis 4 Hermanos', '0212-2673729', ubicacion_geografica(ubicacion_geografica.verificar_latitud('5.193874'),ubicacion_geografica.verificar_longitud('-40.113641'),null), 5, (select l_id from LUGAR where l_nombre='Libertador'));
+insert into taller values (default, 'Mis 2 primos segundos por parte de papa', '0212-2163429', ubicacion_geografica(ubicacion_geografica.verificar_latitud('6.293874'),ubicacion_geografica.verificar_longitud('-41.213641'),null), 5, (select l_id from LUGAR where l_nombre='Libertador'));
+insert into taller values (default, 'Thunder Cars', '0212-2672729', ubicacion_geografica(ubicacion_geografica.verificar_latitud('5.293374'),ubicacion_geografica.verificar_longitud('-40.103641'),null), 10, (select l_id from LUGAR where l_nombre='Libertador'));
+insert into taller values (default, 'Maquina', '0212-5172729', ubicacion_geografica(ubicacion_geografica.verificar_latitud('4.693374'),ubicacion_geografica.verificar_longitud('-39.603641'),null), 7, (select l_id from LUGAR where l_nombre='Libertador'));
+
+--insertar manten-taller
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Mis 3 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Mis 4 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Mis 2 primos segundos por parte de papa'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Thunder Cars'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Maquina'));
 
 --- insert formas de pago---
 INSERT INTO forma_pago  VALUES (DEFAULT,'Efectivo');
@@ -230,6 +243,7 @@ INSERT INTO LUGAR VALUES (DEFAULT,'Libertador','Municipio',(select l_id from LUG
 INSERT INTO CONSESIONARIO VALUES (DEFAULT, 'C-1', '0212-5599283','Av. Teheran, Montalban',(select l_id from LUGAR where l_nombre='Libertador'));
  ----insert sede---
 INSERT INTO SEDE VALUES (DEFAULT,'Av. Teheran, Montalban','0212-5599283',1,20,1,(select c_id from CONSESIONARIO where c_nombre='C-1'),(select l_id from LUGAR where l_nombre='Libertador'));
+
 ----insert alquiler------
 
 
