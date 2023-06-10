@@ -295,7 +295,7 @@ PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fe
                           and mv.mantenimiento_taller_mt_id =mt.mt_id 
                          and( mv.man_periodo_duracion.P_Fecha_Inicio>= TO_DATE(fecha_I,'dd/mm/yy')or
                              mv.man_periodo_duracion.P_Fecha_Fin<= TO_DATE(fecha_F,'dd/mm/yy')
-                             or ma.tipo_mantenimiento_TM_ID=(select tm_id from tipo_vehiculo where tm_nombre=tipo)
+                             or ma.tipo_mantenimiento_TM_ID=(select tm_id from tipo_mantenimiento where tm_nombre=tipo)
                              or v.modelo_M_ID= (select m_id from modelo where m_nombre=modelo)
                              or v.v_placa= placa 
                              or m.marca_ma_id=(select ma_id from marca where ma_nombre = marca));        
@@ -382,8 +382,8 @@ insert into alianza values (DEFAULT,'25/05/23','25/06/23','02/06/23','Todos los 
 
 ---mantenimientos--
 
- insert into mantenimiento values(Default,'cambio de aceite',(select TM_ID from tipo_mantenimiento where tm_nombre='Preventido') );
- select * from mantenimiento_vehiculo;
+ insert into mantenimiento values(Default,'cambio de aceite',(select TM_ID from tipo_mantenimiento where tm_nombre='Correctivo') );
+ select * from mantenimiento_taller;
 
-  insert  into mantenimiento_taller values (default,4,1);
-  insert into mantenimiento_vehiculo values(default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('26/06/23','27/06/23'),periodo_duracion.verificar_fecha_fin('26/06/23','27/06/23')),'22/07/23',30,'DF48S5',1,21);
+  insert  into mantenimiento_taller values (default,22,1);
+  insert into mantenimiento_vehiculo values(default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('26/06/23','27/06/23'),periodo_duracion.verificar_fecha_fin('26/06/23','27/06/23')),'22/07/23',30,'DF48S5',1,41);
