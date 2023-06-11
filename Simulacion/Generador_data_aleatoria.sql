@@ -35,7 +35,7 @@ create or replace package body generador_data_aleatoria_pkg as
         -- arreglos para imagenes
         type imagenes_array IS VARRAY(2) OF VARCHAR2(20);
         -- arreglo para direcciones
-        type direcciones_array IS VARRAY(6) OF CLOB;
+        type direcciones_array IS VARRAY(7) OF CLOB;
         -- arreglo para los tipos de clientes
         type tipos_cliente_array IS VARRAY(4) OF VARCHAR2(50);
         aux_tipo_cliente VARCHAR2(50);
@@ -268,7 +268,7 @@ create or replace package body generador_data_aleatoria_pkg as
         cedula_counter := cedula_counter + 1; -- actualizamos el contador + 1
         
         -- generar direccion
-        direccion := direcciones_posibles(utilities_pkg.get_random_integer(1,7));
+        direccion := direcciones_posibles(utilities_pkg.get_random_integer(1,8));
         
         -- fecha de nacimiento
         SELECT TO_DATE(
@@ -321,6 +321,7 @@ create or replace package body generador_data_aleatoria_pkg as
     EXCEPTION
        WHEN OTHERS
        THEN
+          DBMS_OUTPUT.PUT_LINE('Error en generador data aleatoria');
           DBMS_OUTPUT.put_line (   'ORA-'
              || TO_CHAR (UTL_CALL_STACK.error_number (1), 'fm00000')
              || ': '

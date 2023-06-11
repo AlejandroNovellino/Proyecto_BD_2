@@ -647,7 +647,7 @@ create or replace package body reserva_and_alquiler_pkg as
         -- indicamos que dio inicio el modulo
         DBMS_OUTPUT.PUT_LINE('');
         DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE RESERVAS --------------');
-        -- numero de alquileres a realizar
+        -- numero de reservas a realizar
         numero_reservas := utilities_pkg.get_random_integer(0,16);
         -- iteramos para cada reserva
         for i in 0..numero_reservas loop
