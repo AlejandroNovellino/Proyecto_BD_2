@@ -14,14 +14,14 @@ declare
     where v_placa=:new.vehiculo_v_placa;
  end; 
  
- create or replace trigger cambio_status_alquileres AFTER insert on alquiler FOR EACH ROW
-declare
-  id VARCHAR2(12) ;
- begin
-   Select vehiculo_v_placa into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
-    Update vehiculo set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='En alquiler')
-    where v_placa=id;
- end;
+--create or replace trigger cambio_status_alquileres AFTER insert on alquiler FOR EACH ROW -- Creo que este trigger tenemos que eliminarlo porque que se inserte un alquiler no significa que un auto este ya durante un alquiler, porque por el caso de las reservas ingresar un alquiler no significa que inicie
+--declare
+    -- id VARCHAR2(12) ;
+--begin
+   -- Select vehiculo_v_placa into id from detalle_alquiler where DA_ID= :new.Detalle_alquiler_DA_ID;
+   -- Update vehiculo set status_vehiculo_sv_id= (SELECT sv_id From status_vehiculo where sv_nombre ='En alquiler')
+   -- where v_placa=id;
+-- end;
  
  create or replace trigger cambio_status_alquiler_disponibles AFTER UPDATE on alquiler FOR EACH ROW
 declare

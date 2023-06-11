@@ -258,7 +258,7 @@ create or replace package body utilities_pkg as
     is
     begin
         DBMS_OUTPUT.PUT_LINE(
-            '       - Persona:  ' 
+            '      - Persona:  ' 
             || persona_imprimir.ip.IP_Primer_Nombre || ' '
             || persona_imprimir.ip.IP_Segundo_Nombre || ', '
             || persona_imprimir.ip.IP_Primer_Apeliido || ' '
@@ -273,7 +273,7 @@ create or replace package body utilities_pkg as
     is
     begin
         DBMS_OUTPUT.PUT_LINE(
-            '       - Cliente:  ' 
+            '      - Cliente:  ' 
             || cliente_imprimir.c_informacion_personal.IP_Primer_Nombre || ' '
             || cliente_imprimir.c_informacion_personal.IP_Segundo_Nombre || ', '
             || cliente_imprimir.c_informacion_personal.IP_Primer_Apeliido || ' '
@@ -298,7 +298,7 @@ create or replace package body utilities_pkg as
             where ma.ma_id=vehiculo_imprimir.modelo_marca_ma_id;
         
         DBMS_OUTPUT.PUT_LINE(
-            '       - Vehiculo:  ' 
+            '          - Vehiculo:  ' 
             || marca_vehiculo || ', '
             || modelo_vehiculo || ', '
             || 'placa: ' || vehiculo_imprimir.v_placa || ', '

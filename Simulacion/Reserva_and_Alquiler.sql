@@ -19,6 +19,14 @@ create or replace package reserva_and_alquiler_pkg as
     procedure simulacion_reservas(pk_sede number, dia_actual date, fecha_fin_simulacion date);
     -- procedure para simular el modulo de alquileres
     procedure simulacion_alquileres(pk_sede number, dia_actual date, fecha_fin_simulacion date);
+    ----------------------------------------------------------------------------
+    -- procedure para finalizar un alquiler
+    procedure finalizar_alquiler(alquiler_a_finalizar alquiler%rowtype);
+    -- procedure para finalizar alquileres que terminan ese dia
+    procedure simulacion_finalizacion_alquileres;
+    ----------------------------------------------------------------------------
+    -- procedure para simular un error en el alquiler
+    procedure problema_durante_alquiler(pk_sede number, dia_actual date, fecha_fin_simulacion date);
 end reserva_and_alquiler_pkg;
 /
 
@@ -59,13 +67,16 @@ create or replace package body reserva_and_alquiler_pkg as
     is    
         vehiculo_disponible boolean; -- variable a retornar
         -- variables para el cursor
-        -- se seleccionan todos los carros menos el ya seleccionado al aza, que son de la misma marca y modelo
+        -- se seleccionan todos los carros menos el ya seleccionado al azar, que son de la misma marca y modelo
         cursor vehiculos is select * 
             from vehiculo v 
             where v.v_placa != vehiculo_seleccionado.v_placa and
                   v.modelo_m_id=vehiculo_seleccionado.modelo_m_id and
                   v.modelo_marca_ma_id=vehiculo_seleccionado.modelo_marca_ma_id and
-                  v.sede_s_id=sede_pk; 
+                  v.sede_s_id=sede_pk and
+                  v.status_vehiculo_sv_id = (
+                    select sv_id from status_vehiculo where sv_nombre = 'Disponible'
+                  ); 
         vehiculo_row vehiculo%rowtype := NULL;
         -- nuevo vehiculo a alquilar
         nuevo_vehiculo_a_alquilar vehiculo%rowtype := NULL;
@@ -125,14 +136,20 @@ create or replace package body reserva_and_alquiler_pkg as
         -- se seleccionan todos los vehiculos de las otras sedes
         cursor todos_vehiculos_de_las_otras_sedes is select * 
             from vehiculo v 
-            where v.sede_s_id!=sede_donde_no_hay_el_vehiculo; 
+            where v.sede_s_id!=sede_donde_no_hay_el_vehiculo and
+                  v.status_vehiculo_sv_id = (
+                    select sv_id from status_vehiculo where sv_nombre = 'Disponible'
+                  ); 
         -- se seleccionan todos los vehiculos de otras sedes que tengan las mismas caracteristicas
         cursor vehiculos_iguales_al_deseado_por_cliente is select * 
             from vehiculo v 
             where v.v_placa != vehiculo_seleccionado.v_placa and
                   v.modelo_m_id=vehiculo_seleccionado.modelo_m_id and
                   v.modelo_marca_ma_id=vehiculo_seleccionado.modelo_marca_ma_id and
-                  v.sede_s_id!=sede_donde_no_hay_el_vehiculo; 
+                  v.sede_s_id!=sede_donde_no_hay_el_vehiculo and
+                  v.status_vehiculo_sv_id = (
+                    select sv_id from status_vehiculo where sv_nombre = 'Disponible'
+                  ); 
         -- variable para recorrer el cursor
         vehiculo_row vehiculo%rowtype := NULL;
         -- nuevo vehiculo a alquilar
@@ -238,14 +255,20 @@ create or replace package body reserva_and_alquiler_pkg as
         -- se seleccionan todos los vehiculos de las otras sedes
         cursor todos_vehiculos_de_las_otras_sedes is select * 
             from vehiculo v 
-            where v.sede_s_id!=sede_donde_no_hay_el_vehiculo; 
+            where v.sede_s_id!=sede_donde_no_hay_el_vehiculo and
+                  v.status_vehiculo_sv_id = (
+                    select sv_id from status_vehiculo where sv_nombre = 'Disponible'
+                  ); 
         -- se seleccionan todos los vehiculos de otras sedes que tengan las mismas caracteristicas
         cursor vehiculos_iguales_al_deseado_por_cliente is select * 
             from vehiculo v 
             where v.v_placa != vehiculo_seleccionado.v_placa and
                   v.modelo_m_id=vehiculo_seleccionado.modelo_m_id and
                   v.modelo_marca_ma_id=vehiculo_seleccionado.modelo_marca_ma_id and
-                  v.sede_s_id!=sede_donde_no_hay_el_vehiculo; 
+                  v.sede_s_id!=sede_donde_no_hay_el_vehiculo and
+                  v.status_vehiculo_sv_id = (
+                    select sv_id from status_vehiculo where sv_nombre = 'Disponible'
+                  ); 
         -- variable para recorrer el cursor
         vehiculo_row vehiculo%rowtype := NULL;
         -- nuevo vehiculo a alquilar
@@ -561,7 +584,7 @@ create or replace package body reserva_and_alquiler_pkg as
         insert into detalle_alquiler values (
             default,
             vehiculo_seleccionado.v_precio,
-            0,
+            vehiculo_seleccionado.v_km,
             0,
             periodo_alquiler.get_cantidad_dias_del_periodo(),
             dia_atual,
@@ -900,6 +923,24 @@ create or replace package body reserva_and_alquiler_pkg as
         end loop;
         
     end simulacion_alquileres;
+    ----------------------------------------------------------------------------
+    -- procedure para finalizar un alquiler
+    procedure finalizar_alquiler(alquiler_a_finalizar alquiler%rowtype)
+    is
+    begin
+        -- verificamos si se genera un robo
+        if (utilities_pkg.get_random_integer(0, 101) <= 10) then
+            -- llamamos a la funcion que simula un robo
+        else
+            -- 
+        end if;
+    end finalizar_alquiler;
+    -- procedure para finalizar alquileres que terminan ese dia
+    procedure simulacion_finalizacion_alquileres
+    is
+    begin
+        return;
+    end;
     
 end reserva_and_alquiler_pkg;
 /
