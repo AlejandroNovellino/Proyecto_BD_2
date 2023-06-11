@@ -70,10 +70,8 @@ create or replace package body alianzas_pkg as
         i integer := 0;
         
     begin
-            DBMS_OUTPUT.PUT_LINE('FR!');
     select extract(day from hoy) into num_dia from dual;
         if (num_dia=28 or num_dia=10) then
-            DBMS_OUTPUT.PUT_LINE('FR!');
             --probabilidad de 1 en 5 de que se cree 
             --una alianza en los dias especificados
             if (utilities_pkg.get_random_integer(0,5) >= 1) then
