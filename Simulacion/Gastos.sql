@@ -45,10 +45,17 @@ create or replace package body gastos_pkg as
         insert into gasto values (default,utilities_pkg.get_random_integer(10,30),hoy,rawtohex('Servicio de luz'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         insert into gasto values (default,utilities_pkg.get_random_integer(40,60),hoy,rawtohex('Servicio de internet'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         insert into gasto values (default,utilities_pkg.get_random_integer(10,20),hoy,rawtohex('Servicio de telefonia'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
+        DBMS_OUTPUT.PUT_LINE('Se pagaron los servicios');
         select s_negocio_propio into propio from sede where s_id=sede_actual;
         if (propio = 0) then
             insert into gasto values (default,utilities_pkg.get_random_integer(60,65),hoy,rawtohex('Alquiler del local'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         end if;
+        DBMS_OUTPUT.PUT_LINE('Se ha pagado el alquiler del local');
+        --La compra de mobiliario es opcional
+        if (utilities_pkg.get_random_integer(0,2)>=1) then
+            insert into gasto values (default,utilities_pkg.get_random_integer(10,700),hoy,rawtohex('Compra de mobiliario'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
+        end if;
+        DBMS_OUTPUT.PUT_LINE('Se hizo compra de mobiliario');
     end if;
     end gasto_de_operacion;
 end gastos_pkg;

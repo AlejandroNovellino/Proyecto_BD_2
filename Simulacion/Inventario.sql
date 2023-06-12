@@ -83,12 +83,12 @@ create or replace package body inventario_pkg as
                                                 ,utilities_pkg.get_random_integer(1,ctd_colores)
                                                 ,1
                                                 ,num_sede);
-                     insert into gasto values (default
+                     /*insert into gasto values (default
                                                 ,utilities_pkg.get_random_integer(20,60)*1000
                                                 ,hoy
                                                 ,rawtohex('Compra de vehiculo')
                                                 ,(select tg_id from tipo_gasto where tg_nombre='Operacionales')
-                                                ,sede_actual);
+                                                ,sede_actual);*/
                     salir := 1;
                 end if;
             else

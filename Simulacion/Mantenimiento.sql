@@ -8,7 +8,7 @@ create or replace package mantenimiento_pkg as
     --M3AN6: Finalización de mantenimiento
     procedure finalizacion_de_mantenimiento (hoy date);
     --M3E1: Taller sin disponibilidad para realizar mantenimiento
-    procedure taller_sin_disponibilidad (mto_hoy mantenimiento_vehiculo%rowtype, hoy date);
+    procedure taller_sin_disponibilidad (mto_hoy mantenimiento_vehiculo%rowtype, hoy date, smda integer);
     --M3E2: Siguiente mantenimiento durante alquiler
     procedure siguiente_mantenimiento_durante_alquiler(fecha_inicio date, fecha_fin date, placa varchar2);
 
@@ -33,7 +33,7 @@ create or replace package body mantenimiento_pkg as
         while mtos_hoy%found loop
           select status_vehiculo_sv_id into status_de_vehiculo from vehiculo where v_placa=mto_hoy.vehiculo_v_placa;
           if (status_de_vehiculo=1) then
-            taller_sin_disponibilidad(mto_hoy,hoy);
+            taller_sin_disponibilidad(mto_hoy,hoy,0);
           end if;
           fetch mtos_hoy into mto_hoy;
         end loop;
@@ -60,14 +60,14 @@ create or replace package body mantenimiento_pkg as
              update mantenimiento_vehiculo m
                 set m.status_mantenimiento_s_id=(select s_id from status_mantenimiento where s_nombre='Finalizado')
               where m.man_id=mto_fin_hoy.man_id;
-            insert into gasto values (default,mto_fin_hoy.man_precio,hoy,rawtohex('Mantenimiento en el vehiculo de placa '||mto_fin_hoy.vehiculo_v_placa),(select tg_id from tipo_gasto where tg_nombre='Operacionales'),(select sede_s_id from vehiculo where v_placa=mto_fin_hoy.vehiculo_v_placa));
+            --insert into gasto values (default,mto_fin_hoy.man_precio,hoy,rawtohex('Mantenimiento en el vehiculo de placa '||mto_fin_hoy.vehiculo_v_placa),(select tg_id from tipo_gasto where tg_nombre='Operacionales'),(select sede_s_id from vehiculo where v_placa=mto_fin_hoy.vehiculo_v_placa));
           fetch mtos_fin_hoy into mto_fin_hoy;
         end loop;
         close mtos_fin_hoy;
       end if;
     end finalizacion_de_mantenimiento;
 
-    procedure taller_sin_disponibilidad (mto_hoy mantenimiento_vehiculo%rowtype, hoy date) is
+    procedure taller_sin_disponibilidad (mto_hoy mantenimiento_vehiculo%rowtype, hoy date, smda integer) is
 
         cursor talleres is select taller_t_id from mantenimiento_taller where mantenimiento_m_id=(SELECT mantenimiento_m_id from mantenimiento_taller where mt_id=mto_hoy.mantenimiento_taller_mt_id);
         taller_actual integer;
@@ -78,6 +78,13 @@ create or replace package body mantenimiento_pkg as
         fecha_busqueda date := hoy;
 
     begin
+        --smda (siguiente mantenimiento durante alquiler) es una bandera que, si se activa, 
+        --quiere decir que la busqueda debe empezarse dos d�as despu�s de la fecha dada. 
+        --Esto porque si no, inserta un nuevo mantenimiento en vez de actualizar 
+        --man_fecha_proximo_man en el ya existente.
+        if smda=1 then
+            fecha_busqueda := hoy+2;
+        end if;
         while (salir=0) loop
             open talleres;
             fetch talleres into taller_actual;
@@ -141,7 +148,7 @@ create or replace package body mantenimiento_pkg as
                     where man_id=ult_mto.man_id;
                DBMS_OUTPUT.PUT_LINE('Se reprogramo el siguiente mantenimiento del vehiculo.');     
             else
-                taller_sin_disponibilidad (ult_mto, fecha_fin+2);
+                taller_sin_disponibilidad (ult_mto, fecha_fin, 1);
             end if;
         end if;
         end siguiente_mantenimiento_durante_alquiler;
