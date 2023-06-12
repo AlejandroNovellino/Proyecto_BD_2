@@ -256,9 +256,7 @@ CREATE TABLE rating (
     r_fecha               DATE NOT NULL,
     r_escala_satisfaccion number NOT NULL,
     r_rating_promocion    number NOT NULL,
-    r_observacion         CLOB,
     alquiler_a_id         number NOT NULL,
-    alquiler_cliente_c_id number NOT NULL,
     -- claves primarias de la tabla
     PRIMARY KEY (r_id)
 );

@@ -20,13 +20,20 @@ create or replace package reserva_and_alquiler_pkg as
     -- procedure para simular el modulo de alquileres
     procedure simulacion_alquileres(pk_sede number, dia_actual date, fecha_fin_simulacion date);
     ----------------------------------------------------------------------------
+    -- procedure para simular un robo de vehiculo
+    procedure robo_vehiculo(alquiler_a_finalizar alquiler%rowtype);
+    -- procedure para actualizar el status del cliente
+    procedure actualizacion_status_cliente(alquiler_a_finalizar alquiler%rowtype);
     -- procedure para finalizar un alquiler
     procedure finalizar_alquiler(alquiler_a_finalizar alquiler%rowtype);
     -- procedure para finalizar alquileres que terminan ese dia
-    procedure simulacion_finalizacion_alquileres;
+    procedure simulacion_finalizacion_alquileres(dia_actual date);
+    ----------------------------------------------------------------------------
+    
     ----------------------------------------------------------------------------
     -- procedure para simular un error en el alquiler
-    procedure problema_durante_alquiler(pk_sede number, dia_actual date, fecha_fin_simulacion date);
+    --procedure problema_durante_alquiler(pk_sede number, dia_actual date, fecha_fin_simulacion date);
+    
 end reserva_and_alquiler_pkg;
 /
 
@@ -924,22 +931,174 @@ create or replace package body reserva_and_alquiler_pkg as
         
     end simulacion_alquileres;
     ----------------------------------------------------------------------------
+    -- procedure para simular un robo de vehiculo
+    procedure robo_vehiculo(alquiler_a_finalizar alquiler%rowtype)
+    is
+    begin 
+        DBMS_OUTPUT.PUT_LINE('          - Este alquiler finalizo con el robo del vehiculo');
+        -- creamos la denuncia
+        insert into denuncia values (
+            default,
+            alquiler_a_finalizar.a_periodo_duracion.P_Fecha_Fin,
+            'Realizaron el robo de este vehiculo y no fue entregado el dia que finalizaba su alquiler',
+            alquiler_a_finalizar.a_id
+        );
+        -- los triggers:
+            -- cambio_status_cliente_por_robo: actualiza el status del cliente
+            -- cambio_status_vehiculo_por_robo: actualiza el status del vehiculo
+    end robo_vehiculo;
+    ----------------------------------------------------------------------------
+    -- procedure para actualizar el status del cliente
+    procedure actualizacion_status_cliente(alquiler_a_finalizar alquiler%rowtype)
+    is
+        cantidad_alquileres_realizados_por_clientes number; -- cantidad de alquileres realizados por el cliente
+        cliente_a_actualizar cliente%rowtype;               -- cliente a actualizar
+        pk_tipo_cliente number;                             -- pk del tipo de cliente
+        pk_tipo_cliente_VIP number;                         -- pk del tipo de cliente VIP
+        pk_tipo_cliente_frecuente number;                   -- pk del tipo de cliente frecuente
+    begin
+        -- buscamos las PK de cada tipo de cliente
+        select tc_id into pk_tipo_cliente_VIP from tipo_cliente where tc_nombre = 'VIP';
+        select tc_id into pk_tipo_cliente_frecuente from tipo_cliente where tc_nombre = 'Frecuente';
+        
+        -- buscamos al cliente a actualizar
+        select * into cliente_a_actualizar from cliente where c_id = alquiler_a_finalizar.cliente_c_id;
+        
+        -- buscamos la cantida de alquileres que ha realizado el cliente de este alquiler
+        select count(alq.a_id) into cantidad_alquileres_realizados_por_clientes
+                from alquiler alq
+                where alq.cliente_c_id = alquiler_a_finalizar.cliente_c_id and
+                    alquiler_a_finalizar.a_periodo_duracion.P_Fecha_Fin >= alq.a_periodo_duracion.P_Fecha_Fin;
+                    
+        -- actualizamos el status del cliente segun la cantidad de alquileres
+        if (cantidad_alquileres_realizados_por_clientes >= 5 and cliente_a_actualizar.tipo_cliente_tc_id != pk_tipo_cliente_VIP) then
+            -- actualizamos e imprimimos
+            update cliente set tipo_cliente_tc_id = pk_tipo_cliente_VIP
+                    where c_id = alquiler_a_finalizar.cliente_c_id;
+            DBMS_OUTPUT.PUT_LINE('      - Se actualizara el tipo del cliente a VIP');      
+        elsif (3 <= cantidad_alquileres_realizados_por_clientes and cantidad_alquileres_realizados_por_clientes < 5 and cliente_a_actualizar.tipo_cliente_tc_id != pk_tipo_cliente_frecuente) then
+             -- actualizamos e imprimimos
+            update cliente set tipo_cliente_tc_id = pk_tipo_cliente_frecuente
+                    where c_id = alquiler_a_finalizar.cliente_c_id;
+            DBMS_OUTPUT.PUT_LINE('      - Se actualizara el tipo del cliente a Frecuente');          
+        end if;
+        
+    end actualizacion_status_cliente;
+    ----------------------------------------------------------------------------
     -- procedure para finalizar un alquiler
     procedure finalizar_alquiler(alquiler_a_finalizar alquiler%rowtype)
     is
+        detalle_alquiler_a_actualizar detalle_alquiler%rowtype; -- detalle alquiler a actualizar
+        km_recorridos_durante_alquiler number;                  -- cantidad de km recorridos durante el alquiler 
+        pk_rating number;                                       -- pk del rating insertado
+        numero_rating number;                                   -- escala que dio el liente al alquiler
+        
+        -- arreglo de observaciones
+        type observaciones_array IS VARRAY(9) OF CLOB;
+        -- definimos el arreglo de observaciones
+        posibles_observaciones observaciones_array := observaciones_array(
+            'Mal servicio al cliente',
+            'Demasiado tiempo de espera',
+            'Mala calidad de autos',
+            'Buen servicio, pero pueden mejorar la atencion al cliente',
+            'Las condiciones del auto fueron buenas',
+            'Fueron puntuales',
+            'Excelente servicio',
+            'Excelente calidad del auto',
+            'Fueron puntuales y preocupados'
+        );
+        limite_inferior number; -- limite inferior del arreglo de observaciones
+        limite_superior number; -- limite superior del arreglo de observaciones
     begin
         -- verificamos si se genera un robo
         if (utilities_pkg.get_random_integer(0, 101) <= 10) then
             -- llamamos a la funcion que simula un robo
+            robo_vehiculo(alquiler_a_finalizar);
+            
+            -- finaliza sin actualizar el detalle ya que se dio un robo
+            return;
         else
-            -- 
+            -- buscamos el detalle del alquiler
+            select * into detalle_alquiler_a_actualizar 
+                    from detalle_alquiler
+                    where da_id = alquiler_a_finalizar.detalle_alquiler_da_id;
+            -- generamos una cantidad de Km aleatoria que recorrio el carro
+            km_recorridos_durante_alquiler := utilities_pkg.get_random_integer(500, 5001);
+            -- actualizamos el resultado del alquiler en detalle alquiler
+            update detalle_alquiler 
+                    set da_km_final = detalle_alquiler_a_actualizar.da_km_inicial + km_recorridos_durante_alquiler;
+            -- eltrigger "actualizacion_vehiculo_al_finalizar_alquiler" actualiza de forma automatica el status del carro
+            
+            -- actualizamos el status del cliente
+            actualizacion_status_cliente(alquiler_a_finalizar);
+            
+            -- verificamos si el cliente desea dejar un rating o no
+            if (utilities_pkg.get_random_integer(0, 101) <= 95) then
+                -- si se deja un rating
+                
+                -- generamos el valor de la escala
+                numero_rating := utilities_pkg.get_random_integer(1, 6);
+                -- escogemos los limites supriores e inferiores del arreglo de observaciones
+                if (numero_rating = 5) then
+                    limite_inferior := 7;
+                    limite_superior := 9;
+                elsif (4 >= numero_rating and numero_rating >= 3) then
+                    limite_inferior := 4;
+                    limite_superior := 6;
+                else
+                    limite_inferior := 1;
+                    limite_superior := 3;
+                end if;
+                
+                -- insertamos el rating
+                insert into rating values(
+                    default,
+                    alquiler_a_finalizar.a_periodo_duracion.P_Fecha_Fin,
+                    numero_rating,
+                    numero_rating,
+                    alquiler_a_finalizar.a_id
+                ) returning r_id into pk_rating;
+                
+                DBMS_OUTPUT.PUT_LINE('          - Cliente dejo un rating de ' || numero_rating || 'con las siguientes observaciones:');
+                
+                -- creamos las observaciones
+                for observaciones_index in limite_inferior..limite_superior
+                loop
+                    insert into observacion values (
+                        default,
+                        posibles_observaciones(observaciones_index),
+                        pk_rating
+                    );
+                    DBMS_OUTPUT.PUT_LINE('              - Observacion: ' || posibles_observaciones(observaciones_index));
+                end loop;
+            else
+                -- si no se deja un rating
+                return; -- pareciera que no hacemos nada
+            end if;
         end if;
     end finalizar_alquiler;
+    ----------------------------------------------------------------------------
     -- procedure para finalizar alquileres que terminan ese dia
-    procedure simulacion_finalizacion_alquileres
+    procedure simulacion_finalizacion_alquileres(dia_actual date)
     is
+        -- variables para el cursor
+        cursor alquileres_a_finalizar is select * from alquiler;
+        alquiler_row alquiler%rowtype;
     begin
-        return;
+        -- iteramos sobre los alquileres a finalizar
+        -- abrimos el cursor e iteramos sobre el 
+        open alquileres_a_finalizar;
+        loop 
+            fetch alquileres_a_finalizar into alquiler_row;
+            exit when alquileres_a_finalizar%notfound;
+            -- verificamos si el alquiler finaliza este dia
+            if (alquiler_row.a_periodo_duracion.P_Fecha_Fin = dia_actual) then
+                -- finalizamos el alquiler
+                finalizar_alquiler(alquiler_row);
+            end if;
+        end loop;
+        -- cerramos el cursor
+        close alquileres_a_finalizar;
     end;
     
 end reserva_and_alquiler_pkg;

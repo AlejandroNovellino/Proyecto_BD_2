@@ -98,6 +98,9 @@ create or replace package body main_pkg as
             end loop;
             close cursor_sedes; -- cerramos el cursor
             
+            -- cerramos los alquileres de este dia para todas las sedes
+            reserva_and_alquiler_pkg.simulacion_finalizacion_alquileres(periodo_fechas(index_fecha));
+            
             -- obtenemos la siguiente fecha 
             index_fecha := periodo_fechas.NEXT(index_fecha);  -- siguiente elemento del arreglo
         END LOOP;
