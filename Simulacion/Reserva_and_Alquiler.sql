@@ -29,7 +29,8 @@ create or replace package reserva_and_alquiler_pkg as
     -- procedure para finalizar alquileres que terminan ese dia
     procedure simulacion_finalizacion_alquileres(dia_actual date);
     ----------------------------------------------------------------------------
-    
+    -- procedure para simular cancelar reservas
+    procedure cancelacion_reservas(dia_actual date);
     ----------------------------------------------------------------------------
     -- procedure para simular un error en el alquiler
     --procedure problema_durante_alquiler(pk_sede number, dia_actual date, fecha_fin_simulacion date);
@@ -523,7 +524,7 @@ create or replace package body reserva_and_alquiler_pkg as
                DBMS_OUTPUT.PUT_LINE('       Monto a pagar es 0 por lo tanto no hay nada a cancelar');
                return;
             else 
-                DBMS_OUTPUT.PUT_LINE('      Monto a pagar con descuento aplicado' || to_char(monto_a_pagar_total));
+                DBMS_OUTPUT.PUT_LINE('      Monto a pagar con descuento aplicado ' || to_char(monto_a_pagar_total));
             end if;
             
             -- verificamos cuantas pagos se haran, es decir cuantos metodos de pago se utilizaran
@@ -677,12 +678,14 @@ create or replace package body reserva_and_alquiler_pkg as
         -- indicamos que dio inicio el modulo
         DBMS_OUTPUT.PUT_LINE('');
         DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE RESERVAS --------------');
+        DBMS_OUTPUT.PUT_LINE('');
         -- numero de reservas a realizar
-        numero_reservas := utilities_pkg.get_random_integer(0,16);
+        numero_reservas := utilities_pkg.get_random_integer(0,11);
+        DBMS_OUTPUT.PUT_LINE('  Se realizaran ' || to_char(numero_reservas) || ' reservas');
         -- iteramos para cada reserva
-        for i in 0..numero_reservas loop
+        for i in 1..numero_reservas loop
             DBMS_OUTPUT.PUT_LINE('');
-            DBMS_OUTPUT.PUT_LINE('  ---- Reserva numero ' || to_char(i+1) || ' ----');
+            DBMS_OUTPUT.PUT_LINE('  ---- Reserva numero ' || to_char(i) || ' ----');
             DBMS_OUTPUT.PUT_LINE('');
             
             -- verificamos si la reserva la hara una persona o un cliente basado en la probabilidad establecida
@@ -817,12 +820,14 @@ create or replace package body reserva_and_alquiler_pkg as
         -- indicamos que dio inicio el modulo
         DBMS_OUTPUT.PUT_LINE('');
         DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE ALQUILERES --------------');
+        DBMS_OUTPUT.PUT_LINE('');
         -- numero de alquileres a realizar
-        numero_alquileres := utilities_pkg.get_random_integer(0,16);
+        numero_alquileres := utilities_pkg.get_random_integer(0,11);
+        DBMS_OUTPUT.PUT_LINE('  Se realizaran ' || to_char(numero_alquileres) || ' alquileres');
         -- iteramos para cada reserva
-        for i in 0..numero_alquileres loop
+        for i in 1..numero_alquileres loop
             DBMS_OUTPUT.PUT_LINE('');
-            DBMS_OUTPUT.PUT_LINE('  ---- Alquiler numero ' || to_char(i+1) || ' ----');
+            DBMS_OUTPUT.PUT_LINE('  ---- Alquiler numero ' || to_char(i) || ' ----');
             DBMS_OUTPUT.PUT_LINE('');
             
             -- verificamos si el alquiler la hara una persona o un cliente basado en la probabilidad establecida
@@ -935,7 +940,10 @@ create or replace package body reserva_and_alquiler_pkg as
     procedure robo_vehiculo(alquiler_a_finalizar alquiler%rowtype)
     is
     begin 
-        DBMS_OUTPUT.PUT_LINE('          - Este alquiler finalizo con el robo del vehiculo');
+        DBMS_OUTPUT.PUT_LINE('          - El alquiler con el periodo ' || 
+                TO_CHAR(alquiler_a_finalizar.a_periodo_duracion.P_Fecha_Inicio, 'dd/mm/yyyy') || ' ' || 
+                TO_CHAR(alquiler_a_finalizar.a_periodo_duracion.P_Fecha_Fin, 'dd/mm/yyyy'));
+        DBMS_OUTPUT.PUT_LINE('              - Finalizo con el robo del vehiculo');
         -- creamos la denuncia
         insert into denuncia values (
             default,
@@ -975,12 +983,14 @@ create or replace package body reserva_and_alquiler_pkg as
             -- actualizamos e imprimimos
             update cliente set tipo_cliente_tc_id = pk_tipo_cliente_VIP
                     where c_id = alquiler_a_finalizar.cliente_c_id;
-            DBMS_OUTPUT.PUT_LINE('      - Se actualizara el tipo del cliente a VIP');      
+            DBMS_OUTPUT.PUT_LINE('      - Se actualizara el tipo del cliente a VIP del cliente:');
+            utilities_pkg.print_cliente(cliente_a_actualizar);
         elsif (3 <= cantidad_alquileres_realizados_por_clientes and cantidad_alquileres_realizados_por_clientes < 5 and cliente_a_actualizar.tipo_cliente_tc_id != pk_tipo_cliente_frecuente) then
              -- actualizamos e imprimimos
             update cliente set tipo_cliente_tc_id = pk_tipo_cliente_frecuente
                     where c_id = alquiler_a_finalizar.cliente_c_id;
-            DBMS_OUTPUT.PUT_LINE('      - Se actualizara el tipo del cliente a Frecuente');          
+            DBMS_OUTPUT.PUT_LINE('      - Se actualizara el tipo del cliente a Frecuente del cliente:'); 
+            utilities_pkg.print_cliente(cliente_a_actualizar);
         end if;
         
     end actualizacion_status_cliente;
@@ -1026,8 +1036,14 @@ create or replace package body reserva_and_alquiler_pkg as
             km_recorridos_durante_alquiler := utilities_pkg.get_random_integer(500, 5001);
             -- actualizamos el resultado del alquiler en detalle alquiler
             update detalle_alquiler 
-                    set da_km_final = detalle_alquiler_a_actualizar.da_km_inicial + km_recorridos_durante_alquiler;
+                    set da_km_final = detalle_alquiler_a_actualizar.da_km_inicial + km_recorridos_durante_alquiler
+                    where da_id = alquiler_a_finalizar.detalle_alquiler_da_id;
             -- eltrigger "actualizacion_vehiculo_al_finalizar_alquiler" actualiza de forma automatica el status del carro
+            
+            DBMS_OUTPUT.PUT_LINE('          - Finaliza el alquiler con el periodo ' || 
+                TO_CHAR(alquiler_a_finalizar.a_periodo_duracion.P_Fecha_Inicio, 'dd/mm/yyyy') || ' ' || 
+                TO_CHAR(alquiler_a_finalizar.a_periodo_duracion.P_Fecha_Fin, 'dd/mm/yyyy') || 
+                ' donde se recorrieron ' || to_char(km_recorridos_durante_alquiler) || ' kms');
             
             -- actualizamos el status del cliente
             actualizacion_status_cliente(alquiler_a_finalizar);
@@ -1081,10 +1097,31 @@ create or replace package body reserva_and_alquiler_pkg as
     -- procedure para finalizar alquileres que terminan ese dia
     procedure simulacion_finalizacion_alquileres(dia_actual date)
     is
+        cantidad_alquileres_que_finalizan number := 0; -- cantidad de alquileres que finalizan este dia
         -- variables para el cursor
         cursor alquileres_a_finalizar is select * from alquiler;
         alquiler_row alquiler%rowtype;
     begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE FINALIZACION DE ALQUILERES --------------');
+        DBMS_OUTPUT.PUT_LINE('');
+        -- contamos los alquileres que finalizan hoy
+        -- iteramos sobre los alquileres a finalizar
+        -- abrimos el cursor e iteramos sobre el 
+        open alquileres_a_finalizar;
+        loop 
+            fetch alquileres_a_finalizar into alquiler_row;
+            exit when alquileres_a_finalizar%notfound;
+            -- verificamos si el alquiler finaliza este dia
+            if (alquiler_row.a_periodo_duracion.P_Fecha_Fin = dia_actual) then
+                -- finalizamos el alquiler
+                cantidad_alquileres_que_finalizan := cantidad_alquileres_que_finalizan + 1;
+            end if;
+        end loop;
+        close alquileres_a_finalizar;
+        
+        DBMS_OUTPUT.PUT_LINE('      - Este dia finalizan ' || cantidad_alquileres_que_finalizan || ' alquileres'); 
+        
         -- iteramos sobre los alquileres a finalizar
         -- abrimos el cursor e iteramos sobre el 
         open alquileres_a_finalizar;
@@ -1100,6 +1137,67 @@ create or replace package body reserva_and_alquiler_pkg as
         -- cerramos el cursor
         close alquileres_a_finalizar;
     end;
+    ----------------------------------------------------------------------------
+    -- procedure para simular cancelar reservas
+    procedure cancelacion_reservas(dia_actual date)
+    is 
+        -- variables para el cursor
+        cursor reservas_a_cancelar is select * from reserva;
+        reserva_row reserva%rowtype;
+        
+        cantidad_reservas_eliminar number := 0;         -- cantidad de reservas a eliminar
+        contador_reservas_eliminadas number := 0;       -- contador de cantidad de reservas eliminadas
+        alquiler_de_la_reserva alquiler%rowtype;        -- aquiler de la reserva sobre la que se esta verificando
+    begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE CANCELACION DE RESERVAS --------------');
+        DBMS_OUTPUT.PUT_LINE('');
+        
+        -- verificamos si se cancelaran reservas
+        if (utilities_pkg.get_random_integer(0, 101) <= 15) then
+            DBMS_OUTPUT.PUT_LINE('      - Si se cancelaran reservas'); 
+            
+            -- generamos la cantidad de reservas a eliminar
+            cantidad_reservas_eliminar := utilities_pkg.get_random_integer(1, 5);
+            
+            DBMS_OUTPUT.PUT_LINE('      - Se intentaran cancelar ' ||  to_char(cantidad_reservas_eliminar) || ' reservas'); 
+            
+            -- se eliminan las reservas y con ellas toda informacion
+            -- iteramos sobre las reservas a cancelar
+            -- abrimos el cursor e iteramos sobre el 
+            open reservas_a_cancelar;
+            loop 
+                fetch reservas_a_cancelar into reserva_row;
+                exit when reservas_a_cancelar%notfound;
+                -- buscamos el alquiler de esta reserva
+                select * into alquiler_de_la_reserva
+                        from alquiler
+                        where reserva_re_id = reserva_row.re_id;
+                -- verificamos si el alquiler ya ha finalizado o no, para verificar si puede ser cancelado o no
+                if ((dia_actual < alquiler_de_la_reserva.a_periodo_duracion.P_Fecha_Inicio) and (dia_actual < alquiler_de_la_reserva.a_periodo_duracion.P_Fecha_Fin)) then
+                    -- no ha emppezado el alquiler por lo tanto puede ser cancelado
+                    DBMS_OUTPUT.PUT_LINE('      - Se elimina la reserva realizada el dia ' || 
+                                        TO_CHAR(reserva_row.re_fecha_realizacion, 'dd/mm/yyyy') ||
+                                        ' para el periodo ' ||
+                                        TO_CHAR(alquiler_de_la_reserva.a_periodo_duracion.P_Fecha_Inicio, 'dd/mm/yyyy') || '---' ||
+                                        TO_CHAR( alquiler_de_la_reserva.a_periodo_duracion.P_Fecha_Fin, 'dd/mm/yyyy')
+                    ); 
+                    -- eliminamos la reserva y con ello todos los datos referentes a ella gracias al on cascade y al trigger
+                    delete from reserva where re_id = reserva_row.re_id;
+                    -- actualizamos el contador
+                    contador_reservas_eliminadas := contador_reservas_eliminadas + 1;
+                end if;
+                
+                -- verificamos si se llego a la cantidad de reservas eliminadas
+                if (contador_reservas_eliminadas = cantidad_reservas_eliminar) then
+                    DBMS_OUTPUT.PUT_LINE('      - Elimino la cantidad de reservas totales ');
+                    exit;
+                end if;
+            end loop;
+        else
+            DBMS_OUTPUT.PUT_LINE('      - No se cancelaran reservas'); 
+        end if;
+    end cancelacion_reservas;
     
 end reserva_and_alquiler_pkg;
 /

@@ -48,7 +48,7 @@ create or replace package body main_pkg as
         cursor cursor_sedes is select * from sede;        -- cursor para las sedes
         sede_actual sede%rowtype;                         -- variable para poder utilizar el cursor
     begin
-        DBMS_Output.PUT_LINE('------------------------- Inicio de la simulacion -------------------------');
+        DBMS_Output.PUT_LINE('--------------------------- Inicio de la simulacion ---------------------------');
         DBMS_Output.PUT_LINE('');
         
         -- guardamos las fechas de la simulacion
@@ -70,12 +70,14 @@ create or replace package body main_pkg as
                 EXIT WHEN cursor_sedes%notfound; 
                  
                 -- DESARROLLO POR CADA SEDE-------------------------------------
+                DBMS_Output.PUT_LINE('-------------------------- Actividades para la sede ' || to_char(sede_actual.s_id) || ' --------------------------');
                 
                 -- generamos los datos aleatorios para personas y clientes por cada dia
                 generador_data_aleatoria_pkg.generador_personas(25);
                 generador_data_aleatoria_pkg.generador_clientes(15);
                 
                 -- PRESENTAMOS QUE DIA SE ESTA TRABAJANDO
+                DBMS_Output.PUT_LINE('');
                 DBMS_Output.PUT_LINE('---- DIA ' || TO_CHAR(periodo_fechas(index_fecha), 'dd/mm/yyyy') || ' de la simulacion');
                 
                 -- MODULO 1 ----------------------------------------------------
@@ -98,8 +100,11 @@ create or replace package body main_pkg as
             end loop;
             close cursor_sedes; -- cerramos el cursor
             
-            -- cerramos los alquileres de este dia para todas las sedes
+            -- FINALIZACION DE ALQUILERES
             reserva_and_alquiler_pkg.simulacion_finalizacion_alquileres(periodo_fechas(index_fecha));
+            
+            -- CANCELACION SE RESERVAS
+            reserva_and_alquiler_pkg.cancelacion_reservas(periodo_fechas(index_fecha));
             
             -- obtenemos la siguiente fecha 
             index_fecha := periodo_fechas.NEXT(index_fecha);  -- siguiente elemento del arreglo

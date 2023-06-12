@@ -1,6 +1,6 @@
 create or replace package gestion_clientes_pkg as
     -- procedure para registrar una persona en el sistema
-    procedure registro_cliente(persona_a_registrar persona%rowtype, cliente_registrado OUT cliente%rowtype);
+    procedure registro_cliente(persona_a_registrar persona%rowtype, cliente_registrado OUT cliente%rowtype, se_debe_imprimir boolean default true);
     
     -- ya el escenario 1 del paquete fue atendido por un trigger 
 
@@ -10,14 +10,16 @@ end gestion_clientes_pkg;
 create or replace package body gestion_clientes_pkg as
     ----------------------------------------------------------------------------
     -- procedure para registrar una persona en el sistema
-    procedure registro_cliente(persona_a_registrar persona%rowtype, cliente_registrado OUT cliente%rowtype)
+    procedure registro_cliente(persona_a_registrar persona%rowtype, cliente_registrado OUT cliente%rowtype, se_debe_imprimir boolean default true)
     is
         id_cliente_insertado number;        -- cedula del cliente recien insertado
         fecha_de_registro date := null;     -- fecha de registro 
     begin
-        -- se imprimen los datos de la persona a registrar
-        DBMS_OUTPUT.PUT_LINE('  - Se registrara a:');
-        utilities_pkg.print_persona(persona_a_registrar);
+        if (se_debe_imprimir) then
+            -- se imprimen los datos de la persona a registrar
+            DBMS_OUTPUT.PUT_LINE('  - Se registrara a:');
+            utilities_pkg.print_persona(persona_a_registrar);
+        end if;
         
         -- buscamos la fecha de hoy
         select SYSDATE into fecha_de_registro from dual;
@@ -49,9 +51,11 @@ create or replace package body gestion_clientes_pkg as
         -- borramos de la tabla persona a la persona que cabamos de registrar como cliente
         delete from persona p where p.ip.IP_cedula = cliente_registrado.c_informacion_personal.IP_cedula;
         
-        -- indicamos que la persona fue registrada satisfactoriamente en el sistema
-        DBMS_OUTPUT.PUT_LINE('          La persona no estaba registradad como cliente');
-        DBMS_OUTPUT.PUT_LINE('          Se ha registrado a la persona en el sisteam satisfactoriamente');
+        if (se_debe_imprimir) then
+            -- indicamos que la persona fue registrada satisfactoriamente en el sistema
+            DBMS_OUTPUT.PUT_LINE('          La persona no estaba registradad como cliente');
+            DBMS_OUTPUT.PUT_LINE('          Se ha registrado a la persona en el sisteam satisfactoriamente');
+        end if;
         
     end registro_cliente;
 

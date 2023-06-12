@@ -374,7 +374,7 @@ ALTER TABLE alquiler
 /
 ALTER TABLE alquiler
     ADD CONSTRAINT alquiler_reserva_fk FOREIGN KEY ( reserva_re_id )
-        REFERENCES reserva ( re_id );
+        REFERENCES reserva ( re_id ) ON DELETE CASCADE;
 /
 ALTER TABLE cliente
     ADD CONSTRAINT cliente_lugar_fk FOREIGN KEY ( lugar_l_id )
@@ -406,7 +406,7 @@ ALTER TABLE detalle_alquiler
 /
 ALTER TABLE detalle_pago
     ADD CONSTRAINT detalle_pago_alquiler_fk FOREIGN KEY ( alquiler_a_id )
-        REFERENCES alquiler ( a_id );
+        REFERENCES alquiler ( a_id ) ON DELETE CASCADE;
 /
 ALTER TABLE detalle_pago
     ADD CONSTRAINT detalle_pago_forma_pago_fk FOREIGN KEY ( forma_pago_fp_id )
@@ -422,7 +422,7 @@ ALTER TABLE empleado
 /
 ALTER TABLE entrega
     ADD CONSTRAINT entrega_reserva_fk FOREIGN KEY ( reserva_re_id )
-        REFERENCES reserva ( re_id );
+        REFERENCES reserva ( re_id ) ON DELETE CASCADE;
 /
 ALTER TABLE gasto
     ADD CONSTRAINT gasto_sede_fk FOREIGN KEY ( sede_s_id )

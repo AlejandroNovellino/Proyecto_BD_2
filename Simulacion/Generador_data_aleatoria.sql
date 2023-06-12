@@ -229,7 +229,7 @@ create or replace package body generador_data_aleatoria_pkg as
             'No deseado'
         );
     begin
-        DBMS_OUTPUT.PUT_LINE('  - Persona aleatoria sera generada');
+        --DBMS_OUTPUT.PUT_LINE('  - Persona aleatoria sera generada');
         
         -- generamos la data para la persona -----------------------------------
         -- generamos el sexo
@@ -317,7 +317,7 @@ create or replace package body generador_data_aleatoria_pkg as
         DBMS_LOB.fileclose (documento);
         COMMIT;
         
-        DBMS_OUTPUT.PUT_LINE('  Persona aleatoria insertada');
+        --DBMS_OUTPUT.PUT_LINE('  Persona aleatoria insertada');
     EXCEPTION
        WHEN OTHERS
        THEN
@@ -337,7 +337,7 @@ create or replace package body generador_data_aleatoria_pkg as
         -- selecciamos una persona de forma aleatorio y pasa a ser cliente
         persona_aleatoria := utilities_pkg.get_persona_random();
         -- se inserta en la tabla cliente
-        gestion_clientes_pkg.registro_cliente(persona_aleatoria, cliente_registrado);
+        gestion_clientes_pkg.registro_cliente(persona_aleatoria, cliente_registrado, false);
         
     end generar_cliente;
     ----------------------------------------------------------------------------
