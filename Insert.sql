@@ -214,6 +214,17 @@ insert into mantenimiento values (default,'Motor',(select tm_id from tipo_manten
 insert into mantenimiento values (default,'Reparacion de transmision',(select tm_id from tipo_mantenimiento where tm_nombre='Correctivo'));
 insert into mantenimiento values (default,'Suspension',(select tm_id from tipo_mantenimiento where tm_nombre='Correctivo'));
 
+--- insert lugar---
+INSERT INTO LUGAR VALUES (DEFAULT,'Venezuela','Pais',NULL);
+INSERT INTO LUGAR VALUES (DEFAULT,'Distrito Capital','Estado',(select l_id from LUGAR where l_nombre='Venezuela'));
+INSERT INTO LUGAR VALUES (DEFAULT,'Libertador','Municipio',(select l_id from LUGAR where l_nombre='Distrito Capital'));
+INSERT INTO LUGAR VALUES (DEFAULT,'Merida','Estado',(select l_id from LUGAR where l_nombre='Venezuela'));
+INSERT INTO LUGAR VALUES (DEFAULT,'LibertadorL','Municipio',(select l_id from LUGAR where l_nombre='Merida'));
+INSERT INTO LUGAR VALUES (DEFAULT,'Miranda','Estado',(select l_id from LUGAR where l_nombre='Venezuela'));
+INSERT INTO LUGAR VALUES (DEFAULT,'Chacao','Municipio',(select l_id from LUGAR where l_nombre='Miranda'));
+INSERT INTO LUGAR VALUES (DEFAULT,'Baruta','Municipio',(select l_id from LUGAR where l_nombre='Miranda'));
+INSERT INTO LUGAR VALUES (DEFAULT,'Sucre','Municipio',(select l_id from LUGAR where l_nombre='Miranda'));
+
 --insertar talleres
 insert into taller values (default, 'Mis 3 Hermanos', '0212-2663729', ubicacion_geografica(ubicacion_geografica.verificar_latitud('5.293874'),ubicacion_geografica.verificar_longitud('-40.213641'),null), 10, (select l_id from LUGAR where l_nombre='Libertador'));
 insert into taller values (default, 'Mis 4 Hermanos', '0212-2673729', ubicacion_geografica(ubicacion_geografica.verificar_latitud('5.193874'),ubicacion_geografica.verificar_longitud('-40.113641'),null), 5, (select l_id from LUGAR where l_nombre='Libertador'));
@@ -227,6 +238,22 @@ insert into mantenimiento_taller values (default, (select m_id from mantenimient
 insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Mis 2 primos segundos por parte de papa'));
 insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Thunder Cars'));
 insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0), (select t_id from taller where t_nombre='Maquina'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de bateria')>0), (select t_id from taller where t_nombre='Mis 3 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de bateria')>0), (select t_id from taller where t_nombre='Mis 4 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de bateria')>0), (select t_id from taller where t_nombre='Mis 2 primos segundos por parte de papa'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de bateria')>0), (select t_id from taller where t_nombre='Thunder Cars'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de bateria')>0), (select t_id from taller where t_nombre='Maquina'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de fluidos')>0), (select t_id from taller where t_nombre='Mis 3 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de fluidos')>0), (select t_id from taller where t_nombre='Mis 4 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de fluidos')>0), (select t_id from taller where t_nombre='Mis 2 primos segundos por parte de papa'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de fluidos')>0), (select t_id from taller where t_nombre='Thunder Cars'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Revision de fluidos')>0), (select t_id from taller where t_nombre='Maquina'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Alineacion')>0), (select t_id from taller where t_nombre='Mis 3 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Alineacion')>0), (select t_id from taller where t_nombre='Mis 2 primos segundos por parte de papa'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Alineacion')>0), (select t_id from taller where t_nombre='Thunder Cars'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Balanceo')>0), (select t_id from taller where t_nombre='Mis 3 Hermanos'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Balanceo')>0), (select t_id from taller where t_nombre='Mis 2 primos segundos por parte de papa'));
+insert into mantenimiento_taller values (default, (select m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Balanceo')>0), (select t_id from taller where t_nombre='Thunder Cars'));
 
 --- insert formas de pago---
 INSERT INTO forma_pago  VALUES (DEFAULT,'Efectivo');
@@ -235,14 +262,12 @@ INSERT INTO forma_pago  VALUES (DEFAULT,'Pago movil');
 INSERT INTO forma_pago  VALUES (DEFAULT,'Tarjeta Internacional');
 INSERT INTO forma_pago  VALUES (DEFAULT,'Criptomoneda');
 
---- insert lugar---
-INSERT INTO LUGAR VALUES (DEFAULT,'Venezuela','Pais',NULL);
-INSERT INTO LUGAR VALUES (DEFAULT,'Distrito Capital','Estado',(select l_id from LUGAR where l_nombre='Venezuela'));
-INSERT INTO LUGAR VALUES (DEFAULT,'Libertador','Municipio',(select l_id from LUGAR where l_nombre='Distrito Capital'));
 ----insert consesionario----
 INSERT INTO CONSESIONARIO VALUES (DEFAULT, 'C-1', '0212-5599283','Av. Teheran, Montalban',(select l_id from LUGAR where l_nombre='Libertador'));
  ----insert sede---
 INSERT INTO SEDE VALUES (DEFAULT,'Av. Teheran, Montalban','0212-5599283',1,20,1,(select c_id from CONSESIONARIO where c_nombre='C-1'),(select l_id from LUGAR where l_nombre='Libertador'));
+INSERT INTO SEDE VALUES (DEFAULT,'Av. Francisco Lazo Marti, Santa Monica','0212-5328403',2,13,0,(select c_id from CONSESIONARIO where c_nombre='C-1'),(select l_id from LUGAR where l_nombre='Libertador'));
+INSERT INTO SEDE VALUES (DEFAULT,'Av. Urdaneta con Viaducto Sucre','0274-2883710',3,6,1,(select c_id from CONSESIONARIO where c_nombre='C-1'),(select l_id from LUGAR where l_nombre='LibertadorL'));
 
 --insert aliado
 
@@ -259,17 +284,17 @@ execute PK_Alianza.I_Aliado('gruero.PNG' ,'Tu gruero');
 
 
 ---insert vehiculo
-insert into vehiculo values ('AB169DA',2009,EMPTY_BLOB(),12662,22000
+insert into vehiculo values ('AB169DA',2009,EMPTY_BLOB(),12662,45
                             ,(select m_id from modelo where m_nombre='Camry')
                             ,(select marca_ma_id from modelo where m_nombre='Camry')
                             ,(select sv_id from status_vehiculo where sv_nombre='Disponible')
                             ,(select c_id from color where c_nombre='Plateado')
                             ,(select tv_id from tipo_vehiculo where tv_nombre='Carro')
                             ,1);
-insert into vehiculo values ('AK183NS',2013,EMPTY_BLOB(),10773,28000,(select m_id from modelo where m_nombre='Sentra'),(select marca_ma_id from modelo where m_nombre='Sentra'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Plateado'),(select tv_id from tipo_vehiculo where tv_nombre='Carro'),1);
-insert into vehiculo values ('AD558SD',2012,EMPTY_BLOB(),16251,27000,(select m_id from modelo where m_nombre='Sportage'),(select marca_ma_id from modelo where m_nombre='Sportage'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Rojo'),(select tv_id from tipo_vehiculo where tv_nombre='Carro'),1);
-insert into vehiculo values ('AW834JM',2016,EMPTY_BLOB(),8836,30000,(select m_id from modelo where m_nombre='Elantra'),(select marca_ma_id from modelo where m_nombre='Elantra'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Azul'),(select tv_id from tipo_vehiculo where tv_nombre='Carro'),1);
-insert into vehiculo values ('AU923NL',2014,EMPTY_BLOB(),9682,48000,(select m_id from modelo where m_nombre='Duster'),(select marca_ma_id from modelo where m_nombre='Duster'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Dorado'),(select tv_id from tipo_vehiculo where tv_nombre='Carro'),1);
+insert into vehiculo values ('AK183NS',2013,EMPTY_BLOB(),10773,54,(select m_id from modelo where m_nombre='Sentra'),(select marca_ma_id from modelo where m_nombre='Sentra'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Plateado'),(select tv_id from tipo_vehiculo where tv_nombre='Carro'),1);
+insert into vehiculo values ('AD558SD',2012,EMPTY_BLOB(),16251,54,(select m_id from modelo where m_nombre='Sportage'),(select marca_ma_id from modelo where m_nombre='Sportage'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Rojo'),(select tv_id from tipo_vehiculo where tv_nombre='Carro'),1);
+insert into vehiculo values ('AW834JM',2016,EMPTY_BLOB(),8836,60,(select m_id from modelo where m_nombre='Elantra'),(select marca_ma_id from modelo where m_nombre='Elantra'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Azul'),(select tv_id from tipo_vehiculo where tv_nombre='Carro'),1);
+insert into vehiculo values ('AU923NL',2014,EMPTY_BLOB(),9682,120,(select m_id from modelo where m_nombre='Duster'),(select marca_ma_id from modelo where m_nombre='Duster'),(select sv_id from status_vehiculo where sv_nombre='Disponible'),(select c_id from color where c_nombre='Dorado'),(select tv_id from tipo_vehiculo where tv_nombre='Camioneta'),1);
 
 --insert mantenimiento veh
 
