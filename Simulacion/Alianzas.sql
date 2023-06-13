@@ -20,11 +20,10 @@ create or replace package body alianzas_pkg as
         tipo varchar2(12);
         type  tipos_alianza_array IS VARRAY(3) OF VARCHAR2(12);
         tipos tipos_alianza_array := tipos_alianza_array(
-                                         'fallo'
-                                        ,'choque'
-                                        ,'fallo_choque');
+                                         'Fallo choque'
+                                        ,'Fallo dano');
     begin
-        tipo:=tipos(utilities_pkg.get_random_integer(1,4));
+        tipo:=tipos(utilities_pkg.get_random_integer(1,3));
         return tipo;
     end generar_tipo_alianza;
     
@@ -40,18 +39,18 @@ create or replace package body alianzas_pkg as
             if (utilities_pkg.get_random_integer(0,5) < 2) then
                 --probabilidad de que un dato haya sido ingresado incorrectamente
                 if (utilities_pkg.get_random_integer(0,2) < 1) then
-                    DBMS_OUTPUT.PUT_LINE('Ha ingresado un dato incorrecto');
+                    DBMS_OUTPUT.PUT_LINE('      - Ha ingresado un dato incorrecto');
                     registro_de_un_aliado;
                 else
-                    DBMS_OUTPUT.PUT_LINE('Debe rellenar todos los campos obligatorios');
+                    DBMS_OUTPUT.PUT_LINE('      - Debe rellenar todos los campos obligatorios');
                     registro_de_un_aliado;
                 end if;
             else
                 pk_alianza.i_aliado('descarga.png',generar_nombre_aliado);
-                DBMS_OUTPUT.PUT_LINE('El aliado se ha registrado exitosamente'); 
+                DBMS_OUTPUT.PUT_LINE('      - El aliado se ha registrado exitosamente'); 
             end if;
         else
-            DBMS_OUTPUT.PUT_LINE('El aliado ya existe');                            
+            DBMS_OUTPUT.PUT_LINE('      - El aliado ya existe');
             registro_de_un_aliado;
         end if;
 
@@ -75,15 +74,15 @@ create or replace package body alianzas_pkg as
             --probabilidad de 1 en 5 de que se cree 
             --una alianza en los dias especificados
             if (utilities_pkg.get_random_integer(0,5) >= 1) then
-                DBMS_OUTPUT.PUT_LINE('Se creara una alianza');
+                DBMS_OUTPUT.PUT_LINE('      - Se creara una alianza');
                 --probabilidad de 1 en 2 de que 
                 --el aliado ya esté registrado
                 if (utilities_pkg.get_random_integer(0,2) < 1) then
-                    DBMS_OUTPUT.PUT_LINE('El aliado es nuevo - sera registrado');
+                    DBMS_OUTPUT.PUT_LINE('      - El aliado es nuevo - sera registrado');
                     registro_de_un_aliado;
                     select ao_id into id_aliado from aliado where rownum=1 order by ao_id desc;
                 else
-                    DBMS_OUTPUT.PUT_LINE('El aliado esta registrado');
+                    DBMS_OUTPUT.PUT_LINE('      - El aliado esta registrado');
                     select count(*) into ctd_aliados from aliado;
                     open aliados;
                     fetch aliados into aliado_actual;
@@ -101,28 +100,26 @@ create or replace package body alianzas_pkg as
                     --se comprueba que se disponga de los fondos
                     if (utilities_pkg.get_random_integer(0,3) >= 1) then  
                         insert into alianza values (default
-                                                    --,periodo_duracion(hoy,hoy+utilities_pkg.get_random_integer(1,24)*30)
-                                                    ,hoy
+                                                    ,periodo_duracion(hoy,hoy+utilities_pkg.get_random_integer(1,24)*30)
                                                     ,rawtohex('Alianza')
                                                     ,generar_tipo_alianza
                                                     ,id_aliado
                                                     ,sede_actual);
-                        DBMS_OUTPUT.PUT_LINE('Se creo una alianza con '||nom_aliado);
+                        DBMS_OUTPUT.PUT_LINE('      - Se creo una alianza con '||nom_aliado);
                     else   
-                        DBMS_OUTPUT.PUT_LINE('No se dispone de los fondos para crear la alianza');
+                        DBMS_OUTPUT.PUT_LINE('      - No se dispone de los fondos para crear la alianza');
                     end if;
                 else
                     insert into alianza values (default
-                                                --,periodo_duracion(hoy,hoy+utilities_pkg.get_random_integer(1,24)*30)
-                                                ,hoy
+                                                ,periodo_duracion(hoy,hoy+utilities_pkg.get_random_integer(1,24)*30)
                                                 ,rawtohex('Alianza')
                                                 ,generar_tipo_alianza
                                                 ,id_aliado
                                                 ,sede_actual);
-                    DBMS_OUTPUT.PUT_LINE('Se creo una alianza con '||nom_aliado);
+                    DBMS_OUTPUT.PUT_LINE('      - Se creo una alianza con '||nom_aliado);
                 end if;
             else
-                DBMS_OUTPUT.PUT_LINE('No se creara una alianza hoy');
+                DBMS_OUTPUT.PUT_LINE('      - No se creara una alianza hoy');
             end if;
         end if;
     end creacion_de_alianza;

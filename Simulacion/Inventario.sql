@@ -104,13 +104,15 @@ create or replace package body inventario_pkg as
     procedure fin_de_vida_util (num_sede integer, placa varchar2) is
 
         vender_vehiculo integer;
-
+        km_vehiculo_a_vender number;
         marca integer;
-        v_a_vender varchar2;
+        v_a_vender varchar2(7);
+        
+        verificar_vehiculo_inhabilitado number;
 
     begin
-      update vehiculo set v_km = v_km + utilities_pkg.get_random_integer(10,2000) where v_placa = placa;
-      if v_km<=50000 then
+      update vehiculo set v_km = v_km + utilities_pkg.get_random_integer(10,2000) where v_placa = placa returning v_km into km_vehiculo_a_vender;
+      if km_vehiculo_a_vender <= 50000 then
         vender_vehiculo := utilities_pkg.get_random_integer(0,2);
         if (vender_vehiculo=1) then
             insert into ingreso values (default
@@ -118,18 +120,26 @@ create or replace package body inventario_pkg as
                                         ,(select sysdate from dual)
                                         ,rawtohex('Venta del vehiculo de placa'||placa)
                                         ,num_sede);
-            DBMS_OUTPUT.PUT_LINE('Se realizo la venta del vehiculo');
+            DBMS_OUTPUT.PUT_LINE('          - Se realizo la venta del vehiculo');
             update vehiculo 
                 set status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Vendido') 
                 where v_placa = placa;
         else
-            select marca_ma_id into marca from vehiculo where v_placa = placa;
-            if exists (select * from vehiculo 
-                                where marca_ma_id=marca 
-                                and status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Inhabilitado'))
-                                then
+            select modelo_marca_ma_id into marca from vehiculo where v_placa = placa;
+            
+            
+            select case when exists(
+                select * from vehiculo 
+                        where modelo_marca_ma_id = marca and
+                              status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Inhabilitado')
+            ) then 1
+              else 0
+            end into verificar_vehiculo_inhabilitado
+            from dual;
+            
+            if (verificar_vehiculo_inhabilitado = 1) then
                 select v_placa into v_a_vender from vehiculo 
-                    where marca_ma_id=marca 
+                    where modelo_marca_ma_id=marca 
                     and status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Inhabilitado')
                     and rownum = 1;
                 insert into ingreso values (default
@@ -137,7 +147,7 @@ create or replace package body inventario_pkg as
                                             ,(select sysdate from dual)
                                             ,rawtohex('Venta del vehiculo de placa'||v_a_vender)
                                             ,num_sede);
-                DBMS_OUTPUT.PUT_LINE('Se realizo la venta del vehiculo');
+                DBMS_OUTPUT.PUT_LINE('          - Se realizo la venta del vehiculo');
                 update vehiculo 
                     set status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Vendido') 
                     where v_placa = v_a_vender;

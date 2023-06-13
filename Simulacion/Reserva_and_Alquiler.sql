@@ -1011,7 +1011,7 @@ create or replace package body reserva_and_alquiler_pkg as
         km_recorridos_durante_alquiler number;                  -- cantidad de km recorridos durante el alquiler 
         pk_rating number;                                       -- pk del rating insertado
         numero_rating number;                                   -- escala que dio el liente al alquiler
-        
+        vehiculo_a_validar_para_ser_vendido vehiculo%rowtype;   -- vehiculo para verificar su km
         -- arreglo de observaciones
         type observaciones_array IS VARRAY(9) OF CLOB;
         -- definimos el arreglo de observaciones
@@ -1100,6 +1100,15 @@ create or replace package body reserva_and_alquiler_pkg as
                 -- si no se deja un rating
                 return; -- pareciera que no hacemos nada
             end if;
+            
+            -- verificamos si el auto debe ser vendido -------------------------
+            -- buscamos el auto del detalle de alquiler
+            select * into vehiculo_a_validar_para_ser_vendido from vehiculo where v_placa = detalle_alquiler_a_actualizar.vehiculo_v_placa;
+            -- verificamos si se vende
+            inventario_pkg.fin_de_vida_util (
+                vehiculo_a_validar_para_ser_vendido.sede_s_id, 
+                vehiculo_a_validar_para_ser_vendido.v_placa
+            );
         end if;
     end finalizar_alquiler;
     ----------------------------------------------------------------------------
@@ -1145,7 +1154,7 @@ create or replace package body reserva_and_alquiler_pkg as
         end loop;
         -- cerramos el cursor
         close alquileres_a_finalizar;
-    end;
+    end simulacion_finalizacion_alquileres;
     ----------------------------------------------------------------------------
     -- procedure para simular cancelar reservas
     procedure cancelacion_reservas(dia_actual date)

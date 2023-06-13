@@ -80,6 +80,13 @@ create or replace package body main_pkg as
                 DBMS_Output.PUT_LINE('');
                 DBMS_Output.PUT_LINE('---- DIA ' || TO_CHAR(periodo_fechas(index_fecha), 'dd/mm/yyyy') || ' de la simulacion');
                 
+                -- MODULO 5 ----------------------------------------------------
+                -- CREACION DE ALIANZAS
+                alianzas_pkg.creacion_de_alianza(
+                    periodo_fechas(index_fecha),
+                    sede_actual.s_id
+                );
+                
                 -- MODULO 1 ----------------------------------------------------
                 -- RESERVAS
                 reserva_and_alquiler_pkg.simulacion_reservas(
@@ -102,6 +109,12 @@ create or replace package body main_pkg as
                 );
                 
                 -- ACTIVIDADES DEL DIA 28 --------------------------------------
+                -- COMPRA DE VEHICULO
+                inventario_pkg.compra_de_vehiculo(
+                    periodo_fechas(index_fecha), 
+                    sede_actual.s_id
+                );
+                
                 -- SALIDA DE EMPLEADO
                 empleados_pkg.salida_de_empleado(
                     periodo_fechas(index_fecha), 
@@ -122,6 +135,8 @@ create or replace package body main_pkg as
                     periodo_fechas(index_fecha), 
                     sede_actual.s_id
                 );
+                
+                
             end loop;
             close cursor_sedes; -- cerramos el cursor
             
