@@ -115,7 +115,7 @@ create or replace package body inventario_pkg as
         if (vender_vehiculo=1) then
             insert into ingreso values (default
                                         ,utilities_pkg.get_random_integer(60,180)*10
-                                        ,select sysdate from dual
+                                        ,(select sysdate from dual)
                                         ,rawtohex('Venta del vehiculo de placa'||placa)
                                         ,num_sede);
             DBMS_OUTPUT.PUT_LINE('Se realizo la venta del vehiculo');
@@ -134,7 +134,7 @@ create or replace package body inventario_pkg as
                     and rownum = 1;
                 insert into ingreso values (default
                                             ,utilities_pkg.get_random_integer(60,180)*10
-                                            ,select sysdate from dual
+                                            ,(select sysdate from dual)
                                             ,rawtohex('Venta del vehiculo de placa'||v_a_vender)
                                             ,num_sede);
                 DBMS_OUTPUT.PUT_LINE('Se realizo la venta del vehiculo');

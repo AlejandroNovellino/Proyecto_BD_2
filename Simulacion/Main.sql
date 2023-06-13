@@ -95,8 +95,33 @@ create or replace package body main_pkg as
                     fecha_fin_simulacion
                 );
                 
+                -- ALQUILERES QUE ESTEN EN PROCESO (SIMULACION DE ERRORES)
+                reserva_and_alquiler_pkg.simulacion_problemas_durante_alquileres(
+                    sede_actual.s_id, 
+                    periodo_fechas(index_fecha)
+                );
                 
+                -- ACTIVIDADES DEL DIA 28 --------------------------------------
+                -- SALIDA DE EMPLEADO
+                empleados_pkg.salida_de_empleado(
+                    periodo_fechas(index_fecha), 
+                    sede_actual.s_id
+                );
                 
+                -- CONTRATACION DE EMPLEADO
+                empleados_pkg.contratacion(sede_actual.s_id);
+                
+                -- GASTOS DE NOMINAS
+                gastos_pkg.gasto_de_nomina(
+                    periodo_fechas(index_fecha), 
+                    sede_actual.s_id
+                );
+                
+                -- GASTOS DE OPERACION
+                gastos_pkg.gasto_de_operacion(
+                    periodo_fechas(index_fecha), 
+                    sede_actual.s_id
+                );
             end loop;
             close cursor_sedes; -- cerramos el cursor
             
@@ -106,6 +131,16 @@ create or replace package body main_pkg as
             -- CANCELACION SE RESERVAS
             reserva_and_alquiler_pkg.cancelacion_reservas(periodo_fechas(index_fecha));
             
+            -- MODULO 3 --------------------------------------------------------
+            -- REALIZACION MANTENIMIENTOS DEL DIA
+            mantenimiento_pkg.realizacion_de_mantenimiento(periodo_fechas(index_fecha));
+            
+            -- FINALIZACION MANTENIMIENTOS DEL DIA
+            mantenimiento_pkg.finalizacion_de_mantenimiento(periodo_fechas(index_fecha));
+            
+            
+            
+            ------------------------------------------------------------------------------------
             -- obtenemos la siguiente fecha 
             index_fecha := periodo_fechas.NEXT(index_fecha);  -- siguiente elemento del arreglo
         END LOOP;

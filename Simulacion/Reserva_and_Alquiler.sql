@@ -33,7 +33,9 @@ create or replace package reserva_and_alquiler_pkg as
     procedure cancelacion_reservas(dia_actual date);
     ----------------------------------------------------------------------------
     -- procedure para simular un error en el alquiler
-    --procedure problema_durante_alquiler(pk_sede number, dia_actual date, fecha_fin_simulacion date);
+    procedure problema_durante_alquiler(alquiler_a_fallar alquiler%rowtype, pk_sede number, dia_actual date);
+    -- procedure para simular errores en alquileres activos
+    procedure simulacion_problemas_durante_alquileres(pk_sede number, dia_actual date);
     
 end reserva_and_alquiler_pkg;
 /
@@ -618,6 +620,13 @@ create or replace package body reserva_and_alquiler_pkg as
         select * into ultimo_alquiler_realizado
             from alquiler a
             where a.a_id = alquiler_id;
+            
+        -- llamamos al modulo de mantenimiento siguiente durante alquiler
+        mantenimiento_pkg.siguiente_mantenimiento_durante_alquiler(
+            periodo_alquiler.P_Fecha_Inicio, 
+            periodo_alquiler.P_Fecha_Fin, 
+            vehiculo_seleccionado.v_placa
+        );
         
     end realizar_alquiler;
     ----------------------------------------------------------------------------
@@ -1180,7 +1189,7 @@ create or replace package body reserva_and_alquiler_pkg as
                                         TO_CHAR(reserva_row.re_fecha_realizacion, 'dd/mm/yyyy') ||
                                         ' para el periodo ' ||
                                         TO_CHAR(alquiler_de_la_reserva.a_periodo_duracion.P_Fecha_Inicio, 'dd/mm/yyyy') || '---' ||
-                                        TO_CHAR( alquiler_de_la_reserva.a_periodo_duracion.P_Fecha_Fin, 'dd/mm/yyyy')
+                                        TO_CHAR(alquiler_de_la_reserva.a_periodo_duracion.P_Fecha_Fin, 'dd/mm/yyyy')
                     ); 
                     -- eliminamos la reserva y con ello todos los datos referentes a ella gracias al on cascade y al trigger
                     delete from reserva where re_id = reserva_row.re_id;
@@ -1198,6 +1207,180 @@ create or replace package body reserva_and_alquiler_pkg as
             DBMS_OUTPUT.PUT_LINE('      - No se cancelaran reservas'); 
         end if;
     end cancelacion_reservas;
+    ----------------------------------------------------------------------------
+    -- procedure para simular un error en el alquiler
+    procedure problema_durante_alquiler(alquiler_a_fallar alquiler%rowtype, pk_sede number, dia_actual date)
+    is 
+        existe_alianza_para_tipo_fallo boolean := false;    -- variable para saber si existe una alianza para ese fallo
+        tipo_fallo_seleccionado clob;                       -- variable para tipo de fallo seleccionado
+        cliente_para_alquilar cliente%rowtype;              -- cliente que debe realizar el alquiler
+        periodo_alquiler periodo_duracion;                  -- periodo de duracion del alquiler
+        vehiculo_seleccionado vehiculo%rowtype;              -- estilo de vehiculo que se quiere alquilar
+        
+        -- variables para el cursor
+        cursor alianzas_activas_en_sede is 
+            select  al.aa_id,
+                    al.aa_periodo_duracion,
+                    al.aa_descripcion,
+                    al.aa_tipo,
+                    al.aliado_ao_id,
+                    al.sede_s_id
+            from alianza al where al.sede_s_id = pk_sede;
+        -- variable para recorrer el cursor
+        alianza_row alianza%rowtype;
+        
+        -- arreglo de posibles fallos
+        type tipos_fallos_array IS VARRAY(2) OF CLOB;
+        tipos_fallos tipos_fallos_array := tipos_fallos_array(
+            'Fallo choque',
+            'Fallo dano'
+        );
+    begin
+        -- verificamos si se da un fallo
+        if (utilities_pkg.get_random_integer(0, 101) <= 10) then
+            DBMS_OUTPUT.PUT_LINE('      - Se dara un error sobre el alquiler ' || 
+                                alquiler_a_fallar.a_id || 
+                                ' del periodo ' || 
+                                TO_CHAR(alquiler_a_fallar.a_periodo_duracion.P_Fecha_Inicio, 'dd/mm/yyyy') || '---' ||
+                                TO_CHAR(alquiler_a_fallar.a_periodo_duracion.P_Fecha_Fin, 'dd/mm/yyyy')
+            );
+            
+            -- seleccionamos un tipo de fallo
+            tipo_fallo_seleccionado := tipos_fallos(utilities_pkg.get_random_integer(1, 3));
+            
+            -- verificamos si existen promociones activas para el vehiculo del alquiler
+            -- recorremos el cursor
+            -- abrimos el cursor e iteramos sobre el 
+            open alianzas_activas_en_sede;
+            loop 
+                fetch alianzas_activas_en_sede into alianza_row;
+                exit when alianzas_activas_en_sede%notfound;
+                -- se llama al modulo de fallo en alquiler
+                if (
+                    alianza_row.aa_periodo_duracion.P_Fecha_Inicio <= alquiler_a_fallar.a_periodo_duracion.P_Fecha_Inicio and
+                    alianza_row.aa_tipo = tipo_fallo_seleccionado
+                ) then
+                    -- salimos del loop
+                    existe_alianza_para_tipo_fallo := true;
+                    exit;
+                end if;
+            end loop;
+            -- cerramos el cursor
+            close alianzas_activas_en_sede;
+            
+            -- verificamos si existe una alianza para este tipo de fallo
+            if (existe_alianza_para_tipo_fallo) then
+                DBMS_OUTPUT.PUT_LINE('      - Existe una alianza para este tipo de fallo, por lo tanto no se registra un gasto');
+            else
+                DBMS_OUTPUT.PUT_LINE('      - No existe una alianza para este tipo de fallo, por lo tanto se registra un gasto');
+                -- insertamos un gasto operacional de 2000
+                insert into gasto values (
+                    default,
+                    2000,
+                    dia_actual,
+                    'Se genero por ' || tipo_fallo_seleccionado,
+                    (select tg_id from tipo_gasto where tg_nombre = 'Operacionales'),
+                    pk_sede
+                );
+            end if;
+            
+            -- finalizamos el alquiler
+            finalizar_alquiler(alquiler_a_fallar);
+            DBMS_OUTPUT.PUT_LINE('      - Finalizamos el alquiler');
+            
+            -- buscamos el cliente
+            select * into cliente_para_alquilar from cliente where c_id = alquiler_a_fallar.cliente_c_id;
+            
+            -- creamos el periodo
+            periodo_alquiler := periodo_duracion(
+                dia_actual,
+                alquiler_a_fallar.a_periodo_duracion.P_Fecha_Fin
+            );
+            
+            -- traemos el auto seleccionado para tratar de alquilar uno parecido a traves del escenario 6
+            select  v.v_placa,
+                    v.v_anno,
+                    v.v_foto,
+                    v.v_km,
+                    v.v_precio,
+                    v.modelo_m_id,
+                    v.modelo_marca_ma_id,
+                    v.status_vehiculo_sv_id,
+                    v.color_c_id,
+                    v.tipo_vehiculo_tv_id,
+                    v.sede_s_id
+                    into vehiculo_seleccionado 
+                    from vehiculo v, detalle_alquiler da
+                    where alquiler_a_fallar.detalle_alquiler_da_id = da.da_id and
+                          da.vehiculo_v_placa = v.v_placa;
+            
+            -- realizamos el mantenimiento del vehiculo
+            insert into mantenimiento_vehiculo values (default
+                                                        ,periodo_duracion(dia_actual,dia_actual+1)
+                                                        ,dia_actual+90
+                                                        ,2000
+                                                        ,vehiculo_seleccionado.v_placa
+                                                        ,(SELECT s_id from status_mantenimiento where s_nombre='Operativo')
+                                                        ,(SELECT mt_id from mantenimiento_taller fetch first 1 rows only)
+                                                        );
+            update vehiculo
+                set status_vehiculo_sv_id=(select sv_id from status_vehiculo where sv_nombre='En mantenimiento')
+                where v_placa = vehiculo_seleccionado.v_placa;
+                
+            DBMS_OUTPUT.PUT_LINE('      - Registramos el mantenimiento');
+            
+            -- REALIZAMOS EL ALQUILER       
+            -- se llama al escenario 6
+            solucion_vehiculo_no_disponible_en_sede(cliente_para_alquilar, vehiculo_seleccionado, periodo_alquiler, pk_sede);
+            
+        else 
+            DBMS_OUTPUT.PUT_LINE('      - No se dara un error sobre el alquiler ' || 
+                                alquiler_a_fallar.a_id || 
+                                ' del periodo ' || 
+                                TO_CHAR(alquiler_a_fallar.a_periodo_duracion.P_Fecha_Inicio, 'dd/mm/yyyy') || '---' ||
+                                TO_CHAR(alquiler_a_fallar.a_periodo_duracion.P_Fecha_Fin, 'dd/mm/yyyy')
+            );
+        end if;
+    end problema_durante_alquiler;
+    ----------------------------------------------------------------------------
+    -- procedure para simular errores en alquileres activos
+    procedure simulacion_problemas_durante_alquileres(pk_sede number, dia_actual date)
+    is 
+        cantidad_alquileres_que_finalizan number := 0; -- cantidad de alquileres que finalizan este dia
+        -- variables para el cursor
+        cursor alquileres_activos_de_la_sede is 
+            select  a.a_id,
+                    a.a_monto_total,
+                    a.a_periodo_duracion,
+                    a.reserva_re_id,
+                    a.detalle_alquiler_da_id,
+                    a.cliente_c_id    
+            from alquiler a, detalle_alquiler da, vehiculo v
+            where a.detalle_alquiler_da_id = da.da_id and
+                  da.vehiculo_v_placa = v.v_placa and
+                  v.sede_s_id = pk_sede and
+                  a.a_periodo_duracion.P_Fecha_Inicio <= dia_actual and
+                  a.a_periodo_duracion.P_Fecha_Fin >= dia_actual;
+        -- variable para recorrer el cursor
+        alquiler_row alquiler%rowtype;
+    begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE PROBLEMAS DURANTE ALQUILER --------------');
+        DBMS_OUTPUT.PUT_LINE('');
+        
+        -- recorremos el cursor
+        -- abrimos el cursor e iteramos sobre el 
+        open alquileres_activos_de_la_sede;
+        loop 
+            fetch alquileres_activos_de_la_sede into alquiler_row;
+            exit when alquileres_activos_de_la_sede%notfound;
+            -- se llama al modulo de fallo en alquiler
+           problema_durante_alquiler(alquiler_row, pk_sede, dia_actual);
+        end loop;
+        -- cerramos el cursor
+        close alquileres_activos_de_la_sede;
+        
+    end simulacion_problemas_durante_alquileres;
     
 end reserva_and_alquiler_pkg;
 /
