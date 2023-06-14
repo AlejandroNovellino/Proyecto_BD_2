@@ -16,9 +16,12 @@ create or replace package body gastos_pkg as
         num_dia integer;
 
     begin
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE LOS GASTOS DE NOMINA --------------');
+    DBMS_OUTPUT.PUT_LINE('');
     select extract(day from hoy) into num_dia from dual;
     if (num_dia=28) then
-        DBMS_OUTPUT.PUT_LINE('Se realizaran los pagos de la nomina');
+        DBMS_OUTPUT.PUT_LINE('      - Se realizaran los pagos de la nomina');
         open empleados;
         fetch empleados into empleado_actual;
         while empleados%found
@@ -26,7 +29,7 @@ create or replace package body gastos_pkg as
             nombre := empleado_actual.e_informacion_personal.IP_Primer_Nombre;
             apellido := empleado_actual.e_informacion_personal.IP_Primer_Apeliido;
             insert into gasto values (default,empleado_actual.e_sueldo,hoy,rawtohex('Pago de sueldo a '||nombre||' '||apellido),(select tg_id from tipo_gasto where tg_nombre='Operacionales'),sede_actual);
-            DBMS_OUTPUT.PUT_LINE('Se pago el sueldo de '||nombre||' '||apellido);
+            DBMS_OUTPUT.PUT_LINE('          - Se pago el sueldo de '||nombre||' '||apellido);
             fetch empleados into empleado_actual;
         end loop;
         close empleados;
@@ -39,23 +42,26 @@ create or replace package body gastos_pkg as
         num_dia integer;
 
     begin
+    DBMS_OUTPUT.PUT_LINE('');
+    DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE LOS GASTOS NO OPERACIONALES --------------');
+    DBMS_OUTPUT.PUT_LINE('');
     select extract(day from hoy) into num_dia from dual;
     if (num_dia=28) then
         insert into gasto values (default,utilities_pkg.get_random_integer(10,30),hoy,rawtohex('Servicio de agua'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         insert into gasto values (default,utilities_pkg.get_random_integer(10,30),hoy,rawtohex('Servicio de luz'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         insert into gasto values (default,utilities_pkg.get_random_integer(40,60),hoy,rawtohex('Servicio de internet'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         insert into gasto values (default,utilities_pkg.get_random_integer(10,20),hoy,rawtohex('Servicio de telefonia'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
-        DBMS_OUTPUT.PUT_LINE('Se pagaron los servicios');
+        DBMS_OUTPUT.PUT_LINE('      - Se pagaron los servicios de agua, luz, internet y telefonia');
         select s_negocio_propio into propio from sede where s_id=sede_actual;
         if (propio = 0) then
             insert into gasto values (default,utilities_pkg.get_random_integer(60,65),hoy,rawtohex('Alquiler del local'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         end if;
-        DBMS_OUTPUT.PUT_LINE('Se ha pagado el alquiler del local');
+        DBMS_OUTPUT.PUT_LINE('      - Se ha pagado el alquiler del local');
         --La compra de mobiliario es opcional
         if (utilities_pkg.get_random_integer(0,2)>=1) then
             insert into gasto values (default,utilities_pkg.get_random_integer(10,700),hoy,rawtohex('Compra de mobiliario'),(select tg_id from tipo_gasto where tg_nombre='No operacionales'),sede_actual);
         end if;
-        DBMS_OUTPUT.PUT_LINE('Se hizo compra de mobiliario');
+        DBMS_OUTPUT.PUT_LINE('      - Se hizo compra de mobiliario');
     end if;
     end gasto_de_operacion;
 end gastos_pkg;

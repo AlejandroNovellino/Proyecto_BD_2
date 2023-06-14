@@ -26,8 +26,12 @@ create or replace package body mantenimiento_pkg as
     status_de_vehiculo integer;
 
     begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE REALIZAR MANTENIMIENTOS --------------');
+        DBMS_OUTPUT.PUT_LINE('');  
       select count(*) into hay_mtos from mantenimiento_vehiculo where man_fecha_proximo_man=hoy;
       if (hay_mtos>0) then
+        DBMS_OUTPUT.PUT_LINE('      - Hay mantenimientos a realizar');
         open mtos_hoy;
         fetch mtos_hoy into mto_hoy;
         while mtos_hoy%found loop
@@ -38,6 +42,8 @@ create or replace package body mantenimiento_pkg as
           fetch mtos_hoy into mto_hoy;
         end loop;
         close mtos_hoy;
+      else 
+        DBMS_OUTPUT.PUT_LINE('      - No hay mantenimientos a realizar');
       end if;
     end realizacion_de_mantenimiento;
 
@@ -49,8 +55,12 @@ create or replace package body mantenimiento_pkg as
         hay_mtos_fin integer;
 
     begin
+      DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE FINALIZACION DE MANTENIMIENTOS --------------');
+        DBMS_OUTPUT.PUT_LINE(''); 
       select count(*) into hay_mtos_fin from mantenimiento_vehiculo m where m.man_periodo_duracion.p_fecha_fin=hoy;
       if (hay_mtos_fin>0) then
+        DBMS_OUTPUT.PUT_LINE('      - Hay ' || to_char(hay_mtos_fin) || ' mantenimientos a realizar');
         open mtos_fin_hoy;
         fetch mtos_fin_hoy into mto_fin_hoy;
         while mtos_fin_hoy%FOUND loop
@@ -61,6 +71,7 @@ create or replace package body mantenimiento_pkg as
                 set m.status_mantenimiento_s_id=(select s_id from status_mantenimiento where s_nombre='Finalizado')
               where m.man_id=mto_fin_hoy.man_id;
             --insert into gasto values (default,mto_fin_hoy.man_precio,hoy,rawtohex('Mantenimiento en el vehiculo de placa '||mto_fin_hoy.vehiculo_v_placa),(select tg_id from tipo_gasto where tg_nombre='Operacionales'),(select sede_s_id from vehiculo where v_placa=mto_fin_hoy.vehiculo_v_placa));
+            DBMS_OUTPUT.PUT_LINE('          - Mantenimiento finalizado');
           fetch mtos_fin_hoy into mto_fin_hoy;
         end loop;
         close mtos_fin_hoy;
@@ -110,14 +121,14 @@ create or replace package body mantenimiento_pkg as
                        set status_vehiculo_sv_id=(select sv_id from status_vehiculo where sv_nombre='En mantenimiento')
                      where v_placa=mto_hoy.vehiculo_v_placa;
                     end if;
-                    DBMS_OUTPUT.PUT_LINE('Se encontro otro taller para el mantenimiento en el dia '||TO_CHAR(fecha_busqueda,'dd-MM-yyyy'));
+                    DBMS_OUTPUT.PUT_LINE('      - Se encontro otro taller para el mantenimiento en el dia '||TO_CHAR(fecha_busqueda,'dd-MM-yyyy'));
                     taller_encontrado := 1;
                 end if;
                 fetch talleres into taller_actual;
             end loop;
             close talleres;
             if taller_encontrado=0 then
-                DBMS_OUTPUT.PUT_LINE('No se encontro otro taller para el mantenimiento en el dia '||TO_CHAR(fecha_busqueda,'dd-MM-yyyy'));
+                DBMS_OUTPUT.PUT_LINE('      - No se encontro otro taller para el mantenimiento en el dia '||TO_CHAR(fecha_busqueda,'dd-MM-yyyy'));
                 fecha_busqueda := fecha_busqueda+1;
             else
                 salir :=1 ;
@@ -134,11 +145,14 @@ create or replace package body mantenimiento_pkg as
         disponible integer;
 
         begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE SIGUIENTE MANTENIMIENTO DURANTE ALQUILER --------------');
+        DBMS_OUTPUT.PUT_LINE('');
         select * into ult_mto from mantenimiento_vehiculo where vehiculo_v_placa=placa and rownum=1 order by man_periodo_duracion.p_fecha_inicio desc;
         if ult_mto.man_fecha_proximo_man >= fecha_inicio and ult_mto.man_fecha_proximo_man <= fecha_fin then
-            DBMS_OUTPUT.PUT_LINE('El siguiente mantenimiento del vehiculo esta programado para');
-            DBMS_OUTPUT.PUT_LINE('el '||TO_CHAR(ult_mto.man_fecha_proximo_man,'dd/MM/yyyy')||', que esta dentro del periodo de alquiler.');
-            DBMS_OUTPUT.PUT_LINE('Se va a reprogramar.');
+            DBMS_OUTPUT.PUT_LINE('      - El siguiente mantenimiento del vehiculo esta programado para');
+            DBMS_OUTPUT.PUT_LINE('          el '||TO_CHAR(ult_mto.man_fecha_proximo_man,'dd/MM/yyyy')||', que esta dentro del periodo de alquiler.');
+            DBMS_OUTPUT.PUT_LINE('          - Se va a reprogramar.');
             select taller_t_id into taller_actual from mantenimiento_taller where mt_id=ult_mto.mantenimiento_taller_mt_id;
             --logica para determinar si el taller tiene disponibilidad
             disponible := utilities_pkg.get_random_integer(1,11);
@@ -146,7 +160,7 @@ create or replace package body mantenimiento_pkg as
                 update mantenimiento_vehiculo 
                     set man_fecha_proximo_man=fecha_fin+2 
                     where man_id=ult_mto.man_id;
-               DBMS_OUTPUT.PUT_LINE('Se reprogramo el siguiente mantenimiento del vehiculo.');     
+               DBMS_OUTPUT.PUT_LINE('       Se reprogramo el siguiente mantenimiento del vehiculo.');     
             else
                 taller_sin_disponibilidad (ult_mto, fecha_fin, 1);
             end if;

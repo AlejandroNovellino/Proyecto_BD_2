@@ -18,6 +18,9 @@ create or replace package body empleados_pkg as
         nombre varchar2(20);
         apellido varchar2(20);
     begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE CONTRATACION DE EMPLEADO --------------');
+        DBMS_OUTPUT.PUT_LINE('');
         --probabilidad de 1 en 2 de que se haga una contratacion
         if (utilities_pkg.get_random_integer(0,2) < 1) then
             DBMS_OUTPUT.PUT_LINE('Se intentara una contratacion');
@@ -38,9 +41,9 @@ create or replace package body empleados_pkg as
     informacion_personal.verificar_sexo('M'),
     'Transilvania' 
 ),2400,sede_actual);*/
-                DBMS_OUTPUT.PUT_LINE('Se ha contratado a '||nombre||' '||apellido);
+                DBMS_OUTPUT.PUT_LINE('      - Se ha contratado a '||nombre||' '||apellido);
             else
-                DBMS_OUTPUT.PUT_LINE('Ya se posee la cantidad maxima de empleados');
+                DBMS_OUTPUT.PUT_LINE('      - Ya se posee la cantidad maxima de empleados');
             end if;
         end if;
     end contratacion;
@@ -56,6 +59,9 @@ create or replace package body empleados_pkg as
         cursor empleados is select e_id from empleado;
         empleado_actual integer;
     begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE SALIDA DE EMPLEADO --------------');
+        DBMS_OUTPUT.PUT_LINE('');
         select extract(day from hoy) into num_dia from dual;
         if (num_dia=28) then
             --probabilidad de que se retire a un empleado
@@ -70,10 +76,10 @@ create or replace package body empleados_pkg as
                     close empleados;
                     select e.e_informacion_personal.ip_primer_nombre into nombre from empleado e where e.e_id=empleado_actual;
                     select e.e_informacion_personal.ip_primer_apeliido into apellido from empleado e where e.e_id=empleado_actual;
-                    DBMS_OUTPUT.PUT_LINE('Se ha retirado al empleado '||nombre||' '||apellido);
+                    DBMS_OUTPUT.PUT_LINE('      - Se ha retirado al empleado '||nombre||' '||apellido);
                     delete from empleado where e_id=empleado_actual;
                 else
-                    DBMS_OUTPUT.PUT_LINE('No se ha retirado empleado alguno ya que la sede tiene el minimo de empleados');
+                    DBMS_OUTPUT.PUT_LINE('      - No se ha retirado empleado alguno ya que la sede tiene el minimo de empleados');
                 end if;
             end if;
         end if;

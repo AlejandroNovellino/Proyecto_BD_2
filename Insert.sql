@@ -406,6 +406,104 @@ execute PK_Alianza.I_Aliado('descarga.PNG' ,'pana Tech');
 execute PK_Alianza.I_Aliado('gruero.PNG' ,'Tu gruero');
 /
 
+-- insert alianza
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'Tu gruero'),
+    (select s_id from sede where s_numerosede = 5)
+);
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'pana Tech'),
+    (select s_id from sede where s_numerosede = 5)
+);
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'Tu gruero'),
+    (select s_id from sede where s_numerosede = 5)
+);
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'pana Tech'),
+    (select s_id from sede where s_numerosede = 5)
+);
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'Tu gruero'),
+    (select s_id from sede where s_numerosede = 1)
+);
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'pana Tech'),
+    (select s_id from sede where s_numerosede = 1)
+);
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'Tu gruero'),
+    (select s_id from sede where s_numerosede = 1)
+);
+
+insert into alianza values (
+    default,
+    periodo_duracion(
+        TO_DATE('05/01/2023','MM/DD/YYYY'),
+        TO_DATE('08/01/2023','MM/DD/YYYY')
+    ),
+    'Alianza con tu gruero para fallos del auto',
+    'Fallo dano',
+    (select ao_id from aliado where ao_nombre = 'pana Tech'),
+    (select s_id from sede where s_numerosede = 1)
+);
+
 --cliente
 execute PK_Cliente.I_Cliente('persona1.PNG','Jose','Manuel','Perez','Castillo','V-26778657','josemac@gmail.com',TO_DATE('05/10/1991','dd/MM/yyyy'),'M','10.4974293','-66.9116934','PUENTE','Ocasional', 'Libertador');
 /

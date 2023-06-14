@@ -52,10 +52,13 @@ create or replace package body inventario_pkg as
         modelo_actual modelo%rowtype;
 
     begin
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE COMPRAR VECHICULO --------------');
+        DBMS_OUTPUT.PUT_LINE('');
         --valida que sea el día 28 del mes
         select extract(day from hoy) into num_dia from dual;
         if (num_dia=28) then
-            DBMS_OUTPUT.PUT_LINE('Es el 28 del mes, se intentara una compra de vehiculo');
+            DBMS_OUTPUT.PUT_LINE('      - Es el 28 del mes, se intentara una compra de vehiculo');
             loop
             --selecciona marca de carro
             open marcas;
@@ -101,14 +104,14 @@ create or replace package body inventario_pkg as
             --verifica si el proveedor tiene ese modelo
             modelo_disponible := utilities_pkg.get_random_integer(1,6);
             if (modelo_disponible <= 4) then
-                DBMS_OUTPUT.PUT_LINE('Esta disponible un '
+                DBMS_OUTPUT.PUT_LINE('      - Esta disponible un '
                                     ||nom_marca||' '
                                     ||nom_modelo
                                     ||' para la compra');
                 --verifica si hay fondos suficientes
                 salir := utilities_pkg.get_random_integer(0,2);
                 if (salir = 0) then
-                    DBMS_OUTPUT.PUT_LINE('Se procede con la compra, ya que se dispone de los fondos');
+                    DBMS_OUTPUT.PUT_LINE('      - Se procede con la compra, ya que se dispone de los fondos');
                     select count(*) into ctd_colores from color;
                     insert into vehiculo values(generar_placa
                                                 ,extract(year from hoy)
@@ -127,6 +130,7 @@ create or replace package body inventario_pkg as
                                                 ,rawtohex('Compra de vehiculo')
                                                 ,(select tg_id from tipo_gasto where tg_nombre='Operacionales')
                                                 ,sede_actual);*/
+                    DBMS_OUTPUT.PUT_LINE('      - Se realizo la compra del vehiculo');
                     salir := 1;
                 end if;
             else
@@ -136,6 +140,8 @@ create or replace package body inventario_pkg as
             end if;
             exit when salir=1;
             end loop;
+        else 
+            DBMS_OUTPUT.PUT_LINE('      - No es el 28 del mes, no se intentara una compra de vehiculo');
         end if;
     end compra_de_vehiculo;
 
@@ -149,10 +155,13 @@ create or replace package body inventario_pkg as
         verificar_vehiculo_inhabilitado number;
 
     begin
-      update vehiculo set v_km = v_km + utilities_pkg.get_random_integer(10,2000) where v_placa = placa returning v_km into km_vehiculo_a_vender;
+      DBMS_OUTPUT.PUT_LINE('      - Se actualiza el Km del vehiculo y se verifica si debe ser vendido'); 
+      update vehiculo set v_km = v_km + 0 where v_placa = placa returning v_km into km_vehiculo_a_vender; -- ya la actualizacion se hizo en el trigger
+      DBMS_OUTPUT.PUT_LINE('      - Se verifica si alacanzo los 50.000 km');
       if km_vehiculo_a_vender <= 50000 then
         vender_vehiculo := utilities_pkg.get_random_integer(0,2);
         if (vender_vehiculo=1) then
+            DBMS_OUTPUT.PUT_LINE('          - Se vendera el vehiculo de placa: ' || placa);
             insert into ingreso values (default
                                         ,utilities_pkg.get_random_integer(60,180)*10
                                         ,(select sysdate from dual)
@@ -163,6 +172,7 @@ create or replace package body inventario_pkg as
                 set status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Vendido') 
                 where v_placa = placa;
         else
+            DBMS_OUTPUT.PUT_LINE('          - No se vendera este vehiculo, se verifica si hay otro para vender');
             select modelo_marca_ma_id into marca from vehiculo where v_placa = placa;
             
             
@@ -176,6 +186,7 @@ create or replace package body inventario_pkg as
             from dual;
             
             if (verificar_vehiculo_inhabilitado = 1) then
+                DBMS_OUTPUT.PUT_LINE('          - Si hay otro vehiculo disponible para vender');
                 select v_placa into v_a_vender from vehiculo 
                     where modelo_marca_ma_id=marca 
                     and status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Inhabilitado')
@@ -185,7 +196,7 @@ create or replace package body inventario_pkg as
                                             ,(select sysdate from dual)
                                             ,rawtohex('Venta del vehiculo de placa'||v_a_vender)
                                             ,num_sede);
-                DBMS_OUTPUT.PUT_LINE('          - Se realizo la venta del vehiculo');
+                DBMS_OUTPUT.PUT_LINE('          - Se realizo la venta del vehiculo de placa ' || placa);
                 update vehiculo 
                     set status_vehiculo_sv_id = (select sv_id from status_vehiculo where sv_nombre='Vendido') 
                     where v_placa = v_a_vender;
@@ -196,7 +207,7 @@ create or replace package body inventario_pkg as
             
         end if;
       else
-        DBMS_OUTPUT.PUT_LINE('El vehiculo todavia posee vida util');
+        DBMS_OUTPUT.PUT_LINE('      - El vehiculo todavia posee vida util');
       end if;
     end fin_de_vida_util;
 
