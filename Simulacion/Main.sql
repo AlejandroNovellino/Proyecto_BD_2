@@ -72,13 +72,16 @@ create or replace package body main_pkg as
                 -- DESARROLLO POR CADA SEDE-------------------------------------
                 DBMS_Output.PUT_LINE('-------------------------- Actividades para la sede ' || to_char(sede_actual.s_id) || ' --------------------------');
                 
-                -- generamos los datos aleatorios para personas y clientes por cada dia
-                generador_data_aleatoria_pkg.generador_personas(25);
-                generador_data_aleatoria_pkg.generador_clientes(15);
-                
                 -- PRESENTAMOS QUE DIA SE ESTA TRABAJANDO
                 DBMS_Output.PUT_LINE('');
                 DBMS_Output.PUT_LINE('---- DIA ' || TO_CHAR(periodo_fechas(index_fecha), 'dd/mm/yyyy') || ' de la simulacion');
+                
+                -- generamos los datos aleatorios para personas y clientes por cada dia
+                generador_data_aleatoria_pkg.generador_personas(25);
+                generador_data_aleatoria_pkg.generador_clientes(15);
+                DBMS_Output.PUT_LINE('');
+                DBMS_Output.PUT_LINE('--- Se generaron 25 personas aleatorias y se registraron 15 clientes aleatorios');
+                DBMS_Output.PUT_LINE('');
                 
                 -- MODULO 5 ----------------------------------------------------
                 -- CREACION DE ALIANZAS

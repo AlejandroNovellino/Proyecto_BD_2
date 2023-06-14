@@ -70,7 +70,12 @@ create or replace package body alianzas_pkg as
         
     begin
     select extract(day from hoy) into num_dia from dual;
+        -- indicamos que dio inicio el modulo
+        DBMS_OUTPUT.PUT_LINE('');
+        DBMS_OUTPUT.PUT_LINE('-------------- INICIA LA SIMULACION DE ALIANZAS --------------');
+        DBMS_OUTPUT.PUT_LINE('');
         if (num_dia=28 or num_dia=10) then
+            DBMS_OUTPUT.PUT_LINE('      - Es el dia 10 o 28 del mes');
             --probabilidad de 1 en 5 de que se cree 
             --una alianza en los dias especificados
             if (utilities_pkg.get_random_integer(0,5) >= 1) then
@@ -121,6 +126,8 @@ create or replace package body alianzas_pkg as
             else
                 DBMS_OUTPUT.PUT_LINE('      - No se creara una alianza hoy');
             end if;
+        else 
+            DBMS_OUTPUT.PUT_LINE('      - No es el dia 10 o 28 del mes, por lo tanto no se hace nada');
         end if;
     end creacion_de_alianza;
 end alianzas_pkg;
