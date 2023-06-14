@@ -1,20 +1,20 @@
 --Creacion de un directorio para guardar imagenes
 CREATE OR REPLACE DIRECTORY OBJETOS_LOB AS 'C:\IMAGENES\';
-/
+
 CREATE OR REPLACE PACKAGE PK_Vehiculo AS
 TYPE RESULT_SET IS REF CURSOR;
 
-PROCEDURE  I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2, marca varchar2, status varchar2, colorv varchar2,tipo varchar2,sedes number);
+PROCEDURE  I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number);
 END PK_Vehiculo;
-/
+  
  CREATE OR REPLACE PACKAGE BODY PK_Vehiculo IS
  
-PROCEDURE I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2, marca varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number)
+PROCEDURE I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number)
 is 
  temp blob;
  fle bfile;
   BEGIN
-    INSERT INTO vehiculo values (v_placa,v_anno,EMPTY_BLOB(),v_km,v_precio,(SELECT m_id From modelo where m_nombre = modelos), (SELECT ma_id From marca where ma_nombre = marca), (SELECT sv_id From status_vehiculo where sv_nombre = status),(SELECT c_id From color where c_nombre = colorv) ,(SELECT tv_id From tipo_vehiculo where tv_nombre = tipo),(SELECT s_id From sede where  s_numerosede  = sedes)) returning v_foto INTO temp;
+    INSERT INTO vehiculo values (v_placa,v_anno,EMPTY_BLOB(),v_km,v_precio,(SELECT m_id From modelo where m_nombre = modelos),(select marca_ma_id from modelo where m_nombre=modelos), (SELECT sv_id From status_vehiculo where sv_nombre = status),(SELECT c_id From color where c_nombre = colorv) ,(SELECT tv_id From tipo_vehiculo where tv_nombre = tipo),(SELECT s_id From sede where  s_numerosede  = sedes)) returning v_foto INTO temp;
    fle:= BFILENAME ('OBJETOS_LOB', V_Nombre_foto);
    DBMS_LOB.fileopen (fle, DBMS_LOB.file_readonly);
    DBMS_LOB.loadfromfile (temp,fle,DBMS_LOB.getlength (fle));
@@ -22,21 +22,38 @@ is
     COMMIT;
   END I_Vehiculo;
   END PK_Vehiculo;
-/
-CREATE OR REPLACE PACKAGE PK_Cliente AS
+
+  CREATE OR REPLACE PACKAGE PK_Cliente AS
 TYPE RESULT_SET IS REF CURSOR;
  
 PROCEDURE BUSCAR_Cliente(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2,tipo varchar2);
 PROCEDURE I_Cliente(V_Nombre_foto varchar2,p_nombre Varchar2,s_nombre Varchar2, p_apellido varchar2, s_apellido varchar2, ci varchar2,correo varchar2,nac date,sexo varchar2,latitud varchar2, longitud varchar2, direccion varchar2, tipo varchar2, lugar varchar2);
 END PK_Cliente;
-/
+
 
 CREATE OR REPLACE PACKAGE BODY PK_Cliente IS
  
 PROCEDURE BUSCAR_Cliente( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2, tipo varchar2) 
   AS 
   BEGIN
+  
+  if ((fecha_I is null) and (fecha_F is null) and (tipo is null)) then
     OPEN o_result_set FOR SELECT  c.c_id,
+    c.c_informacion_personal.IP_cedula cedula,
+     CONCAT (c.c_informacion_personal.IP_Primer_Nombre, c.c_informacion_personal.IP_Segundo_Nombre) as full_name,
+    CONCAT(  c.c_informacion_personal.IP_Primer_Apeliido , c.c_informacion_personal.IP_Segundo_Apellido)full_ape,
+    c.c_informacion_personal.IP_Correo correo,
+    c.c_informacion_personal.IP_Fecha_Nacimiento fnac,
+   CASE c.c_informacion_personal.IP_Sexo WHEN 'M' THEN 'Masculino' When 'F' THEN 'Femenino'  END AS sexo,
+    c.ubicacion_mapa.UG_Latitud lat,
+    c.ubicacion_mapa.UG_Longitud lon,
+    CASE c. tipo_cliente_tc_id WHEN 1 THEN 'Ocasional' WHEN 2 THEN 'Frecuente' when 3 then 'VIP ' when 4 then 'No deseado' END AS Tipo_cliente ,
+    c.c_foto, c.fecha_registro
+    FROM  cliente c;
+    
+    else 
+        
+         OPEN o_result_set FOR SELECT  c.c_id,
     c.c_informacion_personal.IP_cedula cedula,
      CONCAT (c.c_informacion_personal.IP_Primer_Nombre, c.c_informacion_personal.IP_Segundo_Nombre) as full_name,
     CONCAT(  c.c_informacion_personal.IP_Primer_Apeliido , c.c_informacion_personal.IP_Segundo_Apellido)full_ape,
@@ -48,8 +65,8 @@ PROCEDURE BUSCAR_Cliente( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F
     CASE c. tipo_cliente_tc_id WHEN 1 THEN 'Ocasional' WHEN 2 THEN 'Frecuente' when 3 then 'VIP ' when 4 then 'No deseado' END AS Tipo_cliente ,
     c.c_foto
     FROM  cliente c
-    where (fecha_registro>= TO_DATE(fecha_I,'dd/mm/yy') or fecha_registro<= TO_DATE(fecha_F,'dd/mm/yy')  or tipo_cliente_tc_id= (select tc_id from tipo_cliente where tc_nombre= tipo));
-  
+    where ((fecha_registro>= TO_DATE(fecha_I,'dd/mm/yy') or fecha_registro<= TO_DATE(fecha_F,'dd/mm/yy') ) or tipo_cliente_tc_id= (select tc_id from tipo_cliente where tc_nombre= tipo));
+   end if;
   END BUSCAR_Cliente;
   
 
@@ -83,7 +100,8 @@ fle bfile;
 
 
 END PK_Cliente;
-/
+
+
 ----Creacion del paquete para alquiler----
 CREATE OR REPLACE PACKAGE PK_Alquiler AS
 TYPE RESULT_SET IS REF CURSOR;
@@ -91,7 +109,6 @@ TYPE RESULT_SET IS REF CURSOR;
 PROCEDURE BUSCAR_Vehiculo(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2,tipo varchar2,marca varchar2, modelo varchar2, annio number);
 PROCEDURE BUSCAR_Vehiculo_Mes(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2,modelo varchar2, mes number, anno number);
 END PK_Alquiler;
-/
 ---Creacion del body del paquete
 CREATE OR REPLACE PACKAGE BODY PK_Alquiler IS
 ----Precedimiento para el reporte 1----
@@ -99,7 +116,7 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
   As 
   Begin
   
-       if ((marca is null)and (tipo is null)and (modelo is null) and ( Fecha_I is null) and (Fecha_F is null))then 
+       if ((marca is null)and (tipo is null)and (modelo is null) and ( Fecha_I is null) and (Fecha_F is null) and (annio is null))then 
         Open O_Result_Set For Select V_Foto,Anno,Modelo,tipo,Ma_nombre,Cant
                         From (Select Count(M.m_nombre) As Cant, V.V_Anno As Anno,V.V_Placa As Placa,M.marca_ma_id as marca , M.m_nombre as modelo,M.m_id as id, t.tv_nombre as tipo
                               From   Detalle_Alquiler D, Alquiler A , Vehiculo V, Tipo_vehiculo T,Modelo M
@@ -109,10 +126,10 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
                                   And A.Detalle_Alquiler_Da_Id=D.Da_Id
                              -- And D.Da_Fecha Between To_Date(Fecha_I,'dd/mm/yy')And To_Date(Fecha_F,'dd/mm/yy')
                               Group By V.V_placa, V.V_Anno,V.Modelo_M_Id,M.m_id,M.marca_ma_id , M.m_nombre,t.tv_nombre,M.m_id,t.tv_nombre
-                              Order By 1 Desc) ,vehiculo, modelo, marca, alquiler aa, detalle_alquiler
+                              Order By 1 Desc) ,vehiculo, modelo, marca
                         Where Placa=V_Placa
-                        and placa =vehiculo_v_placa
-                        and aa.Detalle_Alquiler_Da_Id=Da_Id
+                       -- and placa =vehiculo_v_placa
+                        --and aa.Detalle_Alquiler_Da_Id=Da_Id
                         and Modelo_M_Id= id
                         and M_id =id
                         and marca_ma_id=marca
@@ -130,7 +147,7 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
                                   or V.Tipo_Vehiculo_Tv_Id=(select tv_id from tipo_vehiculo where tv_nombre = tipo)
                                   or (m.marca_ma_id=(select ma_id from marca where ma_nombre = marca))
                                   or (a.a_periodo_duracion.P_Fecha_Inicio >= TO_DATE(Fecha_I,'dd/mm/yy')
-                                  and a.a_periodo_duracion.P_Fecha_Fin <= TO_DATE(Fecha_F,'dd/mm/yy'))
+                                  or a.a_periodo_duracion.P_Fecha_Fin <= TO_DATE(Fecha_F,'dd/mm/yy'))
                                   or v.V_anno=annio)
                              -- And D.Da_Fecha Between To_Date(Fecha_I,'dd/mm/yy')And To_Date(Fecha_F,'dd/mm/yy')
                               Group By V.V_placa, V.V_Anno,V.Modelo_M_Id,M.m_id,M.marca_ma_id , M.m_nombre,t.tv_nombre
@@ -188,7 +205,7 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
   end if ;                         
   End Buscar_Vehiculo_Mes;
   End Pk_Alquiler;
- /
+ 
 
 ----  paquete pk_promocion-----
 CREATE OR REPLACE PACKAGE PK_Promocion AS
@@ -196,22 +213,22 @@ TYPE RESULT_SET IS REF CURSOR;
  
 PROCEDURE BUSCAR_Promocion(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2);
 END PK_Promocion;
-/
+
 ----create body package------
 CREATE OR REPLACE PACKAGE BODY PK_Promocion IS
 PROCEDURE BUSCAR_Promocion( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2) 
   AS 
   BEGIN
         if ((fecha_I is null) and (fecha_F is null) or ((Fecha_I ='')and (Fecha_F= ''))) then
-    OPEN o_result_set FOR SELECT p.p_descripcion,v.v_precio, v.v_precio-(v.v_precio- p.p_porcentaje_descuento),m.m_nombre,n.ma_nombre, v.v_foto,v_anno,h.hp_periodo_duracion.P_Fecha_Inicio,h.hp_periodo_duracion.P_Fecha_Fin
+    OPEN o_result_set FOR SELECT p.p_descripcion,v.v_precio, v.v_precio-((v.v_precio* p.p_porcentaje_descuento)),m.m_nombre,n.ma_nombre, v.v_foto,v_anno,h.hp_periodo_duracion.P_Fecha_Inicio,h.hp_periodo_duracion.P_Fecha_Fin
                           from  marca n , modelo m,historico_promocion  h, Promocion p , vehiculo v
                           where v.modelo_M_ID=m.m_id  
                           and n.ma_id=m.marca_ma_id
                           and p.p_id =h.promocion_p_id 
-                          and h.vehiculo_v_placa=v.v_placa
-                          or((h.hp_periodo_duracion.P_Fecha_Inicio>= TO_DATE('','dd/mm/yy'))or (h.hp_periodo_duracion.P_Fecha_Fin<= TO_DATE('','dd/mm/yy'))); 
+                          and h.vehiculo_v_placa=v.v_placa;
+                         -- or((h.hp_periodo_duracion.P_Fecha_Inicio>= TO_DATE('','dd/mm/yy'))or (h.hp_periodo_duracion.P_Fecha_Fin<= TO_DATE('','dd/mm/yy'))); 
         else 
-            OPEN o_result_set FOR SELECT p.p_descripcion,v.v_precio, v.v_precio-(v.v_precio- p.p_porcentaje_descuento),m.m_nombre,n.ma_nombre, v.v_foto,v_anno,h.hp_periodo_duracion.P_Fecha_Inicio,h.hp_periodo_duracion.P_Fecha_Fin
+            OPEN o_result_set FOR SELECT p.p_descripcion,v.v_precio, v.v_precio-((v.v_precio* p.p_porcentaje_descuento)),m.m_nombre,n.ma_nombre, v.v_foto,v_anno,h.hp_periodo_duracion.P_Fecha_Inicio,h.hp_periodo_duracion.P_Fecha_Fin
                           from  marca n , modelo m,historico_promocion  h, Promocion p , vehiculo v
                           where v.modelo_M_ID=m.m_id  
                           and n.ma_id=m.marca_ma_id
@@ -222,7 +239,7 @@ PROCEDURE BUSCAR_Promocion( o_result_set OUT RESULT_SET, fecha_I varchar2, fecha
                            
   END BUSCAR_Promocion;
   END PK_Promocion;
-/
+
 
 CREATE OR REPLACE PACKAGE PK_Alianza AS
 TYPE RESULT_SET IS REF CURSOR;
@@ -230,16 +247,16 @@ TYPE RESULT_SET IS REF CURSOR;
 PROCEDURE BUSCAR_Alianza(o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F varchar2);
 PROCEDURE I_Aliado(V_Nombre_foto varchar2,nombre Varchar2);
 END PK_Alianza;
-/
+
 
 CREATE OR REPLACE PACKAGE BODY  PK_Alianza IS
 PROCEDURE BUSCAR_alianza( o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2) 
   AS
   BEGIN
-    OPEN o_result_set FOR SELECT alz.aa_periodo_duracion, alz.aa_descripcion, ali.ao_nombre, ali.ao_logo
-                          from  alianza alz, aliado ali
-                          where alz.aliado_ao_id = ali.ao_id
-                          and alz.aa_periodo_duracion.P_Fecha_Inicio between TO_DATE(fecha_I,'dd/mm/yy')and TO_DATE(fecha_F,'dd/mm/yy'); 
+    OPEN o_result_set FOR SELECT aa_fechaI,aa_fechaF,aa_FechaFirma,aa_descripcion,ao_nombre,ao_logo
+                          from  alianza, aliado
+                          where aliado_ao_id=ao_id
+                          and AA_fechai between TO_DATE(fecha_I,'dd/mm/yy')and TO_DATE(fecha_F,'dd/mm/yy'); 
                                                                   
   END BUSCAR_alianza;
 
@@ -257,14 +274,14 @@ is
    COMMIT;
   END I_Aliado; 
   END PK_Alianza;
-/
+
  
 CREATE OR REPLACE PACKAGE PK_Mantenimiento AS
 TYPE RESULT_SET IS REF CURSOR;
  
 PROCEDURE BUSCAR_Mantenimiento(o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2, tipo varchar2, marca varchar2, modelo varchar2, placa varchar2);
 END PK_Mantenimiento; 
-/
+ 
 
 CREATE OR REPLACE PACKAGE BODY PK_Mantenimiento IS
 PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fecha_F varchar2,tipo varchar2, marca varchar2, modelo varchar2, placa varchar2) 
@@ -306,16 +323,16 @@ PROCEDURE BUSCAR_Mantenimiento( o_result_set OUT RESULT_SET,fecha_I varchar2, fe
                          
   END BUSCAR_Mantenimiento;
   END PK_Mantenimiento;
-/
+ 
 ----Busca la cantidad de alquileres que ha realizado un cliente anualmente--- 
 create or replace function buscar_numero(id number ,fechaI date, fechaF date ) return number
 IS cant number;
    ci number;
     begin
-        Select count(*) into cant from alquiler alq where alq.cliente_C_id=id and alq.a_periodo_duracion.P_Fecha_Inicio between fechaI and fechaF group by cliente_c_id ; 
+        Select count(*) into cant from alquiler where cliente_C_id=id and A_fecha_inicio between fechaI and fechaF group by cliente_c_id ; 
         return cant ;
 end;
-/ 
+ 
  
  ----Procedimiento que actualiza el tipo de cliente segun el numero de alquileres ha hecho anualmente --- 
  create or replace PROCEDURE cambiar_tipo_cliente (id number,fechaI date, fechaF date) 
@@ -329,7 +346,7 @@ end;
         Update cliente set tipo_cliente_tc_id = (select TC_ID from tipo_cliente where TC_NOMBRE='Frecuente')
         where c_id=id;   
         end;
-     else if (buscar_numero(id,fechaI,fechaF)>=5)then
+     else if ((buscar_numero(id,fechaI,fechaF)>=5))then
         begin
         Update cliente set tipo_cliente_tc_id =(select TC_ID from tipo_cliente where TC_NOMBRE='VIP')
         where c_id=id;   
@@ -338,7 +355,7 @@ end;
      end if;
       end if;
  end;
- /
+ 
 
  
   ----insert de prueba----
@@ -347,17 +364,18 @@ insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por 
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Honda Civic 2014');
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Ford Explorer 2015');
 --Historico Promocion---
-insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','21/06/23')),1,'AB445D4');
-insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','21/06/23')),2,'DF48S5');
-insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','21/06/23')),3,'AA28E6');
-insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','21/06/23')),4,'AA7821');
+
+insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','22/06/23')),1,'AB445D4');
+insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','22/06/23')),2,'DF48S5');
+insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','22/06/23')),3,'AA28E6');
+insert into historico_promocion values (default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('21/06/23','22/06/23'),periodo_duracion.verificar_fecha_fin('21/06/23','22/06/23')),4,'AA7821');
 
 ---Vehiculo--
-execute PK_Vehiculo.I_Vehiculo('civic.PNG',2,'AA28E7',50,1,'civic','Disponible','AZUL','Carro',1);
-execute PK_Vehiculo.I_Vehiculo('fortuner.PNG',2022,'AB45D4',50,1,'fortuner','Disponible','PLATEADO','Camioneta',1);
-execute PK_Vehiculo.I_Vehiculo('toyo.PNG',2023,'DF48S5',50,1,'corolla','Disponible','BLANCO','Carro',1);
-execute PK_Vehiculo.I_Vehiculo('explorer.PNG',2015,'AA74l4',50,1,'explorer','Disponible','ROJO','Camioneta',1);
-execute PK_Vehiculo.I_Vehiculo('explorer.PNG',2014,'AA5821',50,1,'explorer','Disponible','ROJO','Camioneta',1);
+execute PK_Vehiculo.I_Vehiculo('civic.PNG',2014,'AA28E7',50,15,'civic','Disponible','AZUL','Carro',1);
+execute PK_Vehiculo.I_Vehiculo('fortuner.PNG',2022,'AB45D4',50,20,'fortuner','Disponible','PLATEADO','Camioneta',1);
+execute PK_Vehiculo.I_Vehiculo('toyo.PNG',2023,'DF48S5',50,25,'corolla','Disponible','BLANCO','Carro',1);
+execute PK_Vehiculo.I_Vehiculo('explorer.PNG',2015,'AA74l4',50,12,'explorer','Disponible','ROJO','Camioneta',1);
+execute PK_Vehiculo.I_Vehiculo('explorer.PNG',2014,'AA5821',50,10,'explorer','Disponible','ROJO','Camioneta',1);
 --Cliente--
 execute PK_Cliente.I_Cliente('persona1.PNG','Jose','Manuel','Perez','Castillo','V-26778657','josemac@gmail.com','05/10/91','M','10.4974293','-66.9116934','PUENTE','Ocacional', 'Libertador')
 execute PK_Cliente.I_Cliente('persona2.PNG','Javier','Marcos','Peralta','Contreras','V-26777452','javi@gmail.com','06/11/94','M','10.4974293','-66.9116934','PUENTE','VIP','Libertador')
@@ -389,4 +407,3 @@ insert into alianza values (DEFAULT,'25/05/23','25/06/23','02/06/23','Todos los 
 
   insert  into mantenimiento_taller values (default,22,1);
   insert into mantenimiento_vehiculo values(default,periodo_duracion(periodo_duracion.verificar_fecha_inicio('26/06/23','27/06/23'),periodo_duracion.verificar_fecha_fin('26/06/23','27/06/23')),'22/07/23',30,'DF48S5',1,41);
-*/
