@@ -289,6 +289,93 @@ INSERT INTO SEDE VALUES (DEFAULT,'Av. Teherán, Montalbán','0212-5599283',1,20,
 INSERT INTO SEDE VALUES (DEFAULT,'Av. Urdaneta con Viaducto Sucre','0274-2883710',5,6,1,(select c_id from CONSESIONARIO where c_nombre='C-1'),(select l_id from LUGAR where l_nombre='LibertadorL'));
 INSERT INTO SEDE VALUES (DEFAULT,'Urb. Los Rosales, Calle 82C','0263-7924691',7,5,0,(select c_id from CONSESIONARIO where c_nombre='C-1'),(select l_id from LUGAR where l_nombre='Maracaibo'));
 
+---insert promocion
+insert into promocion values (default,0.15,'15 % de descuento en el alquiler de cualquier camioneta de la flota');
+insert into promocion values (default,0.20,'20 % de descuento en el alquiler de vehiculos Hyundai');
+insert into promocion values (default,0.25,'25 % de descuento en el alquiler de vehiculos blancos');
+insert into promocion values (default,0.15,'15 % de descuento en el alquiler de vehiculos Renault');
+insert into promocion values (default,0.20,'20 % de descuento por Dia del Padre');
+insert into promocion values (default,0.40,'40 % de descuento en alquileres durante el Viernes Negro');
+insert into promocion values (default,0.20,'20 % de descuento por Dia de la Madre');
+insert into promocion values (default,0.30,'30 % de descuento por la Feria del Sol');
+
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AU923NL');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AA126FB');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AR228BD');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AT262MN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AS884SG');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AM824SH');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AJ387IN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AG406IU');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AN843BC');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AF214UC');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AW795CG');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AF545WC');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AU552UV');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AS996WN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AI766EO');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AW834JM');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AE230CA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AJ447AP');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AG406IU');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AN843BC');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AI040AA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AH224TS');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AS996WN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-04-10','yyyy-MM-dd'),TO_DATE('2023-06-30','yyyy-MM-dd')),2,'AI766EO');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-01','yyyy-MM-dd'),TO_DATE('2023-06-15','yyyy-MM-dd')),3,'AN723ER');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-01','yyyy-MM-dd'),TO_DATE('2023-06-15','yyyy-MM-dd')),3,'AE230CA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-01','yyyy-MM-dd'),TO_DATE('2023-06-15','yyyy-MM-dd')),3,'AD630QM');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-01','yyyy-MM-dd'),TO_DATE('2023-06-15','yyyy-MM-dd')),3,'AI040AA')
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-25','yyyy-MM-dd'),TO_DATE('2023-06-10','yyyy-MM-dd')),4,'AU923NL');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-25','yyyy-MM-dd'),TO_DATE('2023-06-10','yyyy-MM-dd')),4,'AC824MD');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AB169DA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AA931SJ');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AO747KN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AN723ER');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AA129KD');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AK760OA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AD630QM');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-06-10','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),5,'AR510ZI');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AA999TF');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AI646FO');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AB123SP');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AO747KN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AN723ER');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AA129KD');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AT262MN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AS884SG');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AA192DK');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AI912DV');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AT619OV');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2022-11-20','yyyy-MM-dd'),TO_DATE('2022-11-30','yyyy-MM-dd')),6,'AJ128MA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AB169DA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AA931SJ');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AO747KN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AN723ER');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AA129KD');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AK760OA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AD630QM');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-05','yyyy-MM-dd'),TO_DATE('2023-05-15','yyyy-MM-dd')),7,'AR510ZI');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AC888ZR');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AL311JC');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AA174OS');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AK760OA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AD630QM');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AR510ZI');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AA619PH');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AP233MP');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AZ109WH');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AP282ZP');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AC651PJ');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AZ989AF');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AL110GH');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AE043AN');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AZ631RT');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AH784AK');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AI040AA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AH224TS');
+
 --insert aliado
 
 execute PK_Alianza.I_Aliado('descarga.PNG' ,'pana Tech');
@@ -426,6 +513,42 @@ insert into alquiler values (default,(select da_precio_diario*da_cantidad_dia fr
 insert into alquiler values (default,(select da_precio_diario*da_cantidad_dia from detalle_alquiler where da_id=40),periodo_duracion((select da_fecha from detalle_alquiler where da_id=40),(select da_fecha from detalle_alquiler where da_id=40)+(select da_cantidad_dia from detalle_alquiler where da_id=40)),NULL,40,15);
 insert into alquiler values (default,(select da_precio_diario*da_cantidad_dia from detalle_alquiler where da_id=41),periodo_duracion((select da_fecha from detalle_alquiler where da_id=41),(select da_fecha from detalle_alquiler where da_id=41)+(select da_cantidad_dia from detalle_alquiler where da_id=41)),NULL,41,15);
 insert into alquiler values (default,(select da_precio_diario*da_cantidad_dia from detalle_alquiler where da_id=42),periodo_duracion((select da_fecha from detalle_alquiler where da_id=42),(select da_fecha from detalle_alquiler where da_id=42)+(select da_cantidad_dia from detalle_alquiler where da_id=42)),NULL,42,15);
+
+--insert de ratings--
+insert into rating values (default,TO_DATE('2023-05-25','yyyy-MM-dd'),5,5,3);
+insert into rating values (default,TO_DATE('2023-04-24','yyyy-MM-dd'),4,5,4);
+insert into rating values (default,TO_DATE('2023-03-15','yyyy-MM-dd'),5,5,5);
+insert into rating values (default,TO_DATE('2023-02-04','yyyy-MM-dd'),3,5,6);
+insert into rating values (default,TO_DATE('2023-03-27','yyyy-MM-dd'),5,5,8);
+insert into rating values (default,TO_DATE('2023-01-13','yyyy-MM-dd'),5,5,9);
+insert into rating values (default,TO_DATE('2023-04-06','yyyy-MM-dd'),4,5,11);
+insert into rating values (default,TO_DATE('2022-12-09','yyyy-MM-dd'),4,5,12);
+insert into rating values (default,TO_DATE('2023-03-28','yyyy-MM-dd'),5,5,14);
+insert into rating values (default,TO_DATE('2022-10-28','yyyy-MM-dd'),3,5,15);
+insert into rating values (default,TO_DATE('2023-04-27','yyyy-MM-dd'),4,5,18);
+insert into rating values (default,TO_DATE('2023-05-30','yyyy-MM-dd'),5,5,23);
+insert into rating values (default,TO_DATE('2023-05-14','yyyy-MM-dd'),4,5,25);
+insert into rating values (default,TO_DATE('2023-04-06','yyyy-MM-dd'),3,5,26);
+insert into rating values (default,TO_DATE('2023-03-15','yyyy-MM-dd'),5,5,28);
+insert into rating values (default,TO_DATE('2022-12-05','yyyy-MM-dd'),4,5,29);
+insert into rating values (default,TO_DATE('2022-09-05','yyyy-MM-dd'),5,5,30);
+insert into rating values (default,TO_DATE('2022-07-02','yyyy-MM-dd'),2,5,31);
+insert into rating values (default,TO_DATE('2023-05-30','yyyy-MM-dd'),4,5,34);
+insert into rating values (default,TO_DATE('2023-05-14','yyyy-MM-dd'),5,5,36);
+insert into rating values (default,TO_DATE('2023-04-06','yyyy-MM-dd'),5,5,37);
+insert into rating values (default,TO_DATE('2023-03-15','yyyy-MM-dd'),3,5,39);
+insert into rating values (default,TO_DATE('2022-12-05','yyyy-MM-dd'),5,5,40);
+insert into rating values (default,TO_DATE('2022-09-05','yyyy-MM-dd'),5,5,41);
+insert into rating values (default,TO_DATE('2022-07-02','yyyy-MM-dd'),4,5,42);
+
+insert into observacion values (default,'Excelente atencion',1);
+insert into observacion values (default,'Buena atencion pero el vehiculo sin aire',4);
+insert into observacion values (default,'Vehiculo bien cuidado',9);
+insert into observacion values (default,'Vino con un rayon en la puerta del copiloto',10);
+insert into observacion values (default,'Excelente atencion',15);
+insert into observacion values (default,'Tuve que mandar el carro al taller dos veces',18);
+insert into observacion values (default,'No tiene la potencia del motor original',22);
+insert into observacion values (default,'Muy buen servicio, carro impecable',24);
 
 /*
 ---insert vehiculo
@@ -601,9 +724,164 @@ insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('202
 insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-08-17','yyyy-MM-dd'),TO_DATE('2022-08-17','yyyy-MM-dd')),TO_DATE('2022-11-17','yyyy-MM-dd'),20,'AA999TF',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
 insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-05-17','yyyy-MM-dd'),TO_DATE('2022-05-17','yyyy-MM-dd')),TO_DATE('2022-08-17','yyyy-MM-dd'),20,'AA999TF',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Don Orlando')));
 insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-02-17','yyyy-MM-dd'),TO_DATE('2022-02-17','yyyy-MM-dd')),TO_DATE('2022-05-17','yyyy-MM-dd'),20,'AA999TF',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
-insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2023-03-03','yyyy-MM-dd'),TO_DATE('2023-06-03','yyyy-MM-dd')),TO_DATE('2023-06-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
-insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-12-03','yyyy-MM-dd'),TO_DATE('2023-03-03','yyyy-MM-dd')),TO_DATE('2023-03-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
-insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-09-03','yyyy-MM-dd'),TO_DATE('2022-12-03','yyyy-MM-dd')),TO_DATE('2023-03-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
-insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-06-03','yyyy-MM-dd'),TO_DATE('2022-09-03','yyyy-MM-dd')),TO_DATE('2023-03-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
-insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-03-03','yyyy-MM-dd'),TO_DATE('2022-06-03','yyyy-MM-dd')),TO_DATE('2023-03-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
-insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2023-03-03','yyyy-MM-dd'),TO_DATE('2022-06-03','yyyy-MM-dd')),TO_DATE('2023-03-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
+insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2023-03-03','yyyy-MM-dd'),TO_DATE('2023-03-03','yyyy-MM-dd')),TO_DATE('2023-06-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
+insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-12-03','yyyy-MM-dd'),TO_DATE('2022-12-03','yyyy-MM-dd')),TO_DATE('2023-03-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
+insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-09-03','yyyy-MM-dd'),TO_DATE('2022-09-03','yyyy-MM-dd')),TO_DATE('2022-12-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
+insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2022-06-03','yyyy-MM-dd'),TO_DATE('2022-06-03','yyyy-MM-dd')),TO_DATE('2022-09-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
+insert into mantenimiento_vehiculo values (default,periodo_duracion(TO_DATE('2023-03-03','yyyy-MM-dd'),TO_DATE('2022-03-03','yyyy-MM-dd')),TO_DATE('2022-06-03','yyyy-MM-dd'),20,'AI646FO',(SELECT s_id from status_mantenimiento where s_nombre='Finalizado'),(SELECT mt_id from mantenimiento_taller where mantenimiento_m_id=(SELECT m_id from mantenimiento where DBMS_LOB.instr(m_descripcion,'Cambio de aceite')>0) and taller_t_id=(SELECT t_id from taller where t_nombre='Mocar')));
+
+
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-25917216'),
+                                    informacion_personal.verificar_nombre_apellido('Jose'),
+                                    informacion_personal.verificar_nombre_apellido('Andres'),
+                                    informacion_personal.verificar_nombre_apellido('Gonzalez'),
+                                    informacion_personal.verificar_nombre_apellido('Cardona'),
+                                    informacion_personal.verificar_correo('jagcjagc@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('12-JUN-1993'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,1);
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-28846541'),
+                                    informacion_personal.verificar_nombre_apellido('Andres'),
+                                    informacion_personal.verificar_nombre_apellido('Jesus'),
+                                    informacion_personal.verificar_nombre_apellido('Colina'),
+                                    informacion_personal.verificar_nombre_apellido('Melendez'),
+                                    informacion_personal.verificar_correo('ajcolina12@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('23-SEP-2000'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,1);        
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-27065111'),
+                                    informacion_personal.verificar_nombre_apellido('Maria'),
+                                    informacion_personal.verificar_nombre_apellido('Camila'),
+                                    informacion_personal.verificar_nombre_apellido('Hernandez'),
+                                    informacion_personal.verificar_nombre_apellido('Sojo'),
+                                    informacion_personal.verificar_correo('star160300@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('16-MAR-2000'),
+                                    informacion_personal.verificar_sexo('F'),
+                                    'direccion' 
+                                    ),2400,1);   
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-29456644'),
+                                    informacion_personal.verificar_nombre_apellido('Daniel'),
+                                    informacion_personal.verificar_nombre_apellido('Moises'),
+                                    informacion_personal.verificar_nombre_apellido('Laddio'),
+                                    informacion_personal.verificar_nombre_apellido('Perez'),
+                                    informacion_personal.verificar_correo('bolocko23@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('23-AGO-2001'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,1);                      
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-19225468'),
+                                    informacion_personal.verificar_nombre_apellido('Jesus'),
+                                    informacion_personal.verificar_nombre_apellido('Ramiro'),
+                                    informacion_personal.verificar_nombre_apellido('Gil'),
+                                    informacion_personal.verificar_nombre_apellido('Gomez'),
+                                    informacion_personal.verificar_correo('jregramiro@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('04-DEC-1986'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,1);               
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-5015122'),
+                                    informacion_personal.verificar_nombre_apellido('Reina'),
+                                    informacion_personal.verificar_nombre_apellido('Alma'),
+                                    informacion_personal.verificar_nombre_apellido('Sepulveda'),
+                                    informacion_personal.verificar_nombre_apellido('Rodriguez'),
+                                    informacion_personal.verificar_correo('reinasepulveda@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('02-ENE-1959'),
+                                    informacion_personal.verificar_sexo('F'),
+                                    'direccion' 
+                                    ),2400,1);    
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-13354684'),
+                                    informacion_personal.verificar_nombre_apellido('Jairo'),
+                                    informacion_personal.verificar_nombre_apellido('David'),
+                                    informacion_personal.verificar_nombre_apellido('Tevez'),
+                                    informacion_personal.verificar_nombre_apellido('Osuna'),
+                                    informacion_personal.verificar_correo('jairodtevez@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('29-JUL-1981'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,1);
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-28446513'),
+                                    informacion_personal.verificar_nombre_apellido('David'),
+                                    informacion_personal.verificar_nombre_apellido('Arturo'),
+                                    informacion_personal.verificar_nombre_apellido('La Riva'),
+                                    informacion_personal.verificar_nombre_apellido('Hernandez'),
+                                    informacion_personal.verificar_correo('davidlarivaa@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('06-OCT-2000'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,2);                                                                                                                                                                                                
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-29050613'),
+                                    informacion_personal.verificar_nombre_apellido('Yonathan'),
+                                    informacion_personal.verificar_nombre_apellido('Jose'),
+                                    informacion_personal.verificar_nombre_apellido('Vazquez'),
+                                    informacion_personal.verificar_nombre_apellido('Arias'),
+                                    informacion_personal.verificar_correo('yonisoni56@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('31-MAY-2001'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,2);
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-27670971'),
+                                    informacion_personal.verificar_nombre_apellido('Eduardo'),
+                                    informacion_personal.verificar_nombre_apellido('Miguel'),
+                                    informacion_personal.verificar_nombre_apellido('Consalvo'),
+                                    informacion_personal.verificar_nombre_apellido('Perez'),
+                                    informacion_personal.verificar_correo('educon001@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('08-SEP-2001'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,3);            
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-30005546'),
+                                    informacion_personal.verificar_nombre_apellido('Valeria'),
+                                    informacion_personal.verificar_nombre_apellido('Andreina'),
+                                    informacion_personal.verificar_nombre_apellido('Matuzzi'),
+                                    informacion_personal.verificar_nombre_apellido('Lopez'),
+                                    informacion_personal.verificar_correo('valeeematuzzi@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('22-NOV-2002'),
+                                    informacion_personal.verificar_sexo('F'),
+                                    'direccion' 
+                                    ),2400,3);           
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-22605655'),
+                                    informacion_personal.verificar_nombre_apellido('Perla'),
+                                    informacion_personal.verificar_nombre_apellido('Sofia'),
+                                    informacion_personal.verificar_nombre_apellido('Davila'),
+                                    informacion_personal.verificar_nombre_apellido('Ortiz'),
+                                    informacion_personal.verificar_correo('perladavila@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('17-JAN-1994'),
+                                    informacion_personal.verificar_sexo('F'),
+                                    'direccion' 
+                                    ),2400,3);                                                                                                                         
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-28879546'),
+                                    informacion_personal.verificar_nombre_apellido('Manuel'),
+                                    informacion_personal.verificar_nombre_apellido('Jose'),
+                                    informacion_personal.verificar_nombre_apellido('Iribarren'),
+                                    informacion_personal.verificar_nombre_apellido('Garcia'),
+                                    informacion_personal.verificar_correo('iribarrengarcia@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('07-FEB-1999'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,3);                                    
+insert into empleado values (default,informacion_personal(
+                                    informacion_personal.verificar_cedula('V-29374855'),
+                                    informacion_personal.verificar_nombre_apellido('Jose'),
+                                    informacion_personal.verificar_nombre_apellido('Luis'),
+                                    informacion_personal.verificar_nombre_apellido('Sanson'),
+                                    informacion_personal.verificar_nombre_apellido('Ortega'),
+                                    informacion_personal.verificar_correo('jsanson9191@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('05-OCT-1998'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ),2400,3);                                    
