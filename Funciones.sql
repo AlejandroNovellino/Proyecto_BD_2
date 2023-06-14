@@ -4,12 +4,12 @@ CREATE OR REPLACE DIRECTORY OBJETOS_LOB AS 'C:\IMAGENES\';
 CREATE OR REPLACE PACKAGE PK_Vehiculo AS
 TYPE RESULT_SET IS REF CURSOR;
 
-PROCEDURE  I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number);
+PROCEDURE  I_Vehiculo(V_Nombre_foto varchar2,v_placa Varchar2,v_anno number,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number);
 END PK_Vehiculo;
   
  CREATE OR REPLACE PACKAGE BODY PK_Vehiculo IS
  
-PROCEDURE I_Vehiculo(V_Nombre_foto varchar2,v_anno number,v_placa Varchar2,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number)
+PROCEDURE I_Vehiculo(V_Nombre_foto varchar2,v_placa Varchar2,v_anno number,v_km number,v_precio number, modelos varchar2,status varchar2, colorv varchar2,tipo varchar2,sedes number)
 is 
  temp blob;
  fle bfile;

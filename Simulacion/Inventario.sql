@@ -3,9 +3,9 @@ create or replace package inventario_pkg as
     --genera placa
     function generar_placa return varchar2;
 
-    --M2E1: Compra de vehÃ­culo para aÃ±adir a la flota
+    --M2E1: Compra de vehículo para añadir a la flota
     procedure compra_de_vehiculo (hoy date, num_sede integer);
-    --M2E2: VehÃ­culo termine su vida Ãºtil
+    --M2E2: Vehículo termine su vida útil
     procedure fin_de_vida_util (num_sede integer, placa varchar2 /*, marca integer, modelo integer*/);
 
 end inventario_pkg;
@@ -30,8 +30,9 @@ create or replace package body inventario_pkg as
         num_dia integer;
         salir integer := 0;
 
-        ctd_marcas integer;
-        id_marca integer;
+        aux_cursores integer;
+        i integer := 0;
+        
         ctd_modelos integer;
         id_1er_modelo integer;
         id_modelo integer;
@@ -42,24 +43,61 @@ create or replace package body inventario_pkg as
 
         modelo_disponible integer;
 
+        cursor marcas is select * from marca;
+        marca_actual marca%rowtype;
+        ctd_marcas integer;
+        id_marca integer;
+
+        cursor modelos is select * from modelo where marca_ma_id = id_marca;
+        modelo_actual modelo%rowtype;
+
     begin
-        --valida que sea el dÃ­a 28 del mes
+        --valida que sea el día 28 del mes
         select extract(day from hoy) into num_dia from dual;
         if (num_dia=28) then
             DBMS_OUTPUT.PUT_LINE('Es el 28 del mes, se intentara una compra de vehiculo');
             loop
-            --selecciona modelo de carro
+            --selecciona marca de carro
+            open marcas;
+            fetch marcas into marca_actual;
             select count(*) into ctd_marcas from marca;
-            id_marca := utilities_pkg.get_random_integer(1,ctd_marcas+1);
-            select ma_nombre into nom_marca from marca where ma_id=id_marca;
-            select count(*) into ctd_modelos from modelo 
+            aux_cursores := utilities_pkg.get_random_integer(1,ctd_marcas);
+            while (i<aux_cursores) loop
+                id_marca := marca_actual.ma_id;
+                fetch marcas into marca_actual;
+                i := i+1;
+            end loop;
+            --Si esto no funciona solo hay que moverlo una linea arriba
+            nom_marca := marca_actual.ma_nombre;
+            close marcas;
+            i := 0;
+
+            --select count(*) into ctd_marcas from marca;
+            --id_marca := utilities_pkg.get_random_integer(1,ctd_marcas+1);
+            --select ma_nombre into nom_marca from marca where ma_id=id_marca;
+
+            --selecciona modelo de carro
+            open modelos;
+            fetch modelos into modelo_actual;
+            select count(*) into ctd_modelos from modelo where marca_ma_id = id_marca;
+            aux_cursores := utilities_pkg.get_random_integer(1,ctd_modelos);
+            while (i<aux_cursores) loop
+                id_modelo := modelo_actual.m_id;
+                fetch modelos into modelo_actual;
+                i := i+1;
+            end loop;
+            nom_modelo := modelo_actual.m_nombre;
+            close modelos;
+
+            /*select count(*) into ctd_modelos from modelo 
                 where marca_ma_id = id_marca;
             select m_id into id_1er_modelo from modelo
                where marca_ma_id = id_marca
                   and rownum = 1;
             id_modelo := utilities_pkg.get_random_integer(id_1er_modelo, 
                                             id_1er_modelo+ctd_modelos+1);
-            select m_nombre into nom_modelo from modelo where m_id=id_modelo;                                            
+            select m_nombre into nom_modelo from modelo where m_id=id_modelo;
+            */                                            
             --verifica si el proveedor tiene ese modelo
             modelo_disponible := utilities_pkg.get_random_integer(1,6);
             if (modelo_disponible <= 4) then
@@ -93,7 +131,7 @@ create or replace package body inventario_pkg as
                 end if;
             else
                 --valida si el usuario desea seleccionar otro
-                --modelo de carro. Si es 1, sale del mÃ³dulo.
+                --modelo de carro. Si es 1, sale del módulo.
                 salir := utilities_pkg.get_random_integer(0,2);
             end if;
             exit when salir=1;
