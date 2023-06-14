@@ -357,7 +357,7 @@ end;
  end;
  
 
- 
+ /*
   ----insert de prueba----
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Toyota Fortuner 2022');
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Toyota Corolla 2023');
