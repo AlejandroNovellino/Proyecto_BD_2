@@ -376,6 +376,29 @@ insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-0
 insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AI040AA');
 insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-02-01','yyyy-MM-dd'),TO_DATE('2023-02-25','yyyy-MM-dd')),8,'AH224TS');
 
+--insert eprsona
+insert into persona values (default,EMPTY_BLOB(),ubicacion_geografica(10.450192,-68.982388),(select l_id from LUGAR where l_nombre='Libertador'),(select tc_id from tipo_cliente where tc_nombre='Ocasional'),informacion_personal(
+                                    informacion_personal.verificar_cedula('V-28120942'),
+                                    informacion_personal.verificar_nombre_apellido('Jose'),
+                                    informacion_personal.verificar_nombre_apellido('Fernando'),
+                                    informacion_personal.verificar_nombre_apellido('Sosa'),
+                                    informacion_personal.verificar_nombre_apellido('Arnal'),
+                                    informacion_personal.verificar_correo('jsoesoas@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('11-SEP-1998'),
+                                    informacion_personal.verificar_sexo('M'),
+                                    'direccion' 
+                                    ));
+insert into persona values (default,EMPTY_BLOB(),ubicacion_geografica(10.450192,-68.982388),(select l_id from LUGAR where l_nombre='Libertador'),(select tc_id from tipo_cliente where tc_nombre='Ocasional'),informacion_personal(
+                                    informacion_personal.verificar_cedula('V-29124681'),
+                                    informacion_personal.verificar_nombre_apellido('Daniela'),
+                                    informacion_personal.verificar_nombre_apellido('Arantxa'),
+                                    informacion_personal.verificar_nombre_apellido('Faria'),
+                                    informacion_personal.verificar_nombre_apellido('Lopez'),
+                                    informacion_personal.verificar_correo('daniarantxafl@gmail.com'),
+                                    informacion_personal.verificar_fecha_nacimiento('28-MAR-1997'),
+                                    informacion_personal.verificar_sexo('F'),
+                                    'direccion' 
+                                    ));
 --insert aliado
 
 execute PK_Alianza.I_Aliado('descarga.PNG' ,'pana Tech');
@@ -424,6 +447,12 @@ execute PK_Cliente.I_Cliente('persona1.PNG','Francisco','Fernando','Peraza','Oba
 /
 execute PK_Cliente.I_Cliente('persona3.PNG','Josefa','Begonia','Lamus','Perez','V-13929855','jobegonialamus@gmail.com',TO_DATE('12/01/1980','dd/MM/yyyy'),'M','8.4974293','-71.9116934','Si','Frecuente','Maracaibo');
 /
+
+--insert reserva
+insert into reserva values (default,TO_DATE('12/05/2023','dd/MM/yyyy'),'Agendada',2);
+insert into reserva values (default,TO_DATE('24/05/2023','dd/MM/yyyy'),'Agendada',6);
+insert into reserva values (default,TO_DATE('22/05/2023','dd/MM/yyyy'),'Agendada',16);
+insert into reserva values (default,TO_DATE('28/05/2023','dd/MM/yyyy'),'Agendada',11);
 
 ---insert detalle-alquiler----
 insert into detalle_alquiler values (default, (select v_precio from vehiculo where v_placa='AB169DA'),(select v_km from vehiculo where v_placa='AB169DA'),(select v_km from vehiculo where v_placa='AB169DA'),5,TO_DATE('2023-06-09','yyyy-MM-dd'),'AB169DA');
