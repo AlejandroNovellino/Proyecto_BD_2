@@ -299,9 +299,9 @@ insert into promocion values (default,0.40,'40 % de descuento en alquileres dura
 insert into promocion values (default,0.20,'20 % de descuento por Dia de la Madre');
 insert into promocion values (default,0.30,'30 % de descuento por la Feria del Sol');
 
-insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AU923NL');
-insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AA126FB');
-insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AR228BD');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AB169DA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AB169DA');
+insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AB169DA');
 insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AT262MN');
 insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AS884SG');
 insert into historico_promocion values (default,periodo_duracion(TO_DATE('2023-05-20','yyyy-MM-dd'),TO_DATE('2023-06-20','yyyy-MM-dd')),1,'AM824SH');
@@ -1011,4 +1011,18 @@ insert into empleado values (default,informacion_personal(
                                     informacion_personal.verificar_fecha_nacimiento('05-OCT-1998'),
                                     informacion_personal.verificar_sexo('M'),
                                     'direccion' 
-                                    ),2400,3);                                    
+                                    ),2400,3);     
+                                    
+--  insert detalles de compras
+insert into detalle_compra values (
+    default,
+    1,
+    2500,
+    (select v_placa from vehiculo fetch first 1 row only)
+);
+insert into detalle_compra values (
+    default,
+    1,
+    3500,
+    (select v_placa from vehiculo fetch first 1 row only)
+);
