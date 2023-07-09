@@ -93,14 +93,11 @@ TYPE RESULT_SET IS REF CURSOR;
 PROCEDURE BUSCAR_Vehiculo(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2,tipo varchar2,marca varchar2, modelo varchar2, annio number);
 PROCEDURE BUSCAR_Vehiculo_Mes(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2,modelo varchar2, mes number, anno number);
 PROCEDURE BUSCAR_Vehiculo_Porcentaje(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2, mes number, fechaI varchar2, fechaF varchar2);
-<<<<<<< Updated upstream
 PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2);
-=======
 -- Procedure para el reporte numero 12
 procedure satisfaccion_del_cliente(o_result_set OUT RESULT_SET, fecha_inicio date, fecha_fin date, tipo_vehiculo_param varchar2, marca_param varchar2, modelo_param varchar2, placa_param varchar2);
 -- Procedure para el reporte numero 13
 procedure cantidad_alquileres_por_dia_de_semana(o_result_set OUT RESULT_SET, fecha_inicio_semana date, fecha_fin_semana date);
->>>>>>> Stashed changes
 END PK_Alquiler;
 ---Creacion del body del paquete
 CREATE OR REPLACE PACKAGE BODY PK_Alquiler IS
@@ -235,7 +232,6 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
                               
   end if ;                         
   End Buscar_Vehiculo_Porcentaje;
-<<<<<<< Updated upstream
  
 PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2)
     As
@@ -285,8 +281,6 @@ PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF
     
       end if;
 End BUSCAR_Formas_Pago;
-
-=======
   
   -- Procedure para el reporte numero 12
     procedure satisfaccion_del_cliente(o_result_set OUT RESULT_SET, fecha_inicio date, fecha_fin date, tipo_vehiculo_param varchar2, marca_param varchar2, modelo_param varchar2, placa_param varchar2)
@@ -389,7 +383,6 @@ End BUSCAR_Formas_Pago;
                 group by dia_semana.dia
         ;
     end cantidad_alquileres_por_dia_de_semana;
->>>>>>> Stashed changes
 
   End Pk_Alquiler;
  
