@@ -93,7 +93,14 @@ TYPE RESULT_SET IS REF CURSOR;
 PROCEDURE BUSCAR_Vehiculo(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2,tipo varchar2,marca varchar2, modelo varchar2, annio number);
 PROCEDURE BUSCAR_Vehiculo_Mes(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2,modelo varchar2, mes number, anno number);
 PROCEDURE BUSCAR_Vehiculo_Porcentaje(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2, mes number, fechaI varchar2, fechaF varchar2);
+<<<<<<< Updated upstream
 PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2);
+=======
+-- Procedure para el reporte numero 12
+procedure satisfaccion_del_cliente(o_result_set OUT RESULT_SET, fecha_inicio date, fecha_fin date, tipo_vehiculo_param varchar2, marca_param varchar2, modelo_param varchar2, placa_param varchar2);
+-- Procedure para el reporte numero 13
+procedure cantidad_alquileres_por_dia_de_semana(o_result_set OUT RESULT_SET, fecha_inicio_semana date, fecha_fin_semana date);
+>>>>>>> Stashed changes
 END PK_Alquiler;
 ---Creacion del body del paquete
 CREATE OR REPLACE PACKAGE BODY PK_Alquiler IS
@@ -228,6 +235,7 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
                               
   end if ;                         
   End Buscar_Vehiculo_Porcentaje;
+<<<<<<< Updated upstream
  
 PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2)
     As
@@ -278,6 +286,110 @@ PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF
       end if;
 End BUSCAR_Formas_Pago;
 
+=======
+  
+  -- Procedure para el reporte numero 12
+    procedure satisfaccion_del_cliente(o_result_set OUT RESULT_SET, fecha_inicio date, fecha_fin date, tipo_vehiculo_param varchar2, marca_param varchar2, modelo_param varchar2, placa_param varchar2)
+    is
+    begin
+        -- Verificamos que los parametros valgan null todos
+        if (fecha_inicio is null) and (fecha_fin is null) and (tipo_vehiculo_param is null) and (marca_param is null) and (modelo_param is null) and (placa_param is null) then
+            -- todos los parametros son null
+            open o_result_set for 
+                select tp_veh.tv_nombre tipo_vehiculo_r, marca.ma_nombre marca_vehiculo, modelo.m_nombre modelo_vehiculo, veh.v_anno anno_vehiculo, veh.v_placa placa_vehiculo, veh.v_foto foto_vehiculo, ra.r_escala_satisfaccion escala, (
+                    select XMLAGG(XMLELEMENT(E,obs.o_descripcion||'%n')).EXTRACT('//text()').getstringval()
+                    from observacion obs
+                    where   obs.rating_r_id = ra.r_id
+                ) observaciones
+                from alquiler alq, detalle_alquiler det_alq, vehiculo veh, tipo_vehiculo tp_veh, marca, modelo, rating ra
+                where   alq.detalle_alquiler_da_id = det_alq.da_id  and
+                        det_alq.vehiculo_v_placa = veh.v_placa      and
+                        veh.tipo_vehiculo_tv_id = tp_veh.tv_id      and
+                        veh.modelo_m_id = modelo.m_id               and
+                        veh.modelo_marca_ma_id = marca.ma_id        and
+                        ra.alquiler_a_id = alq.a_id
+            ;
+        else 
+            -- no todos los parametros son null
+            open o_result_set for 
+                select tp_veh.tv_nombre tipo_vehiculo_r, marca.ma_nombre marca_vehiculo, modelo.m_nombre modelo_vehiculo, veh.v_anno anno_vehiculo, veh.v_placa placa_vehiculo, veh.v_foto foto_vehiculo, ra.r_escala_satisfaccion escala, (
+                    select XMLAGG(XMLELEMENT(E,obs.o_descripcion||'%n')).EXTRACT('//text()').getstringval()
+                    from observacion obs
+                    where   obs.rating_r_id = ra.r_id
+                ) observaciones
+                from alquiler alq, detalle_alquiler det_alq, vehiculo veh, tipo_vehiculo tp_veh, marca, modelo, rating ra
+                where   alq.detalle_alquiler_da_id = det_alq.da_id  and
+                        det_alq.vehiculo_v_placa = veh.v_placa      and
+                        veh.tipo_vehiculo_tv_id = tp_veh.tv_id      and
+                        veh.modelo_m_id = modelo.m_id               and
+                        veh.modelo_marca_ma_id = marca.ma_id        and
+                        ra.alquiler_a_id = alq.a_id                 or
+                        -- elementos que dependen de los parametros
+                        fecha_inicio <= alq.a_periodo_duracion.P_Fecha_Inicio   or 
+                        fecha_fin  >= alq.a_periodo_duracion.P_Fecha_Fin        or
+                        tp_veh.tv_nombre = tipo_vehiculo_param                  or
+                        marca.ma_nombre = marca_param                           or
+                        modelo.m_nombre = modelo_param                          or
+                        placa_param = placa_param
+            ;
+        end if;
+    end satisfaccion_del_cliente;
+  
+  -- Procedure para el reporte numero 13
+    procedure cantidad_alquileres_por_dia_de_semana(o_result_set OUT RESULT_SET, fecha_inicio_semana date, fecha_fin_semana date)
+    is
+        -- variables para los dias 
+        fecha_lunes date := fecha_inicio_semana;
+        fecha_martes date := fecha_inicio_semana + 1;
+        fecha_miercoles date := fecha_inicio_semana + 2;
+        fecha_jueves date := fecha_inicio_semana + 3;
+        fecha_viernes date := fecha_inicio_semana + 4;
+        fecha_sabado date := fecha_inicio_semana + 5;
+        fecha_domingo date := fecha_fin_semana;
+    begin
+        -- Realizamos el query
+        -- es necesario que la data retorne de la forma (cant, dia) para tener una serie de cantidades y de dias
+        -- se puede hacer de dos formas:
+            -- se hace que la fecha inicio sea el inico de una semana y la fecha de fin seria el fin de la semana (esta es la opcion que se trabajara)
+            -- se cuentan los dias de la semana entre las fechas dadas
+        open o_result_set for 
+            select count(alq.a_id) cantidades,  dia_semana.dia 
+                from alquiler alq, (select to_char(fecha_lunes, 'DAY') dia FROM dual) dia_semana
+                where fecha_lunes between alq.a_periodo_duracion.P_Fecha_Inicio and alq.a_periodo_duracion.P_Fecha_Fin
+                group by dia_semana.dia
+            union all
+            select count(alq.a_id) cantidades,  dia_semana.dia 
+                from alquiler alq, (select to_char(fecha_martes, 'DAY') dia FROM dual) dia_semana
+                where fecha_martes between alq.a_periodo_duracion.P_Fecha_Inicio and alq.a_periodo_duracion.P_Fecha_Fin
+                group by dia_semana.dia
+            union all
+            select count(alq.a_id) cantidades,  dia_semana.dia 
+                from alquiler alq, (select to_char(fecha_miercoles, 'DAY') dia FROM dual) dia_semana
+                where fecha_miercoles between alq.a_periodo_duracion.P_Fecha_Inicio and alq.a_periodo_duracion.P_Fecha_Fin
+                group by dia_semana.dia
+            union all
+            select count(alq.a_id) cantidades,  dia_semana.dia 
+                from alquiler alq, (select to_char(fecha_jueves, 'DAY') dia FROM dual) dia_semana
+                where fecha_jueves between alq.a_periodo_duracion.P_Fecha_Inicio and alq.a_periodo_duracion.P_Fecha_Fin
+                group by dia_semana.dia
+            union all
+            select count(alq.a_id) cantidades,  dia_semana.dia 
+                from alquiler alq, (select to_char(fecha_viernes, 'DAY') dia FROM dual) dia_semana
+                where fecha_viernes between alq.a_periodo_duracion.P_Fecha_Inicio and alq.a_periodo_duracion.P_Fecha_Fin
+                group by dia_semana.dia
+            union all
+            select count(alq.a_id) cantidades,  dia_semana.dia 
+                from alquiler alq, (select to_char(fecha_sabado, 'DAY') dia FROM dual) dia_semana
+                where fecha_sabado between alq.a_periodo_duracion.P_Fecha_Inicio and alq.a_periodo_duracion.P_Fecha_Fin
+                group by dia_semana.dia
+            union all
+            select count(alq.a_id) cantidades,  dia_semana.dia 
+                from alquiler alq, (select to_char(fecha_domingo, 'DAY') dia FROM dual) dia_semana
+                where fecha_domingo between alq.a_periodo_duracion.P_Fecha_Inicio and alq.a_periodo_duracion.P_Fecha_Fin
+                group by dia_semana.dia
+        ;
+    end cantidad_alquileres_por_dia_de_semana;
+>>>>>>> Stashed changes
 
   End Pk_Alquiler;
  
