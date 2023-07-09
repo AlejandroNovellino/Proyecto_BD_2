@@ -93,6 +93,7 @@ TYPE RESULT_SET IS REF CURSOR;
 PROCEDURE BUSCAR_Vehiculo(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2,tipo varchar2,marca varchar2, modelo varchar2, annio number);
 PROCEDURE BUSCAR_Vehiculo_Mes(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2,modelo varchar2, mes number, anno number);
 PROCEDURE BUSCAR_Vehiculo_Porcentaje(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2, mes number, fechaI varchar2, fechaF varchar2);
+PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2);
 END PK_Alquiler;
 ---Creacion del body del paquete
 CREATE OR REPLACE PACKAGE BODY PK_Alquiler IS
@@ -199,18 +200,18 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
   Begin
   if ((marca is null)and (tipo is null)and (fechaI is null) and (mes is null) and (fechaF is null))then 
      Open O_Result_Set For 
-                         Select Count(M.m_nombre)As Cant, M.m_nombre as modelo, M.m_id as id
+                         Select Count(M.m_nombre)As Cant, M.m_nombre as modelo, M.m_id as id, Extract(Month From a.a_periodo_duracion.P_Fecha_Inicio)
                         From Detalle_Alquiler D, alquiler A , Vehiculo V, Modelo M, Tipo_vehiculo T
                          Where V.V_Placa=D.vehiculo_v_placa
                         and V.Modelo_M_Id= M.m_id
                         and V.Tipo_Vehiculo_Tv_Id=t.tv_id
                         And A.Detalle_Alquiler_Da_Id=D.Da_Id
-                        Group By  M.m_nombre, M.m_id,M.marca_ma_id
-                        Order By  3 desc;
+                        Group By  M.m_nombre, M.m_id,M.marca_ma_id,Extract(Month From a.a_periodo_duracion.P_Fecha_Inicio)
+                        Order By  4,1 desc;
+                                  
                                            
      else 
-     Open O_Result_Set For
-                          Select Count(M.m_nombre)As Cant, M.m_nombre as modelo, M.m_id as id
+     Open O_Result_Set For Select Count(M.m_nombre)As Cant, M.m_nombre as modelo, M.m_id as id,Extract(Month From a.a_periodo_duracion.P_Fecha_Inicio)
                                   From Detalle_Alquiler D, alquiler A , Vehiculo V, Modelo M, Tipo_vehiculo T
                                   Where V.V_Placa=D.vehiculo_v_placa
                                   and V.Modelo_M_Id= M.m_id
@@ -222,12 +223,61 @@ Procedure Buscar_Vehiculo( O_Result_Set Out Result_Set, Fecha_I Varchar2, Fecha_
                                   or Extract(Month From a.a_periodo_duracion.P_Fecha_Inicio  )=mes
                                   or (a.a_periodo_duracion.P_Fecha_Inicio >= TO_DATE(fechaI,'dd/mm/yy')
                                   or a.a_periodo_duracion.P_Fecha_Fin <= TO_DATE(fechaF,'dd/mm/yy')))
-                              Group By  M.m_nombre, M.m_id
-                              Order By 1 desc;
+                              Group By  M.m_nombre, M.m_id,Extract(Month From a.a_periodo_duracion.P_Fecha_Inicio)
+                              Order By 4,1 desc;
                               
   end if ;                         
   End Buscar_Vehiculo_Porcentaje;
  
+PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2)
+    As
+  Begin 
+ 
+  if ( (tipo is null)and (fechaI is null) and (fechaF is null))then 
+     
+     Open O_Result_Set For 
+                          select  e.nombre||':'||' '||'$'||' '||e.total,e.nombre,e.total, f.total
+                          from (SELECT sum (d.DP_monto) as total, f.fp_nombre as nombre
+                           FROM detalle_pago d, forma_pago f, alquiler a , vehiculo v, tipo_vehiculo t, detalle_alquiler da
+                           WHERE  d.forma_pago_fp_id=f.fp_id
+                           and d.alquiler_a_id=a.a_id
+                           and da.vehiculo_v_placa=v.v_placa
+                           and a.detalle_alquiler_da_id=da.da_id
+                           and v.tipo_vehiculo_tv_id= t.tv_id
+                           group by f.fp_nombre) e,(SELECT sum (d.DP_monto) as total
+                                                     FROM detalle_pago d, forma_pago f, alquiler a , vehiculo v, tipo_vehiculo t, detalle_alquiler da
+                                                     WHERE  d.forma_pago_fp_id=f.fp_id
+                                                     and d.alquiler_a_id=a.a_id
+                                                     and da.vehiculo_v_placa=v.v_placa
+                                                     and a.detalle_alquiler_da_id=da.da_id
+                                                     and v.tipo_vehiculo_tv_id= t.tv_id) f;
+                         
+    else
+        Open O_Result_Set For 
+                          select  e.nombre||':'||' '||'$'||' '||e.total,e.nombre,e.total, f.total
+                          from (SELECT sum (d.DP_monto) as total, f.fp_nombre as nombre
+                           FROM detalle_pago d, forma_pago f, alquiler a , vehiculo v, tipo_vehiculo t, detalle_alquiler da
+                           WHERE  d.forma_pago_fp_id=f.fp_id
+                           and d.alquiler_a_id=a.a_id
+                           and da.vehiculo_v_placa=v.v_placa
+                           and a.detalle_alquiler_da_id=da.da_id
+                           and v.tipo_vehiculo_tv_id= t.tv_id
+                           and (v.tipo_vehiculo_tv_id=(select tv_id from tipo_vehiculo where tv_nombre = tipo)or
+                           a.a_periodo_duracion.P_Fecha_Inicio >= TO_DATE(FechaI,'dd/mm/yy')
+                                  or a.a_periodo_duracion.P_Fecha_Fin <= TO_DATE(FechaF,'dd/mm/yy'))
+                           group by f.fp_nombre) e, (SELECT sum (d.DP_monto) as total
+                                                     FROM detalle_pago d, forma_pago f, alquiler a , vehiculo v, tipo_vehiculo t, detalle_alquiler da
+                                                     WHERE  d.forma_pago_fp_id=f.fp_id
+                                                     and d.alquiler_a_id=a.a_id
+                                                     and da.vehiculo_v_placa=v.v_placa
+                                                     and a.detalle_alquiler_da_id=da.da_id
+                                                     and v.tipo_vehiculo_tv_id= t.tv_id and (v.tipo_vehiculo_tv_id=(select tv_id from tipo_vehiculo where tv_nombre = tipo)or
+                           a.a_periodo_duracion.P_Fecha_Inicio >= TO_DATE(FechaI,'dd/mm/yy')
+                                  or a.a_periodo_duracion.P_Fecha_Fin <= TO_DATE(FechaF,'dd/mm/yy'))) f;
+    
+      end if;
+End BUSCAR_Formas_Pago;
+
 
   End Pk_Alquiler;
  
@@ -473,7 +523,7 @@ PROCEDURE BUSCAR_Reserva(o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F 
  end;
  
 
- 
+ SELECT * FROM ALQUILER
   ----insert de prueba----
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Toyota Fortuner 2022');
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Toyota Corolla 2023');
