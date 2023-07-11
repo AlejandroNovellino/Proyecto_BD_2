@@ -94,9 +94,8 @@ PROCEDURE BUSCAR_Vehiculo(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_
 PROCEDURE BUSCAR_Vehiculo_Mes(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2,modelo varchar2, mes number, anno number);
 PROCEDURE BUSCAR_Vehiculo_Porcentaje(o_result_set OUT RESULT_SET, tipo varchar2, marca varchar2, mes number, fechaI varchar2, fechaF varchar2);
 PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2);
--- Procedure para el reporte numero 12
+PROCEDURE BUSCAR_Alquileres(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2, status varchar2);
 procedure satisfaccion_del_cliente(o_result_set OUT RESULT_SET, fecha_inicio date, fecha_fin date, tipo_vehiculo_param varchar2, marca_param varchar2, modelo_param varchar2, placa_param varchar2);
--- Procedure para el reporte numero 13
 procedure cantidad_alquileres_por_dia_de_semana(o_result_set OUT RESULT_SET, fecha_inicio_semana date, fecha_fin_semana date);
 END PK_Alquiler;
 ---Creacion del body del paquete
@@ -281,8 +280,43 @@ PROCEDURE BUSCAR_Formas_Pago(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF
     
       end if;
 End BUSCAR_Formas_Pago;
-  
-  -- Procedure para el reporte numero 12
+
+PROCEDURE BUSCAR_Alquileres(o_result_set OUT RESULT_SET,fechaI varchar2, fechaF varchar2,tipo varchar2, status varchar2)
+  As
+  Begin
+     if ((tipo is null)and (fechaI is null) and (fechaF is null) and (status is null))then 
+      Open O_Result_Set For   SELECT v.v_placa, v.v_anno, v.v_foto, m.m_nombre, ma.ma_nombre, t.tv_nombre, s.sv_nombre,  c.c_informacion_personal.IP_cedula ,a.a_periodo_duracion.P_Fecha_Inicio, a.a_periodo_duracion.P_Fecha_Fin, c.c_informacion_personal.IP_Primer_Nombre||' '||c.c_informacion_personal.IP_Primer_Apeliido, e.e_descripcion,  CASE  When e.e_ubicacion_geografica_retiro.UG_Latitud is null then 0 end as  lat, CASE  When e.e_ubicacion_geografica_retiro.UG_Longitud is null then 0 end as lon
+         FROM vehiculo v left join detalle_alquiler d on v.v_placa=d.vehiculo_v_placa 
+         left join alquiler a on d.da_id= a.detalle_alquiler_da_id
+         left join cliente c on a.cliente_c_id= c.c_id
+         left join reserva r on a.reserva_re_id=r.re_id
+         left join entrega e on e.reserva_re_id=r.re_id,
+         modelo m, marca ma, tipo_vehiculo t, status_vehiculo s
+         Where v.modelo_m_id = m.m_id
+         and v.modelo_marca_ma_id=ma.ma_id
+         and v.tipo_vehiculo_tv_id= t.tv_id
+         and v.status_vehiculo_sv_id= s.sv_id;
+        else
+          Open O_Result_Set For    SELECT v.v_placa, v.v_anno, v.v_foto, m.m_nombre, ma.ma_nombre, t.tv_nombre, s.sv_nombre,  c.c_informacion_personal.IP_cedula ,a.a_periodo_duracion.P_Fecha_Inicio, a.a_periodo_duracion.P_Fecha_Fin, c.c_informacion_personal.IP_Primer_Nombre||' '||c.c_informacion_personal.IP_Primer_Apeliido, e.e_descripcion, CASE  When e.e_ubicacion_geografica_retiro.UG_Latitud is null then 0 end as  lat, CASE  When e.e_ubicacion_geografica_retiro.UG_Longitud is null then 0 end as lon
+                 FROM vehiculo v left join detalle_alquiler d on v.v_placa=d.vehiculo_v_placa 
+                 left join alquiler a on d.da_id= a.detalle_alquiler_da_id
+                 left join cliente c on a.cliente_c_id= c.c_id
+                 left join reserva r on a.reserva_re_id=r.re_id
+                 left join entrega e on e.reserva_re_id=r.re_id,
+                  modelo m, marca ma, tipo_vehiculo t, status_vehiculo s
+                 Where v.modelo_m_id = m.m_id
+                 and v.modelo_marca_ma_id=ma.ma_id
+                 and v.tipo_vehiculo_tv_id= t.tv_id
+                 and v.status_vehiculo_sv_id= s.sv_id
+                 and ( a.a_periodo_duracion.P_Fecha_Inicio >= TO_DATE(fechaI,'dd/mm/yy')
+                    or a.a_periodo_duracion.P_Fecha_Fin <= TO_DATE(fechaF,'dd/mm/yy')
+                    or v.tipo_vehiculo_tv_id=(select tv_id from tipo_vehiculo where tv_nombre = tipo)
+                    or v.status_vehiculo_sv_id=(select sv_id from status_vehiculo where sv_nombre = status
+                   ));
+       end if;
+       end BUSCAR_Alquileres;
+       
+-- Procedure para el reporte numero 12
     procedure satisfaccion_del_cliente(o_result_set OUT RESULT_SET, fecha_inicio date, fecha_fin date, tipo_vehiculo_param varchar2, marca_param varchar2, modelo_param varchar2, placa_param varchar2)
     is
     begin
@@ -490,13 +524,13 @@ End BUSCAR_Formas_Pago;
         end if;
     end cantidad_alquileres_por_dia_de_semana;
 
-  End Pk_Alquiler;
- 
+end PK_Alquiler;
+
 
 ----  paquete pk_promocions-----
 CREATE OR REPLACE PACKAGE PK_Promocion AS
 TYPE RESULT_SET IS REF CURSOR;
- 
+
 PROCEDURE BUSCAR_Promocion(o_result_set OUT RESULT_SET,  fecha_I varchar2, fecha_F varchar2);
 END PK_Promocion;
 
@@ -633,7 +667,7 @@ PROCEDURE BUSCAR_Ingreso_Egreso(o_result_set OUT RESULT_SET,mes number, anno num
   BEGIN
   If (mes is null and anno is null) then
   
-  OPEN o_result_set FOR SELECT e.total,e.m,e.a,g.total,g.m,g.a
+  OPEN o_result_set FOR SELECT '$'||''||e.total,Case e.m  When 1 Then 'Enero' When 2 Then 'Febrero'When 3 Then 'Marzo' When 4 Then 'Abril' When 5 Then 'Mayo' When 6 Then 'Junio' When 7 Then 'Julio'When 8 Then 'Agosto' When 9 Then 'Septiembre' When 10 Then 'Octubre' When 11 Then 'Noviembre' When 12 Then 'Diciembre'End,e.a,'$'||''||g.total,g.m,g.a
                            FROM (select sum(G_precio) as total ,Extract(Month From g_fecha)m,Extract(Year From g_fecha) a 
                                         from gasto  
                                         group by Extract(Month From g_fecha),Extract(Year From g_fecha))g
@@ -642,9 +676,9 @@ PROCEDURE BUSCAR_Ingreso_Egreso(o_result_set OUT RESULT_SET,mes number, anno num
                                         group by Extract(Month From i_fecha),Extract(Year From i_fecha)) e
                                 where e.a=g.a
                                 and   e.m=g.m;
- 
+
   else
-     OPEN o_result_set FOR SELECT e.total,e.m,e.a,g.total,g.m,g.a
+     OPEN o_result_set FOR SELECT '$'||''||e.total,Case e.m  When 1 Then 'Enero' When 2 Then 'Febrero'When 3 Then 'Marzo' When 4 Then 'Abril' When 5 Then 'Mayo' When 6 Then 'Junio' When 7 Then 'Julio'When 8 Then 'Agosto' When 9 Then 'Septiembre' When 10 Then 'Octubre' When 11 Then 'Noviembre' When 12 Then 'Diciembre'End ,e.a,'$'||''||g.total,g.m,g.a
                            FROM (select sum(G_precio) as total ,Extract(Month From g_fecha)m,Extract(Year From g_fecha) a 
                                         from gasto  
                                         where Extract(Month From g_fecha)=mes
@@ -733,8 +767,6 @@ PROCEDURE BUSCAR_Reserva(o_result_set OUT RESULT_SET, fecha_I varchar2, fecha_F 
       end if;
  end;
  
-
- SELECT * FROM ALQUILER
   ----insert de prueba----
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Toyota Fortuner 2022');
 insert into Promocion values (DEFAULT,0.50,'50% en descuento en el alquiler por día para vehiculos Toyota Corolla 2023');
